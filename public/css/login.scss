@@ -7,6 +7,32 @@ body {
         width: 360px;
         padding: 2% 0 0;
         margin: auto;
+        .password_strength_area {
+            margin: 8px 0;
+            display: inline-block;
+            width: 100%;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            .indicator {
+                height: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin: 10px 0;
+                span {
+                    width: 100%;
+                    height: 100%;
+                    background-color: white;
+                    border-radius: 5px;
+                    border: 1px solid black;
+                }
+            }
+        }
         .form {
             position: relative;
             z-index: 1;

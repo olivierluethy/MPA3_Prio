@@ -14,12 +14,15 @@ class TimeController
         $pdo = connectDatabase();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-		$time = $_GET['timeRecord'];
-		$id = $_GET['id'];
+		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+			$rapport = e(post('rapport'));
+			$time = e(post('time'));
+			$id = e(post('taskId'));
 
-		$Time->addTimeRecord($time, $id);
+			$Time->addTimeRecord($rapport, $time, $id);
 
-		header('Location: home');
+			header('Location: home');
+		}
 	}
 
 	public function zeituebersicht(){
@@ -34,30 +37,22 @@ class TimeController
         $pdo = connectDatabase();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-		/* Get all times */
-		$getAllTimes = $Time -> getAllTimes();
-		$getAllTimes = $getAllTimes -> fetchAll();
+		/* Get title and id of task */
+		$getTitleOfTask = $Time -> getTitleOfTask(); // title, aufgabeId
+		$getTitleOfTask = $getTitleOfTask -> fetchAll();
 
-		/* Get times which were created within 24 hours */
-		$getTimesUnderADay = $Time -> getTimesUnderADay();
-		$getTimesUnderADay = $getTimesUnderADay -> fetchAll();
+		/* Get all rapports for that title from that task */
+		$getRapports = $Time -> getRapports(); // get all rapports
+		$getRapports = $getRapports -> fetchAll();
 
-		/* Get times which were created after 24 hours */
-		$getTimesOverADay = $Time -> getTimesOverADay();
-		$getTimesOverADay = $getTimesOverADay -> fetchAll();
+		$getTitleOfTaskCounter = 0;
+		$getRapportsCounter = 0;
 
-		$getAllTimesCounter = 0;
-		$getTimesUnderADayCounter = 0;
-		$getTimesOverADayCounter = 0;
-
-		foreach ($getAllTimes as $getAllTimes2){
-			$getAllTimesCounter++;
+		foreach ($getTitleOfTask as $getTitleOfTask2){
+			$getTitleOfTaskCounter++;
 		}
-		foreach ($getTimesUnderADay as $getTimesUnderADay2){
-			$getTimesUnderADayCounter++;
-		}
-		foreach ($getTimesOverADay as $getTimesOverADay2){
-			$getTimesOverADayCounter++;
+		foreach ($getRapports as $getRapports2){
+			$getRapportsCounter++;
 		}
 
 		require 'app/Views/zeituebersicht.view.php';
@@ -95,17 +90,98 @@ class TimeController
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $time = $_POST['time'];
+			$rapport = e(post('rapport'));
+			$time = e(post('time'));
 
-            $Time->edit_time($id, $time);
+            $Time->edit_time($id, $rapport, $time);
 
-            header('Location: http://localhost/MPA2_Prio/zeituebersicht');
+            header('Location: http://localhost/Prio/zeituebersicht');
         }
 		/* Needed data to show data that can be changed */
 		else{
-            $getTime = $Time->getTime($id);
-        	$getTime = $getTime -> fetchAll();
+            $getRapport = $Time->getRapport($id);
+        	$getRapport = $getRapport -> fetchAll();
         }
         require 'app/Views/editTime.view.php';
+	}
+
+	public function showHistory(){
+		$Time = new Time();
+
+        // Initialize the session
+        session_start();
+
+        $id = $_GET['id'];
+
+		$pdo = connectDatabase();
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+		/* Get all rapports from task */
+		$getHistorys = $Time -> getHistorys($id);
+		$getHistorys = $getHistorys -> fetchAll();
+
+		$totaltime = 0;
+        $sum = strtotime('00:00:00');
+		// Calculate total time used for this task
+		foreach($getHistorys as $getHistory){
+			// Converting the time into seconds
+            $timeinsec = strtotime($getHistory['zeit']) - $sum;
+
+            // Sum the time with previous value
+            $totaltime = $totaltime + $timeinsec;
+		}
+
+		$h = intval($totaltime / 3600);
+		if ($h < 10)
+		{
+			$h = "0" . $h;
+		}
+
+		$totaltime = $totaltime - ($h * 3600);
+
+		// Minutes is obtained by dividing
+		// remaining total time with 60
+		$m = intval($totaltime / 60);
+		if ($m < 10)
+		{
+			$m = "0" . $m;
+		}
+
+		// Remaining value is seconds
+		$s = $totaltime - ($m * 60);
+		if ($s < 10)
+		{
+			$s = "0" . $s;
+		}
+		// Converting the time into seconds
+		$timeinsec = strtotime($getHistory['zeit']) - $sum;
+
+		// Sum the time with previous value
+		$totaltime = $totaltime + $timeinsec;
+
+		$totaltime = "$h:$m:$s";
+
+		require 'app/Views/history.view.php';
+	}
+
+	public function formatTimeOutput($h, $m, $s){
+		$output = "";
+		if($h == 1){
+			$output .= "$h Hour ";
+		}else if($h > 1){
+			$output .= "$h Hours ";
+		}
+		if($m == 1){
+			$output .= "$m Minute ";
+		}else if($m > 1){
+			$output .= "$m Minutes ";
+		}
+		if($s == 1){
+			$output .= "$s Second ";
+		}else if($s > 1){
+			$output .= "$s Seconds ";
+		}
+		
+		echo $output;
 	}
 }

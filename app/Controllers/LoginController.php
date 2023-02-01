@@ -14,11 +14,6 @@ class LoginController{
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         require 'app/Views/login/login.view.php';
-        
-        // Include config file
-        // https://www.php.net/manual/de/function.require-once.php
-        define('__ROOT__', dirname(dirname(__FILE__)));
-        require_once(__ROOT__.'\Views\login\config.php');
 
         // Define variables and initialize with empty values
         $email = $password = "";
@@ -112,11 +107,6 @@ class LoginController{
         }else if($_SERVER['REQUEST_METHOD'] !== 'POST'){
             header("location: login");
         }else if ($_SERVER["REQUEST_METHOD"] == "POST"){
-            // Include config file
-            // https://www.php.net/manual/de/function.require-once.php
-            define('__ROOT__', dirname(dirname(__FILE__)));
-            require_once(__ROOT__.'\Views\login\config.php');
-        
             // Define variables and initialize with empty values
             $username = $password = $confirm_password = "";
             $username_err = $password_err = $confirm_password_err = "";

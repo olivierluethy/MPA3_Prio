@@ -9,49 +9,37 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
-    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Home</title>
 </head>
 
 <body>
     <!-- Navigation Bar -->
-    <nav>
-        <div class="part1" onclick="home()">
-            <img src="images/logo.png" alt="">
-            <h1>Prio</h1>
-        </div>
-        <div class="part2">
-        <?php
-            /* Wenn Benutzer noch nicht eingeloggt ist */
-            if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-                echo "<button class='loginBtn' onclick='goToLogin()'>Login  <i class='fas fa-sign-in-alt'></i></button>";
-            }else{
-                /* Admin */
-                if($_SESSION['role'] == 1){
-                    echo "<a href='admin'>Admin Area</a>";
-                    echo "<button onclick='zuLogout()'>Logout  <i class='fas fa-sign-out-alt'></i></button>";
-                }
-                /* Gesperrt */
-                if($_SESSION['role'] == 2){
-                    echo "<button class='active' onclick='aufgaben()'>Tasks <i class='fas fa-tasksfas fa-tasks'></i></button>";
-                    echo "<button onclick='zuLogout()'>Logout  <i class='fas fa-sign-out-alt'></i></button>";
-                }
-                /* Normaler Benutzer */
-                if($_SESSION['role'] == 0) {
-                    echo "<button class='active' onclick='aufgaben()'>Tasks <i class='fas fa-tasksfas fa-tasks'></i></button>";
-                    echo "<button onclick='zeiterfassung()'>Time recording <i class='fas fa-clock'></i></button>";
-                    echo "<button onclick='zuLogout()'>Logout  <i class='fas fa-sign-out-alt'></i></button>";
-                }
-            }
-            ?>
-        </div>
-    </nav>
+    <?php
+    $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+    include("header.php");
+    ?>
 
     <div class="hero-image">
         <div class="hero-text">
-            <h1 style="font-size:50px">About Prio</h1>
+            <h1 style="font-size:50px">Welcome To Prio</h1>
+            <h2>Set your priorities <strong>quickly</strong> and <strong>correctly</strong> to meet all your goals.</h2>
+            <p>That is our motto.</p>
         </div>
     </div>
+    <h1 style="text-align:center;">What is this project about?</h1>
+    <h3 style="margin-left:2rem; color: gray;">
+        This project is concretely about accomplishing tasks that you set for yourself.
+        Usually, people set too many new goals for the new year, or for the new age. The problem is, most of them are
+        not described in a meaningful way so that they are realistic and achievable.
+        This app is designed to help fix that problem as best it can.
+
+        In this app you can add tasks or goals that you would like to have done or achieved. You define a title and
+        describe what you would like to achieve and the motivation behind it.
+        Why do you want to achieve it and where are the benefits?
+        What will it bring me in the future, or am I just doing it for fun?
+
+        These are the questions you should ask yourself before you set a new goal.</h3>
     <script src="public/js/routes.js"></script>
     <script src="public/js/validation.js"></script>
     <?php include('app/Views/footer.view.php'); ?>

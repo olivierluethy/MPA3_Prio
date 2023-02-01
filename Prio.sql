@@ -26,7 +26,7 @@ CREATE TABLE aufgabe (
   motivation TEXT NOT NULL,
   deadline DATE,
   prioritaet INT NOT NULL,
-  status INT NOT NULL, /* Nicht erledigt: 0, Erledigt: 1 */
+  status INT NOT NULL DEFAULT 0, /* Nicht erledigt: 0, Erledigt: 1 */
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   fk_benutzerId INT NOT NULL,
   FOREIGN KEY (fk_benutzerId) REFERENCES benutzer(benutzerId)
@@ -46,14 +46,15 @@ CREATE TABLE essays (
 );
 
 --
--- Tabelle 'Zeiteinträge'
+-- Tabelle 'Rapport'
 --
 
-CREATE TABLE zeiteintraege (
-  zeiteintraegeId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE rapport (
+  rapportId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  rapport VARCHAR(255) NOT NULL,
   zeit TIME NOT NULL,
-  fk_aufgabeId INT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fk_aufgabeId INT NOT NULL,
   FOREIGN KEY (fk_aufgabeId) REFERENCES aufgabe(aufgabeId)
 );
 

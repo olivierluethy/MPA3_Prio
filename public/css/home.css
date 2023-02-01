@@ -119,7 +119,6 @@
   background-color: transparent;
   border: none;
   padding: 0 1em 0 0;
-  width: 10%;
   font-family: sans-serif;
   font-weight: bold;
   line-height: inherit;
@@ -136,6 +135,7 @@
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
+  margin-left: 0.1rem;
   margin-bottom: 0.4rem;
   transition-duration: 0.4s;
   cursor: pointer;
@@ -145,7 +145,7 @@
   color: #4CAF50;
 }
 .order tr td:nth-child(1) {
-  width: 20%;
+  width: 17%;
 }
 .order tr td:nth-child(2) {
   text-align: left;

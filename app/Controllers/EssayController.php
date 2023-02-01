@@ -76,8 +76,8 @@ class EssayController
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-			$title = $_POST['title'];
-			$essay = $_POST['essay'];
+			$title = e(post('title'));
+			$essay = e(post('essay'));
 
             $Essay->add_essay($title, $essay);
 

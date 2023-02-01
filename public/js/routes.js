@@ -2,9 +2,13 @@
 let currentYear = new Date().getFullYear();
 document.getElementById('year').innerHTML = '&copy; ' + currentYear + ' Prio. All rights Reserved.';
 
-/* Um zur Route zu gelangen um auf die Startseite zu gelangen */
 function home() {
     location.href = "home";
+}
+
+/* Um zur Route zu gelangen um auf die Startseite zu gelangen */
+function about() {
+    location.href = "about";
 }
 /* Um zur Route zu gelangen um zur Loginseite zu gelangen */
 function goToLogin() {
@@ -30,6 +34,10 @@ function showEssay(id) {
 
 function addTask() {
     location.href = "add_task";
+}
+
+function showHistory(id){
+    location.href = "showHistory?id=" + id;
 }
 
 function accept(essayId, userId) {

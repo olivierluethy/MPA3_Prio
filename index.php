@@ -12,24 +12,23 @@ $routes = [
 	/* Aufgaben hinzufügen, bearbeiten und löschen */
 	'add_task' => 'TaskController@add_task',
 	'edit_task' => 'TaskController@edit_task',
-	'edit_time' => 'TimeController@edit_time',
 	'delete_task' => 'TaskController@delete_task',
-	'delete_time' => 'TimeController@delete_time',
-
+	'complete_task' => 'TaskController@complete_task',
 	'higherPrio' => 'TaskController@higherPrio',
 	'lowerPrio' => 'TaskController@lowerPrio',
 
-	'complete_task' => 'TaskController@complete_task',
+	/* Zeiten erfassen, bearbeiten und löschen */
+	'zeituebersicht' => 'TimeController@zeituebersicht',
+	'addTimeRecord' => 'TimeController@addTimeRecord',
+	'edit_time' => 'TimeController@edit_time',
+	'delete_time' => 'TimeController@delete_time',
+	'showHistory' => 'TimeController@showHistory',
 
-	'accept' => 'EssayController@accept',
-	'refuse' => 'EssayController@refuse',
-
+	/* Essay schreiben, akzeptieren und ablehnen */
 	'essay' => 'EssayController@essay',
 	'add_essay' => 'EssayController@add_essay',
-
-	'addTimeRecord' => 'TimeController@addTimeRecord',
-
-	'zeituebersicht' => 'TimeController@zeituebersicht',
+	'accept' => 'EssayController@accept',
+	'refuse' => 'EssayController@refuse',
 
 	/* Adminbereich */
 	'admin' => 'EssayController@admin',

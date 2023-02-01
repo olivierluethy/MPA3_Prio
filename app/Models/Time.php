@@ -8,60 +8,57 @@ class Time
         $this->db = connectDatabase();
     }
 
-	public function addTimeRecord($time, $id){
+	public function addTimeRecord($rapport, $time, $id){
         // $beschreibung = e(post('beschreibung'));
-		$statement = $this->db->prepare('INSERT INTO `zeiteintraege` (zeit, fk_aufgabeId) VALUES (:zeit, :fk_aufgabeId)');
+		$statement = $this->db->prepare('INSERT INTO `rapport` (rapport, zeit, fk_aufgabeId) VALUES (:rapport, :zeit, :fk_aufgabeId)');
+		$statement->bindParam(':rapport', $rapport, PDO::PARAM_STR);
 		$statement->bindParam(':zeit', $time, PDO::PARAM_STR);
 		$statement->bindParam(':fk_aufgabeId', $id, PDO::PARAM_STR);
 		$statement->execute();
 	}
 
-	public function getAllTimes(){
-		$statement = $this->db->prepare('SELECT aufgabe.titel, aufgabe.beschreibung, zeiteintraege.zeit, zeiteintraege.created_at FROM zeiteintraege 
-		INNER JOIN aufgabe ON aufgabe.aufgabeId = zeiteintraege.fk_aufgabeId 
-		WHERE aufgabe.fk_benutzerId = :id ORDER BY zeiteintraege.created_at;');
+	/* Get title of task */
+	public function getTitleOfTask(){
+		$statement = $this->db->prepare('SELECT DISTINCT titel, aufgabeId FROM aufgabe WHERE fk_benutzerId = :id');
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
 		$statement->execute();
         return $statement;
 	}
 
-	public function getTimesUnderADay(){
-		$statement = $this->db->prepare('SELECT aufgabe.titel, aufgabe.beschreibung, zeiteintraege.zeit, zeiteintraege.created_at, zeiteintraege.zeiteintraegeId FROM zeiteintraege 
-		INNER JOIN aufgabe ON aufgabe.aufgabeId = zeiteintraege.fk_aufgabeId 
-		WHERE aufgabe.fk_benutzerId = :id AND zeiteintraege.created_at > SUBDATE( NOW(), INTERVAL 24 HOUR) 
-		ORDER BY zeiteintraege.created_at;');
-		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
-		$statement->execute();
-        return $statement;
-	}
-
-	public function getTimesOverADay(){
-		$statement = $this->db->prepare('SELECT aufgabe.titel, aufgabe.beschreibung, zeiteintraege.zeit, zeiteintraege.created_at, zeiteintraege.zeiteintraegeId FROM zeiteintraege 
-		INNER JOIN aufgabe ON aufgabe.aufgabeId = zeiteintraege.fk_aufgabeId 
-		WHERE aufgabe.fk_benutzerId = :id AND zeiteintraege.created_at < SUBDATE( NOW(), INTERVAL 24 HOUR) 
-		ORDER BY zeiteintraege.created_at;');
-		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
+	/* Get all rapports from that task */
+	public function getRapports(){
+		$statement = $this->db->prepare('SELECT * FROM rapport ORDER BY created_at DESC');
 		$statement->execute();
         return $statement;
 	}
 
 	public function delete_time($id){
-		$statement = $this->db->prepare('DELETE FROM `zeiteintraege` WHERE zeiteintraegeId = :id');
+		$statement = $this->db->prepare('DELETE FROM `rapport` WHERE rapportId = :id');
         $statement->bindParam(':id', $id, PDO::PARAM_STR);
         $statement->execute();
 	}
 
-	public function getTime($id){
-		$statement = $this->db->prepare('SELECT * FROM zeiteintraege WHERE zeiteintraegeId = :id');
+	public function getRapport($id){
+		$statement = $this->db->prepare('SELECT * FROM rapport WHERE rapportId = :id');
 		$statement->bindParam(':id', $id, PDO::PARAM_STR);
 		$statement->execute();
         return $statement;
 	}
 
-	public function edit_time($id, $time){
-		$statement = $this->db->prepare('UPDATE zeiteintraege SET zeit = :time WHERE zeiteintraegeId = :id');
+	public function edit_time($id, $rapport, $time){
+		$statement = $this->db->prepare('UPDATE rapport SET rapport = :rapport, zeit = :time WHERE rapportId = :id');
+		$statement->bindParam(':rapport', $rapport, PDO::PARAM_STR);
 		$statement->bindParam(':time', $time, PDO::PARAM_STR);
 		$statement->bindParam(':id', $id, PDO::PARAM_STR);
 		$statement->execute();
+	}
+
+	public function getHistorys($id){
+		$statement = $this->db->prepare('SELECT aufgabe.titel, rapport.rapport, rapport.zeit, rapport.created_at FROM rapport 
+		INNER JOIN aufgabe ON aufgabe.aufgabeId = rapport.fk_aufgabeId
+		WHERE fk_aufgabeId = :id');
+		$statement->bindParam(':id', $id, PDO::PARAM_STR);
+		$statement->execute();
+        return $statement;
 	}
 }

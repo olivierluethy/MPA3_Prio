@@ -17,8 +17,12 @@ function start_recording(id) {
         clock_element.title = "Stop recording";
     } else if (startCounter == 1) {
         clock_element.src = "images/clock off.png";
-        stop();
-        location.href = "addTimeRecord?timeRecord=" + time_element.innerHTML + "&id=" + id;
+        stop(id);
+        // location.href = "addTimeRecord?timeRecord=" + time_element.innerHTML + "&id=" + id;
+        modal.style.display = "block";
+        document.getElementById("appt-time").value = time_element.innerHTML;
+        document.getElementById("taskId").value = id;
+
         startCounter = 0;
     }
 }
@@ -46,7 +50,14 @@ function start(id) {
     interval = setInterval(timer, 1000);
 }
 
-function stop() {
+function stop(id) {
     clearInterval(interval);
     interval = null;
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+        document.querySelector('#active_time' + id).innerHTML = "00:00:00";
+        document.querySelector('#start' + id).src = "images/clock off.png";
+    }
 }

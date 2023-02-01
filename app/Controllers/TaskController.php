@@ -69,15 +69,14 @@ class TaskController
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $title = $_POST['title'];
-            $description = $_POST['description'];
-			$motivation = $_POST['motivation'];
+            $titel = e(post('title'));
+			$beschreibung = e(post('description'));
+			$motivation = e(post('motivation'));
+			$deadline = e(post('deadline'));
+			$prioritaet = e(post('priority'));
 
-			$deadline = $_POST['deadline'];
-			$priority = $_POST['priority'];
-
-            $Task->add_task($title, $description, $motivation, $deadline, $priority);
-
+            $Task->add_task($titel, $beschreibung, $motivation, $deadline, $prioritaet);
+ 
             header('Location: home');
         }
 		require 'app/Views/addTask.view.php';
@@ -98,11 +97,11 @@ class TaskController
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $titel = $_POST['title'];
-            $beschreibung = $_POST['description'];
-			$motivation = $_POST['motivation'];
-			$deadline = $_POST['deadline'];
-			$prioritaet = $_POST['priority'];
+            $titel = e(post('title'));
+			$beschreibung = e(post('description'));
+			$motivation = e(post('motivation'));
+			$deadline = e(post('deadline'));
+			$prioritaet = e(post('priority'));
         
 			$Task->edit_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $id);
 

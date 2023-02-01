@@ -30,64 +30,88 @@
   text-align: right;
 }
 
+.search {
+  margin: auto;
+  display: block;
+  padding: 15px 232px;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  text-align: center;
+  box-shadow: 0px 0px 30px 2px #000000;
+  transition-duration: 0.8s;
+  outline: none;
+}
+.search:focus {
+  border-radius: 50px;
+}
+
+#nothingFound {
+  text-align: center;
+  color: red;
+  display: none;
+}
+
 .data,
 td,
 th {
   text-align: left;
 }
 
-.data {
-  border-spacing: 0;
-  width: 96.5%;
-  background-color: transparent;
-  box-shadow: 0px 0px 30px 2px #000000;
-  margin-left: auto;
-  margin-right: auto;
+.flex-container > div {
+  display: flex;
+  flex-wrap: wrap;
 }
-.data td {
+.flex-container > div .data {
+  border-spacing: 0;
+  background-color: lightgray;
+  box-shadow: 0px 0px 30px 2px #000000;
+  border-radius: 20px;
+  margin-left: 2.5rem;
+  margin-bottom: 2rem;
+}
+.flex-container > div .data tr {
   border: solid 5px #000;
-  border-style: none solid solid none;
   padding: 20px;
 }
-.data td .cke_top {
-  display: none;
-}
-.data td button {
-  display: block;
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
+.flex-container > div .data tr td button {
+  background-color: royalblue;
+  border: 1px solid royalblue;
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
   transition-duration: 0.4s;
   cursor: pointer;
 }
-.data td button img {
-  width: 70%;
+.flex-container > div .data tr td button i {
+  color: white;
+}
+.flex-container > div .data tr td button:hover {
+  background-color: transparent;
+  color: royalblue;
+}
+.flex-container > div .data tr td button:hover i {
+  color: royalblue;
+}
+.flex-container > div .data tr td img {
+  width: 8%;
   -o-object-fit: contain;
      object-fit: contain;
 }
-.data td button:hover {
-  transform: scale(1.8);
-  background-color: rgb(138, 138, 138);
+.flex-container > div .data tr .editDelete {
+  font-size: 40px;
 }
-.data tr:first-child td:first-child {
-  border-top-left-radius: 10px;
+.flex-container > div .data tr .editDelete img {
+  transition-duration: 0.4s;
+  cursor: pointer;
 }
-.data tr:first-child td:last-child {
-  border-top-right-radius: 10px;
+.flex-container > div .data tr .editDelete img:hover {
+  transform: scale(0.7);
 }
-.data tr:first-child td {
-  border-top-style: solid;
-  background-color: royalblue;
-  color: white;
-}
-.data tr td:first-child {
-  border-left-style: solid;
-}
-.data tr td:first-child {
-  border-bottom-left-radius: 10px;
-}
-.data tr td:last-child {
-  border-bottom-right-radius: 10px;
+.flex-container > div .data tr .cke_top {
+  display: none;
 }
 
 th,

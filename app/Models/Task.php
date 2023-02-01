@@ -59,7 +59,7 @@ class Task
 
 	/* To delete one task */
 	public function deleteTask($id){
-		$statement = $this->db->prepare('DELETE FROM `zeiteintraege` WHERE fk_aufgabeId = :id');
+		$statement = $this->db->prepare('DELETE FROM `rapport` WHERE fk_aufgabeId = :id');
         $statement->bindParam(':id', $id, PDO::PARAM_STR);
         $statement->execute();
 
@@ -133,4 +133,13 @@ class Task
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
 		$statement->execute();
 	}
+
+	// Sort Algorithm
+    public function sortTask($sort_option){
+        $statement = $this->db->prepare("SELECT * FROM aufgabe WHERE fk_benutzerId = :benutzerId AND status = 0 ORDER BY $sort_option");
+        $statement->bindParam(':benutzerId', $_SESSION["id"], PDO::PARAM_STR);
+		/* Bind Param fügt alles mit zusätzlichen Gänsefüschen zu, um SQL-Injection zu verhindern "" */
+        $statement->execute();
+        return $statement;
+    }
 }

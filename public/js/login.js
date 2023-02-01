@@ -87,10 +87,14 @@ window.addEventListener("load", function() {
             if (document.querySelector('#verypass').value.trim() === '') {
                 document.querySelector('#verypass').insertAdjacentHTML("afterend", "<label class=\"warning\"> Bitte Passwort erneut eingeben</label>");
                 errors = true;
-            } else if (document.querySelector('#password_register').value != document.querySelector('#passwort_again').value) {
+            } else if (document.querySelector('#password_register').value != document.querySelector('#verypass').value) {
                 document.querySelector('#verypass').insertAdjacentHTML("afterend", "<label class=\"warning\"> Nicht das gleiche Passwort</label>");
                 errors = true;
             }
+        }
+        if (isPasswordReady == false) {
+            document.querySelector('.password_strength_area').insertAdjacentHTML("afterend", "<label class=\"warning\"> Bitte stärkeres Passwort eingeben</label>");
+            errors = true;
         }
         if (errors) {
             evt.preventDefault();

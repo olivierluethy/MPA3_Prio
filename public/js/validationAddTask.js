@@ -47,6 +47,9 @@ window.addEventListener("load", function() {
             if (document.querySelector('#priority').value.trim() === '') {
                 document.querySelector('#priority').insertAdjacentHTML("afterend", "<label class=\"warning\"> Please enter a priority!</label>");
                 errors = true;
+            }else if (document.querySelector('#priority').value <= 0){
+                document.querySelector('#priority').insertAdjacentHTML("afterend", "<label class=\"warning\"> Please enter a priority higher than 0!</label>");
+                errors = true;
             }
         }
         if (errors) {
