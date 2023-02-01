@@ -1,0 +1,133 @@
+/* Navigation Bar */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    overflow-x: hidden;
+    background-color: rgb(255, 255, 255);
+    nav {
+        display: flex;
+        width: 100%;
+        background-color: lightblue;
+        box-shadow: 2px 3px 5px grey;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        .part1 {
+            margin-left: 2rem;
+            display: flex;
+            width: 20%;
+            cursor: pointer;
+            img {
+                object-fit: contain;
+                width: 20%;
+                margin-top: auto;
+                margin-bottom: auto;
+                min-width: 40px;
+                transition: 500ms;
+                &:hover {
+                    transform: scale(1.1);
+                    transition: 500ms;
+                }
+            }
+            h1 {
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-left: 1rem;
+                transition-duration: 0.4s;
+                &:hover {
+                    text-shadow: 2px 2px lightgray;
+                }
+            }
+        }
+        .part2 {
+            width: 80%;
+            margin-top: auto;
+            margin-bottom: auto;
+            text-align: right;
+            margin-right: 2rem;
+            a {
+                font-weight: bold;
+                text-decoration: none;
+                color: black;
+                margin-left: 2rem;
+                transition-duration: 0.4s;
+                &:hover {
+                    font-style: italic;
+                    color: white;
+                }
+                &.active {
+                    color: yellow;
+                    font-style: italic;
+                }
+            }
+            .icon {
+                display: none;
+                font-size: 2rem;
+            }
+            button {
+                background-color: royalblue;
+                border: 2px solid royalblue;
+                color: white;
+                padding: 16px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                margin-left: 2rem;
+                box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+                &:hover {
+                    background-color: lightblue;
+                    color: royalblue;
+                    border: 2px solid royalblue;
+                }
+                &.active {
+                    border: 2px solid white;
+                    background-color: white;
+                    color: royalblue;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 769px) {
+    body {
+        nav {
+            .part2 {
+                button {
+                    display: none;
+                }
+                .icon {
+                    display: block;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 769px) {
+    body {
+        nav {
+            display: block;
+            .part2.responsive {
+                position: relative;
+                .icon {
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                }
+                button {
+                    float: none;
+                    display: block;
+                    text-align: left;
+                }
+            }
+        }
+    }
+}
