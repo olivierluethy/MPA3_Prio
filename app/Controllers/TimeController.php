@@ -38,22 +38,13 @@ class TimeController
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		/* Get title and id of task */
-		$getTitleOfTask = $Time -> getTitleOfTask(); // title, aufgabeId
-		$getTitleOfTask = $getTitleOfTask -> fetchAll();
+		$getTitleOfTask = $Time->getTitleOfTask()->fetchAll(); // title, aufgabeId
 
 		/* Get all rapports for that title from that task */
-		$getRapports = $Time -> getRapports(); // get all rapports
-		$getRapports = $getRapports -> fetchAll();
+		$getRapports = $Time -> getRapports()->fetchAll(); // get all rapports
 
-		$getTitleOfTaskCounter = 0;
-		$getRapportsCounter = 0;
-
-		foreach ($getTitleOfTask as $getTitleOfTask2){
-			$getTitleOfTaskCounter++;
-		}
-		foreach ($getRapports as $getRapports2){
-			$getRapportsCounter++;
-		}
+		$titleOfTaskCount = count($getTitleOfTask);
+		$rapportsCount = count($getRapports);
 
 		require 'app/Views/zeituebersicht.view.php';
 	}
@@ -85,7 +76,6 @@ class TimeController
 
         $id = $_GET['id'];
 
-        $title = '';
         $pdo = connectDatabase();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -99,8 +89,7 @@ class TimeController
         }
 		/* Needed data to show data that can be changed */
 		else{
-            $getRapport = $Time->getRapport($id);
-        	$getRapport = $getRapport -> fetchAll();
+            $getRapport = $Time->getRapport($id)->fetchAll();
         }
         require 'app/Views/editTime.view.php';
 	}
@@ -117,8 +106,7 @@ class TimeController
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		/* Get all rapports from task */
-		$getHistorys = $Time -> getHistorys($id);
-		$getHistorys = $getHistorys -> fetchAll();
+		$getHistorys = $Time -> getHistorys($id)->fetchAll();
 
 		$totaltime = 0;
         $sum = strtotime('00:00:00');

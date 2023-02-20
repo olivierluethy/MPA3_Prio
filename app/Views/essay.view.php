@@ -21,14 +21,12 @@
     ?>
 
     <div class="essay">
-        <?php
-        echo "<h1><u>" . $getEssay[0][1] . "</u></h1>
-              <td><textarea readonly class='ckeditor' id='essay'>" ?><?php echo $getEssay[0][2] . "</textarea></td>
-              <div class='acre'>
-                <button class='acbtn' onclick='accept(" . $getEssay[0][0] . ", " . $getEssay[0][4] . ")'>Accept</button>
-                <button class='rebtn' onclick='refuse(" . $getEssay[0][0] . ", " . $getEssay[0][4] . ")'>Refuse</button>
-              </div>";
-                                                                    ?>
+        <h1><u><?= $getEssay[0][1] ?></u></h1>
+        <td><textarea readonly class="ckeditor" id="essay"><?= $getEssay[0][2] ?></textarea></td>
+        <div class="acre">
+            <button class="acbtn" onclick="accept(<?= $getEssay[0][0] ?>, <?= $getEssay[0][4] ?>)">Accept</button>
+            <button class="rebtn" onclick="refuse(<?= $getEssay[0][0] ?>, <?= $getEssay[0][4] ?>)">Refuse</button>
+        </div>
     </div>
 
     <script src="ckeditor/ckeditor.js"></script>
