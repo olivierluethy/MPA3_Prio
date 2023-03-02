@@ -20,7 +20,7 @@ class Essay
 		$statement = $this->db->prepare('SELECT * FROM essays WHERE essayId = :id');
 		$statement->bindParam(':id', $id, PDO::PARAM_STR);
 		$statement->execute();
-        return $statement;
+        return $statement-> fetchAll();
 	}
 
 	public function add_essay($title, $essay){

@@ -42,8 +42,7 @@ class TimeController
 
 		/* Get all rapports for that title from that task */
 		$getRapports = $Time -> getRapports()->fetchAll(); // get all rapports
-
-		$titleOfTaskCount = count($getTitleOfTask);
+		
 		$rapportsCount = count($getRapports);
 
 		require 'app/Views/zeituebersicht.view.php';

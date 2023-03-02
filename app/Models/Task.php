@@ -12,7 +12,7 @@ class Task
 		$statement = $this->db->prepare('SELECT * FROM aufgabe WHERE fk_BenutzerId = :id ORDER BY prioritaet');
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
 		$statement->execute();
-        return $statement;
+        return $statement->fetchAll();
 	}
 
 	/* For OPEN TASKS */
@@ -21,7 +21,7 @@ class Task
 		ORDER BY prioritaet DESC');
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
 		$statement->execute();
-        return $statement;
+        return $statement-> fetchAll();
 	}
 
 	/* For DONE TASKS */
@@ -30,7 +30,7 @@ class Task
 		ORDER BY prioritaet DESC');
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
 		$statement->execute();
-        return $statement;
+        return $statement-> fetchAll();
 	}
 
 	/* To add one task */
@@ -73,7 +73,7 @@ class Task
 		$statement = $this->db->prepare('SELECT * FROM aufgabe WHERE aufgabeId = :id');
 		$statement->bindParam(':id', $id, PDO::PARAM_STR);
 		$statement->execute();
-        return $statement;
+        return $statement-> fetchAll();
 	}
 
 	/* If task completed on point user receives one minus point */

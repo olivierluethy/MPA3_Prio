@@ -39,34 +39,34 @@ if ($_SESSION['role'] == 2)
 /* If the user isn't blocked from the site */
 else if ($_SESSION['role'] == 0)
 {
-    if ($getAllTasksCounter > 0)
+    if (count($getAllTasks) > 0)
     {
         echo "<table class='switch'>
                     <tr>
                         <th><button id='openButton' onclick='navSwitch(1)'>Open ";
-        if ($getAllTasksOpenCounter == 0)
+        if (count($getAllTasksOpen) == 0)
         {
             echo "(empty) </button></th>";
         }
         else
         {
-            echo "(" . $getAllTasksOpenCounter . ")</th>";
+            echo "(" . count($getAllTasksOpen) . ")</th>";
         }
         echo "<th></th>
                         <th><button id='doneButton' onclick='navSwitch(2)'>Completed ";
-        if ($getAllTasksDoneCounter == 0)
+        if (count($getAllTasksDone) == 0)
         {
             echo "(empty) </button></th>";
         }
         else
         {
-            echo "(" . $getAllTasksDoneCounter . ")";
+            echo "(" . count($getAllTasksDone) . ")";
         }
         echo "</tr>
                 </table>";
         /* For open tasks */
         echo "<div id='open'>";
-        if ($getAllTasksOpenCounter > 0)
+        if (count($getAllTasksOpen) > 0)
         {?>
         <table class="order">
             <tr>
@@ -200,7 +200,7 @@ else if ($_SESSION['role'] == 0)
         echo "</div>";
         /* For done tasks */
         echo "<div id='done'>";
-        if ($getAllTasksDoneCounter > 0)
+        if (count($getAllTasksDone) > 0)
         {
             echo "
                         <table class='order'>

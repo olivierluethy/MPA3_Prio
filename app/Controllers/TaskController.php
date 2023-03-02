@@ -18,20 +18,14 @@ class TaskController
 			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	
 			/* Get all tasks */
-			$getAllTasks = $Task -> getAllTasks()->fetchAll();
+			$getAllTasks = $Task -> getAllTasks();
 			
 			/* Get all open tasks */
-			$getAllTasksOpen = $Task -> getAllTasksOpen()-> fetchAll();
+			$getAllTasksOpen = $Task -> getAllTasksOpen();
 	
-			$getAllTasksCounter = count($getAllTasks);
-			$getAllTasksOpenCounter = count($getAllTasksOpen);
-
 			// Done Tasks
 			/* Get all tasks */
 			$getAllTasksDone = $Task -> getAllTasksDone();
-			$getAllTasksDone = $getAllTasksDone -> fetchAll();
-	
-			$getAllTasksDoneCounter = count($getAllTasksDone);
 		}
 		require 'app/Views/home.view.php';
 	}
@@ -75,6 +69,7 @@ class TaskController
 
 		if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 			header('Location: login');
+			exit;
 		}
 
 		$id = $_GET['id'];
@@ -95,7 +90,7 @@ class TaskController
             header('Location: home');	
         }else{
 			/* Get Data to edit */
-			$getTask = $Task -> getTask($id)-> fetchAll();
+			$getTask = $Task -> getTask($id);
         }
 		require 'app/Views/editTask.view.php';
 	}
@@ -106,6 +101,7 @@ class TaskController
 
 		if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 			header('Location: login');
+			exit;
 		}
 
 		$Task = new Task();
@@ -125,6 +121,7 @@ class TaskController
 
 		if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 			header('Location: login');
+			exit;
 		}
 
 		$Task = new Task();
@@ -144,6 +141,7 @@ class TaskController
 
 		if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 			header('Location: login');
+			exit;
 		}
 
 		$Task = new Task();
@@ -157,38 +155,43 @@ class TaskController
         header('Location: home');
 	}
 
-	public function complete_task(){
-		// Initialize the session
-        session_start();
+	public function complete_task()
+	{
+	// Start the session
+	session_start();
+	// Check if user is logged in
+	if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+		header('Location: login');
+		exit;
+	}
 
-		if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-			header('Location: login');
-		}
+	// Connect to database
+	$pdo = connectDatabase();
+	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-		$Task = new Task();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	// Get task details
+	$task = new Task();
+	$getDeadtime = $task->getDeadtime($_GET['id'])->fetchAll();
+	$isPastDeadline = new DateTime() > new DateTime($getDeadtime[0][0]);
 
-		/* Get Data to edit */
-		$getDeadtime = $Task -> getDeadtime($_GET['id'])-> fetchAll();
+	// Mark task as completed
+	if ($isPastDeadline) {
+		$task->complete_task_past($_GET['id']);
+	} else {
+		$task->complete_task($_GET['id']);
+	}
 
-		if(new DateTime() > new DateTime($getDeadtime[0][0])){
-			/* Date is in the past */
-			$Task->complete_task_past($_GET['id']);
-		}
-		else {
-			/* Date is NOT in the past */
-			$Task->complete_task($_GET['id']);
-		}
+	// Check deficiency points
+	$getDeficiencyPoints = $task->getDeficiencyPoints()->fetchAll();
+	$deficiencyPoints = $getDeficiencyPoints[0][0];
 
-		/* Get amount of deficiency points */
-		$getDeficiencyPoints = $Task -> getDeficiencyPoints()-> fetchAll();
-
-		if($getDeficiencyPoints[0][0] == 10){
-			$Task->lowerRole();
-			header('Location: logout');
-		}else if($getDeficiencyPoints[0][0] < 10){
-			header('Location: home');
-		}
+	if ($deficiencyPoints == 10) {
+		$task->lowerRole();
+		header('Location: logout');
+		exit;
+	} elseif ($deficiencyPoints < 10) {
+		header('Location: home');
+		exit;
+	}
 	}
 }

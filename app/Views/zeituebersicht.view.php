@@ -21,7 +21,7 @@ include ("header.php");
 ?>
 
     <!-- Zeiterfassungen -->
-    <?php if ($getTitleOfTaskCounter > 0) { ?>
+    <?php if (count($getTitleOfTask) > 0) { ?>
     <table class='leiste'>
         <tr>
             <th>
@@ -63,11 +63,16 @@ include ("header.php");
 
                                 <!-- Display all essential informations about task -->
                                 <tr>
-                                    <td><?= $getRapports2['rapport']; ?></td>
-                                    <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
-                                    <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
-                                    <td><i class="fas fa-clock"></i> <?=$getRapports2['zeit']; ?></td>
-    
+                                    <td><?= $getRapports2['rapport'] ?></td>
+                                    <td>
+                                        <i class="fas fa-calendar-days"></i>
+                                        <?= date('dS M Y', strtotime($getRapports2['created_at'])) ?>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-clock"></i>
+                                        <?= $getRapports2['zeit'] ?>
+                                    </td>
+
                                     <?php
                                     // Converting the time into seconds
                                     $timeinsec = strtotime($getRapports2['zeit']) - $sum;

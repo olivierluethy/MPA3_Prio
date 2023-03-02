@@ -11,7 +11,6 @@ body nav {
   width: 100%;
   background-color: lightblue;
   box-shadow: 2px 3px 5px grey;
-  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 100;
