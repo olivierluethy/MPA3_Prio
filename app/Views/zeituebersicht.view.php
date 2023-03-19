@@ -21,7 +21,7 @@ include ("header.php");
 ?>
 
     <!-- Zeiterfassungen -->
-    <?php if ($getTitleOfTaskCounter > 0) { ?>
+    <?php if (count($getTitleOfTask) > 0) { ?>
     <table class='leiste'>
         <tr>
             <th>
@@ -61,14 +61,14 @@ include ("header.php");
                                     <th>Edit / Delete</th>
                                 </tr>";?>
 
-                                <!-- Display all essential informations about task -->
-                                <tr>
-                                    <td><?= $getRapports2['rapport']; ?></td>
-                                    <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
-                                    <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
-                                    <td><i class="fas fa-clock"></i> <?=$getRapports2['zeit']; ?></td>
-    
-                                    <?php
+        <!-- Display all essential informations about task -->
+        <tr>
+            <td><?= $getRapports2['rapport']; ?></td>
+            <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
+            <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
+            <td><i class="fas fa-clock"></i> <?=$getRapports2['zeit']; ?></td>
+
+            <?php
                                     // Converting the time into seconds
                                     $timeinsec = strtotime($getRapports2['zeit']) - $sum;
     
@@ -89,7 +89,7 @@ include ("header.php");
                                         echo "<td></td>";
                                     }
                         ?>
-                    <?php
+            <?php
                     } else {
                         /* Check if their are already 5 rows of data */
                         if ($rapportCounter == 5)
@@ -97,14 +97,14 @@ include ("header.php");
                             echo "<tr><td><button title='Look into the history' onclick='showHistory(". $getTitleOfTask2['aufgabeId'] .")'><i class='fa fa-archive'></i>&nbsp History</button></td><td></td><td></td></tr>";
                             break;
                         } else { ?>
-                            <!-- Display all essential informations about task -->
-                            <tr>
-                                <td><?= $getRapports2['rapport']; ?></td>
-                                <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
-                                <td><?= $date ?></td>
-                                <td><i class="fa fa-clock-o"></i> <?=$getRapports2['zeit']; ?></td>
+            <!-- Display all essential informations about task -->
+        <tr>
+            <td><?= $getRapports2['rapport']; ?></td>
+            <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
+            <td><?= $date ?></td>
+            <td><i class="fa fa-clock-o"></i> <?=$getRapports2['zeit']; ?></td>
 
-                                <?php
+            <?php
                                 // Converting the time into seconds
                                 $timeinsec = strtotime($getRapports2['zeit']) - $sum;
 
@@ -159,7 +159,7 @@ include ("header.php");
                 echo "
                     <tr>
                         <td><strong>Total time spent: <font color='red'>"?>
-                        <?php
+            <?php
                         $Time = new TimeController();
                         $Time->formatTimeOutput($h, $m, $s);?><?php echo "</font></strong></td>
                         <td></td>

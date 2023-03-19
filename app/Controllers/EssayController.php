@@ -17,14 +17,7 @@ class EssayController
 			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 			/* Get all essays */
-			$getEssays = $Essay -> getEssays();
-			$getEssays = $getEssays -> fetchAll();
-
-			$getEssaysCounter = 0;
-
-			foreach ($getEssays as $getEssays2){
-				$getEssaysCounter++;
-			}
+			$getEssays = $Essay -> getEssays() -> fetchAll();;
 
 			require 'app/Views/admin.view.php';	
 		}else {
@@ -47,8 +40,7 @@ class EssayController
 		$id = $_GET['id'];
 
 		/* Get essay */
-		$getEssay = $Essay -> getEssay($id);
-		$getEssay = $getEssay -> fetchAll();
+		$getEssay = $Essay -> getEssay($id) -> fetchAll();;
 
 		$getEssayCounter = 0;
 

@@ -39,62 +39,62 @@ if ($_SESSION['role'] == 2)
 /* If the user isn't blocked from the site */
 else if ($_SESSION['role'] == 0)
 {
-    if ($getAllTasksCounter > 0)
+    if (count($getAllTasks) > 0)
     {
         echo "<table class='switch'>
                     <tr>
                         <th><button id='openButton' onclick='navSwitch(1)'>Open ";
-        if ($getAllTasksOpenCounter == 0)
+        if (count($getAllTasksOpen) == 0)
         {
             echo "(empty) </button></th>";
         }
         else
         {
-            echo "(" . $getAllTasksOpenCounter . ")</th>";
+            echo "(" . count($getAllTasksOpen) . ")</th>";
         }
         echo "<th></th>
                         <th><button id='doneButton' onclick='navSwitch(2)'>Completed ";
-        if ($getAllTasksDoneCounter == 0)
+        if (count($getAllTasksDone) == 0)
         {
             echo "(empty) </button></th>";
         }
         else
         {
-            echo "(" . $getAllTasksDoneCounter . ")";
+            echo "(" . count($getAllTasksDone) . ")";
         }
         echo "</tr>
                 </table>";
         /* For open tasks */
         echo "<div id='open'>";
-        if ($getAllTasksOpenCounter > 0)
+        if (count($getAllTasksOpen) > 0)
         {?>
-        <table class="order">
-            <tr>
-                <td>
-                    <h2>All open tasks sorted by:</h2>
-                </td>
-                <td>
-                    <!-- Choose sorting option -->
-                    <form action="" method="GET">
-                        <select name="sort">
-                            <option value="">--Select Option--</option>
-                            <option value="priority"
-                                <?php if (isset($_GET['sort']) && $_GET['sort'] == "priority"){ echo "selected"; }?>>
-                                Priority</option>
-                            <option value="alphabet"
-                                <?php if (isset($_GET['sort']) && $_GET['sort'] == "alphabet"){ echo "selected"; }?>>
-                                Alphabet</option>
-                            <option value="deadline"
-                                <?php if (isset($_GET['sort']) && $_GET['sort'] == "deadline"){ echo "selected"; }?>>
-                                Deadline</option>
-                        </select>
-                        <button title='Sort all tasks' type='submit'>Sort <i class='fa fa-sort'></i></button>
-                    </form>
-                </td>
-                <td><button title='Click on this button to add a task' class='plus' onclick='addTask()'><i
-                            class='fa fa-plus'></i></button></td>
-            </tr>
-        </table>
+    <table class="order">
+        <tr>
+            <td>
+                <h2>All open tasks sorted by:</h2>
+            </td>
+            <td>
+                <!-- Choose sorting option -->
+                <form action="" method="GET">
+                    <select name="sort">
+                        <option value="">--Select Option--</option>
+                        <option value="priority"
+                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "priority"){ echo "selected"; }?>>
+                            Priority</option>
+                        <option value="alphabet"
+                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "alphabet"){ echo "selected"; }?>>
+                            Alphabet</option>
+                        <option value="deadline"
+                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "deadline"){ echo "selected"; }?>>
+                            Deadline</option>
+                    </select>
+                    <button title='Sort all tasks' type='submit'>Sort <i class='fa fa-sort'></i></button>
+                </form>
+            </td>
+            <td><button title='Click on this button to add a task' class='plus' onclick='addTask()'><i
+                        class='fa fa-plus'></i></button></td>
+        </tr>
+    </table>
     <main>
         <?php
             // make a connector
@@ -200,7 +200,7 @@ else if ($_SESSION['role'] == 0)
         echo "</div>";
         /* For done tasks */
         echo "<div id='done'>";
-        if ($getAllTasksDoneCounter > 0)
+        if (count($getAllTasksDone) > 0)
         {
             echo "
                         <table class='order'>

@@ -22,7 +22,7 @@
     ?>
 
     <?php
-    if ($getEssaysCounter > 0) {
+    if (count($getEssays) > 0) {
         foreach ($getEssays as $getEssays2) {
             echo "<div class='essay'>
                         <table>

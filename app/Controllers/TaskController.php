@@ -18,33 +18,14 @@ class TaskController
 			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	
 			/* Get all tasks */
-			$getAllTasks = $Task -> getAllTasks();
-			$getAllTasks = $getAllTasks -> fetchAll();
+			$getAllTasks = $Task -> getAllTasks()-> fetchAll();
 			
 			/* Get all open tasks */
-			$getAllTasksOpen = $Task -> getAllTasksOpen();
-			$getAllTasksOpen = $getAllTasksOpen -> fetchAll();
+			$getAllTasksOpen = $Task -> getAllTasksOpen() -> fetchAll();;
 	
-			$getAllTasksCounter = 0;
-			$getAllTasksOpenCounter = 0;
-
-			foreach ($getAllTasks as $getAllTasks2){
-				$getAllTasksCounter++;
-			}
-			foreach ($getAllTasksOpen as $getAllTasksOpen2){
-				$getAllTasksOpenCounter++;
-			}
-
 			// Done Tasks
 			/* Get all tasks */
-			$getAllTasksDone = $Task -> getAllTasksDone();
-			$getAllTasksDone = $getAllTasksDone -> fetchAll();
-	
-			$getAllTasksDoneCounter = 0;
-	
-			foreach ($getAllTasksDone as $getAllTasksDone2){
-				$getAllTasksDoneCounter++;
-			}
+			$getAllTasksDone = $Task -> getAllTasksDone() -> fetchAll();;
 		}
 		require 'app/Views/home.view.php';
 	}
@@ -108,8 +89,7 @@ class TaskController
             header('Location: home');	
         }else{
 			/* Get Data to edit */
-			$getTask = $Task -> getTask($id);
-        	$getTask = $getTask -> fetchAll();
+			$getTask = $Task -> getTask($id) -> fetchAll();;
         }
 		require 'app/Views/editTask.view.php';
 	}
@@ -184,8 +164,7 @@ class TaskController
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		/* Get Data to edit */
-		$getDeadtime = $Task -> getDeadtime($_GET['id']);
-		$getDeadtime = $getDeadtime -> fetchAll();
+		$getDeadtime = $Task -> getDeadtime($_GET['id']) -> fetchAll();;
 
 		if(new DateTime() > new DateTime($getDeadtime[0][0])){
 			/* Date is in the past */
@@ -197,8 +176,7 @@ class TaskController
 		}
 
 		/* Get amount of deficiency points */
-		$getDeficiencyPoints = $Task -> getDeficiencyPoints();
-		$getDeficiencyPoints = $getDeficiencyPoints -> fetchAll();
+		$getDeficiencyPoints = $Task -> getDeficiencyPoints() -> fetchAll();;
 
 		if($getDeficiencyPoints[0][0] == 10){
 			$Task->lowerRole();
