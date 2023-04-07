@@ -42,13 +42,7 @@ class EssayController
 		/* Get essay */
 		$getEssay = $Essay -> getEssay($id) -> fetchAll();;
 
-		$getEssayCounter = 0;
-
-		foreach ($getEssay as $getEssay2){
-			$getEssayCounter++;
-		}
-
-		if($getEssayCounter == 0){
+		if(count($getEssay) == 0){
 			header('Location: login');
 		}else{
 			require 'app/Views/essay.view.php';

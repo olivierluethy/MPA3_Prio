@@ -101,8 +101,8 @@ include ("header.php");
         <tr>
             <td><?= $getRapports2['rapport']; ?></td>
             <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
-            <td><?= $date ?></td>
-            <td><i class="fa fa-clock-o"></i> <?=$getRapports2['zeit']; ?></td>
+            <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
+            <td><i class="fas fa-clock"></i> <?=$getRapports2['zeit']; ?></td>
 
             <?php
                                 // Converting the time into seconds
