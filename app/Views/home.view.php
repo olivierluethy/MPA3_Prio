@@ -18,6 +18,17 @@
     <?php
 $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
 include ("header.php");
+
+// Set the encryption method
+$encryption_method = "AES-256-CBC";
+
+// Set the secret key and iv
+$secret_key = 'my_secret_key';
+$secret_iv = 'my_secret_iv';
+
+// Hash the secret key and iv
+$key = hash('sha256', $secret_key);
+$iv = substr(hash('sha256', $secret_iv) , 0, 16);
 ?>
 
     <?php
@@ -67,7 +78,7 @@ else if ($_SESSION['role'] == 0)
         /* For open tasks */
         echo "<div id='open'>";
         if (count($getAllTasksOpen) > 0)
-        {?>
+        { ?>
     <table class="order">
         <tr>
             <td>
@@ -79,13 +90,22 @@ else if ($_SESSION['role'] == 0)
                     <select name="sort">
                         <option value="">--Select Option--</option>
                         <option value="priority"
-                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "priority"){ echo "selected"; }?>>
+                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "priority")
+            {
+                echo "selected";
+            } ?>>
                             Priority</option>
                         <option value="alphabet"
-                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "alphabet"){ echo "selected"; }?>>
+                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "alphabet")
+            {
+                echo "selected";
+            } ?>>
                             Alphabet</option>
                         <option value="deadline"
-                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "deadline"){ echo "selected"; }?>>
+                            <?php if (isset($_GET['sort']) && $_GET['sort'] == "deadline")
+            {
+                echo "selected";
+            } ?>>
                             Deadline</option>
                     </select>
                     <button title='Sort all tasks' type='submit'>Sort <i class='fa fa-sort'></i></button>
@@ -119,50 +139,78 @@ else if ($_SESSION['role'] == 0)
             $getObjects = $Task->sortTask($sort_option);
             $getObjects = $getObjects->fetchAll();
 
-
             $rowCounter = 0;
-                foreach ($getObjects as $getObject)
+            foreach ($getObjects as $getObject)
+            {
+                $rowCounter++;
+                if ($rowCounter == 1)
                 {
-                    $rowCounter++;
-                    if ($rowCounter == 1)
-                    {
-                        echo "<div class='task' style='background-color: #FFD700;'>";
-                    }else if ($rowCounter == 2){
-                        echo "<div class='task' style='background-color: #C0C0C0;'>";
-                    }else if($rowCounter == 3){
-                        echo "<div class='task' style='background-color: #CD7F32;'>";
-                    }else{
-                        echo "<div class='task' style='background-color: #99CCFF;'>";
-                    }
+                    echo "<div class='task' style='background-color: #FFD700;'>";
+                }
+                else if ($rowCounter == 2)
+                {
+                    echo "<div class='task' style='background-color: #C0C0C0;'>";
+                }
+                else if ($rowCounter == 3)
+                {
+                    echo "<div class='task' style='background-color: #CD7F32;'>";
+                }
+                else
+                {
+                    echo "<div class='task' style='background-color: #99CCFF;'>";
+                }
 ?>
 
         <table>
             <tr>
                 <th>
-                    <h1><?= $getObject['titel']; ?></h1>
+                <h1>
+                    <?php
+                $encrypted_titel = base64_decode($getObject['titel']);
+                $decrypted_titel = openssl_decrypt($encrypted_titel, $encryption_method, $key, 0, $iv);
+                $escaped_titel = htmlspecialchars($decrypted_titel);
+                echo $escaped_titel;
+                var_dump($escaped_titel)
+?>
+                </h1>
+
                 </th>
                 <th><textarea readonly class="ckeditor" name="description"
-                        id="description_open"><?php echo $getObject['beschreibung'] ?></textarea></th>
+                        id="description_open"><?php
+                $encrypted_beschreibung = base64_decode($getObject['beschreibung']);
+                $decrypted_beschreibung = openssl_decrypt($encrypted_beschreibung, $encryption_method, $key, 0, $iv);
+                $escaped_beschreibung = htmlspecialchars($decrypted_beschreibung);
+                echo $escaped_beschreibung; ?></textarea></th>
                 <th><textarea readonly class="ckeditor" name=""
-                        id="motivation_open"><?php echo $getObject['motivation'] ?></textarea></th>
+                        id="motivation_open"><?php
+                $encrypted_motivation = base64_decode($getObject['motivation']);
+                $decrypted_motivation = openssl_decrypt($encrypted_motivation, $encryption_method, $key, 0, $iv);
+                $escaped_motivation = htmlspecialchars($decrypted_motivation);
+                echo $escaped_motivation
+?></textarea></th>
                 <!-- Format date -->
-                <?php $date = date('dS M Y', strtotime($getObject['deadline'])); ?>
+                <?php
+                $encrypted_date = base64_decode($getObject['deadline']);
+                $decrypted_date = openssl_decrypt($encrypted_date, $encryption_method, $key, 0, $iv);
+                $escaped_date = htmlspecialchars($encrypted_date);
+
+                $date = date('dS M Y', strtotime($escaped_date)); ?>
                 <th><?php echo $date ?></th><?php
-                    /* Check if task as been created under 24 hours */
-                    if (strtotime($getObject['created_at']) >= strtotime('-1 day'))
-                    {
-                        /* Task is younger than 24 hours */
-                        echo "
+                /* Check if task as been created under 24 hours */
+                if (strtotime($getObject['created_at']) >= strtotime('-1 day'))
+                {
+                    /* Task is younger than 24 hours */
+                    echo "
                                                 <th>
                                                     <img title='Edit task' onclick='editTask(" . $getObject['aufgabeId'] . ")' src='images/edit.png' alt=''>
                                                     <img title='Delete task' onclick='deleteTask(" . $getObject['aufgabeId'] . ")' src='images/delete.png' alt=''>
                                                 </th>";
-                    }
-                    /* When task is or older than 24 hours */
-                    else
-                    {
-                        echo "<th></th>";
-                    } ?>
+                }
+                /* When task is or older than 24 hours */
+                else
+                {
+                    echo "<th></th>";
+                } ?>
                 <th>
                     <h1 id='active_time<?=$getObject['aufgabeId']; ?>'>00:00:00</h1>
                 </th>
@@ -178,15 +226,17 @@ else if ($_SESSION['role'] == 0)
                         src='images/up.png' alt=''><br>
                     <p><?=$getObject['prioritaet']; ?></p>
                     <?php
-                    if($getObject['prioritaet'] > 0){?>
+                if ($getObject['prioritaet'] > 0)
+                { ?>
                     <img title='Decrease priority' onclick="lowerPrio(<?=$getObject['aufgabeId']; ?>)"
                         src='images/down.png' alt=''>
-                    <?php }?>
+                    <?php
+                } ?>
                 </th>
             </tr>
         </table>
         </div><?php
-                }
+            }
 
             echo "</main>";
         }

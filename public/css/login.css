@@ -18,7 +18,6 @@ body .login .password_strength_area {
   text-align: center;
   -webkit-user-select: none;
   -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 body .login .password_strength_area .indicator {

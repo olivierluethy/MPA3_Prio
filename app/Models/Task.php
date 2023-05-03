@@ -9,10 +9,25 @@ class Task
     }
 
 	public function getAllTasks(){
-		$statement = $this->db->prepare('SELECT * FROM aufgabe WHERE fk_BenutzerId = :id ORDER BY prioritaet');
-		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
+		$secret_key = 'my_secret_key';
+		
+		$statement = $this->db->prepare('SELECT 
+        aufgabeId, 
+        AES_ENCRYPT(titel, :secret_key) as encrypted_titel, 
+        AES_ENCRYPT(beschreibung, :secret_key) as encrypted_beschreibung, 
+        AES_ENCRYPT(motivation, :secret_key) as encrypted_motivation, 
+        AES_ENCRYPT(deadline, :secret_key) as encrypted_deadline, 
+        AES_ENCRYPT(prioritaet, :secret_key) as encrypted_prioritaet, 
+        status, 
+        created_at 
+			FROM aufgabe 
+			WHERE fk_BenutzerId = :id 
+			ORDER BY prioritaet');
+
+		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
+		$statement->bindParam(':secret_key', $secret_key, PDO::PARAM_STR);
 		$statement->execute();
-        return $statement;
+		return $statement;
 	}
 
 	/* For OPEN TASKS */
@@ -35,24 +50,86 @@ class Task
 
 	/* To add one task */
 	public function add_task($titel, $beschreibung, $motivation, $deadline, $prioritaet){
+		// Set the encryption method
+		$encryption_method = "AES-256-CBC";
+
+		// Set the secret key and iv
+		$secret_key = 'my_secret_key';
+		$secret_iv = 'my_secret_iv';
+
+		// Hash the secret key and iv
+		$key = hash('sha256', $secret_key);
+		$iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+		// Encrypt the titel
+		$encrypted_titel = openssl_encrypt($titel, $encryption_method, $key, 0, $iv);
+		$encrypted_titel = base64_encode($encrypted_titel);
+
+		// Encrypt the beschreibung
+		$encrypted_beschreibung = openssl_encrypt($beschreibung, $encryption_method, $key, 0, $iv);
+		$encrypted_beschreibung = base64_encode($encrypted_beschreibung);
+
+		// Encrypt the motivation
+		$encrypted_motivation = openssl_encrypt($motivation, $encryption_method, $key, 0, $iv);
+		$encrypted_motivation = base64_encode($encrypted_motivation);
+
+		// Encrypt the deadline
+		$encrypted_deadline = openssl_encrypt($deadline, $encryption_method, $key, 0, $iv);
+		$encrypted_deadline = base64_encode($encrypted_deadline);
+
+		// Encrypt the priority
+		$encrypted_prioritaet = openssl_encrypt($prioritaet, $encryption_method, $key, 0, $iv);
+		$encrypted_prioritaet = base64_encode($encrypted_prioritaet);
+
 		$statement = $this->db->prepare("INSERT INTO `aufgabe` (titel, beschreibung, motivation, deadline, prioritaet, fk_benutzerId) VALUES (:titel, :beschreibung, :motivation, :deadline, :prioritaet, :id)");
-		$statement->bindParam(':titel', $titel, PDO::PARAM_STR);
-		$statement->bindParam(':beschreibung', $beschreibung, PDO::PARAM_STR);
-		$statement->bindParam(':motivation', $motivation, PDO::PARAM_STR);
-		$statement->bindParam(':deadline', $deadline, PDO::PARAM_STR);
-		$statement->bindParam(':prioritaet', $prioritaet, PDO::PARAM_STR);
+		$statement->bindParam(':titel', $encrypted_titel, PDO::PARAM_STR);
+		$statement->bindParam(':beschreibung', $encrypted_beschreibung, PDO::PARAM_STR);
+		$statement->bindParam(':motivation', $encrypted_motivation, PDO::PARAM_STR);
+		$statement->bindParam(':deadline', $encrypted_deadline, PDO::PARAM_STR);
+		$statement->bindParam(':prioritaet', $encrypted_prioritaet, PDO::PARAM_STR);
 		$statement->bindParam(':id', $_SESSION['id'], PDO::PARAM_STR);
 		$statement->execute();
 	}
 
 	/* To edit a task */
 	public function edit_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $id){
+		// Set the encryption method
+		$encryption_method = "AES-256-CBC";
+
+		// Set the secret key and iv
+		$secret_key = 'my_secret_key';
+		$secret_iv = 'my_secret_iv';
+
+		// Hash the secret key and iv
+		$key = hash('sha256', $secret_key);
+		$iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+		// Encrypt the titel
+		$encrypted_titel = openssl_encrypt($titel, $encryption_method, $key, 0, $iv);
+		$encrypted_titel = base64_encode($encrypted_titel);
+
+		// Encrypt the beschreibung
+		$encrypted_beschreibung = openssl_encrypt($beschreibung, $encryption_method, $key, 0, $iv);
+		$encrypted_beschreibung = base64_encode($encrypted_beschreibung);
+
+		// Encrypt the motivation
+		$encrypted_motivation = openssl_encrypt($motivation, $encryption_method, $key, 0, $iv);
+		$encrypted_motivation = base64_encode($encrypted_motivation);
+
+		// Encrypt the deadline
+		$encrypted_deadline = openssl_encrypt($deadline, $encryption_method, $key, 0, $iv);
+		$encrypted_deadline = base64_encode($encrypted_deadline);
+
+		// Encrypt the priority
+		$encrypted_prioritaet = openssl_encrypt($prioritaet, $encryption_method, $key, 0, $iv);
+		$encrypted_prioritaet = base64_encode($encrypted_prioritaet);
+
 		$statement = $this->db->prepare('UPDATE aufgabe SET titel = :titel, beschreibung = :beschreibung, motivation = :motivation, deadline = :deadline, prioritaet = :prioritaet WHERE aufgabeId = :id');
-		$statement->bindParam(':titel', $titel, PDO::PARAM_STR);
-		$statement->bindParam(':beschreibung', $beschreibung, PDO::PARAM_STR);
-		$statement->bindParam(':motivation', $motivation, PDO::PARAM_STR);
-		$statement->bindParam(':deadline', $deadline, PDO::PARAM_STR);
-		$statement->bindParam(':prioritaet', $prioritaet, PDO::PARAM_STR);
+		$statement->bindParam(':titel', $encrypted_titel, PDO::PARAM_STR);
+		$statement->bindParam(':beschreibung', $encrypted_beschreibung, PDO::PARAM_STR);
+		$statement->bindParam(':motivation', $encrypted_motivation, PDO::PARAM_STR);
+		$statement->bindParam(':deadline', $encrypted_deadline, PDO::PARAM_STR);
+		$statement->bindParam(':prioritaet', $encrypted_prioritaet, PDO::PARAM_STR);
 		$statement->bindParam(':id', $id, PDO::PARAM_STR);
 		$statement->execute();
 	}

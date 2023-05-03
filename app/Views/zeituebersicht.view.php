@@ -18,10 +18,21 @@
     <?php
 $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
 include ("header.php");
+
+// Set the encryption method
+$encryption_method = "AES-256-CBC";
+
+// Set the secret key and iv
+$secret_key = 'my_secret_key';
+$secret_iv = 'my_secret_iv';
+
+// Hash the secret key and iv
+$key = hash('sha256', $secret_key);
+$iv = substr(hash('sha256', $secret_iv), 0, 16);
 ?>
 
     <!-- Zeiterfassungen -->
-    <?php if (count($getTitleOfTask) > 0) { ?>
+    <?php if (count($getTitleOfTask)) { ?>
     <table class='leiste'>
         <tr>
             <th>
@@ -129,10 +140,16 @@ include ("header.php");
                 }
             }
             if($rapportCounter == 0) {
-                echo
-                "<div>
-                    <table class='data' id=" . $getTitleOfTask2['titel'] . ">
-                        <tr><th><p>" . $getTitleOfTask2['titel'] . "</p></th></tr>
+                $encrypted_titel = base64_decode($getTitleOfTask2['titel']);
+                $decrypted_titel = openssl_decrypt($encrypted_titel, $encryption_method, $key, 0, $iv);
+                $escaped_titel = htmlspecialchars($decrypted_titel);?>
+                <div>
+                    <table class='data' id="<?= $escaped_titel ?>">
+                        <tr>
+                            <th>
+                                <p><?= $escaped_titel ?></p>
+                            </th>
+                        </tr>
                         <tr>
                             <td></td>
                             <td><font color='red'><strong>No rapports found</strong></font></td>
@@ -140,8 +157,8 @@ include ("header.php");
                             <td></td>
                         </tr>
                     </table>
-                </div>";
-            }
+                </div>
+            <?php }
             if($rapportCounter < 5 && $rapportCounter != 0){
                 $h = intval($totaltime / 3600);
 
@@ -170,11 +187,14 @@ include ("header.php");
         }
         ?>
     </div>
-    <?php } ?>
+    <?php } else { ?>
     <div id="nothingFound">
         <h1>Nothing found</h1>
         <img src="images/sad_smiley.png" alt="">
+        <h2>Add a new task and click on the clock to add a time. It will appear h</h2>
     </div>
+
+    <?php } ?>
 
     <script src="public/js/searchTask.js"></script>
     <script src="public/js/responsive.js"></script>
