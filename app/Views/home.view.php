@@ -29,6 +29,33 @@ $secret_iv = 'my_secret_iv';
 // Hash the secret key and iv
 $key = hash('sha256', $secret_key);
 $iv = substr(hash('sha256', $secret_iv) , 0, 16);
+
+
+
+function decryptDate($encrypted_date) {
+    // Set the encryption method
+    $encryption_method = "AES-256-CBC";
+
+    // Set the secret key and iv
+    $secret_key = 'my_secret_key';
+    $secret_iv = 'my_secret_iv';
+
+    // Hash the secret key and iv
+    $key = hash('sha256', $secret_key);
+    $iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+    // Decode the encrypted date
+    $decoded_date = base64_decode($encrypted_date);
+
+    // Decrypt the date
+    $decrypted_date = openssl_decrypt($decoded_date, $encryption_method, $key, 0, $iv);
+
+    // Convert the decrypted date to the correct format
+    $date = date('dS M Y', strtotime($decrypted_date));
+
+    return $date;
+}
+
 ?>
 
     <?php
@@ -169,9 +196,7 @@ else if ($_SESSION['role'] == 0)
                 $encrypted_titel = base64_decode($getObject['titel']);
                 $decrypted_titel = openssl_decrypt($encrypted_titel, $encryption_method, $key, 0, $iv);
                 $escaped_titel = htmlspecialchars($decrypted_titel);
-                echo $escaped_titel;
-                var_dump($escaped_titel)
-?>
+                echo $escaped_titel;?>
                 </h1>
 
                 </th>
@@ -190,21 +215,18 @@ else if ($_SESSION['role'] == 0)
 ?></textarea></th>
                 <!-- Format date -->
                 <?php
-                $encrypted_date = base64_decode($getObject['deadline']);
-                $decrypted_date = openssl_decrypt($encrypted_date, $encryption_method, $key, 0, $iv);
-                $escaped_date = htmlspecialchars($encrypted_date);
-
-                $date = date('dS M Y', strtotime($escaped_date)); ?>
-                <th><?php echo $date ?></th><?php
+                $encrypted_deadline = $getObject['deadline'];
+                $deadline = decryptDate($encrypted_deadline); ?>
+                <th><?php echo $deadline ?></th><?php
                 /* Check if task as been created under 24 hours */
                 if (strtotime($getObject['created_at']) >= strtotime('-1 day'))
                 {
                     /* Task is younger than 24 hours */
                     echo "
-                                                <th>
-                                                    <img title='Edit task' onclick='editTask(" . $getObject['aufgabeId'] . ")' src='images/edit.png' alt=''>
-                                                    <img title='Delete task' onclick='deleteTask(" . $getObject['aufgabeId'] . ")' src='images/delete.png' alt=''>
-                                                </th>";
+                    <th>
+                        <img title='Edit task' onclick='editTask(" . $getObject['aufgabeId'] . ")' src='images/edit.png' alt=''>
+                        <img title='Delete task' onclick='deleteTask(" . $getObject['aufgabeId'] . ")' src='images/delete.png' alt=''>
+                    </th>";
                 }
                 /* When task is or older than 24 hours */
                 else
@@ -224,9 +246,17 @@ else if ($_SESSION['role'] == 0)
                 <th>
                     <img title='Increase priority' onclick="higherPrio(<?=$getObject['aufgabeId']; ?>)"
                         src='images/up.png' alt=''><br>
-                    <p><?=$getObject['prioritaet']; ?></p>
+                        <p><?=
+    
+    $encrypted_prioritaet = base64_decode($getObject['prioritaet']);
+$decrypted_prioritaet = openssl_decrypt($encrypted_prioritaet, $encryption_method, $key, 0, $iv);
+$prioritaet_number = intval($decrypted_prioritaet);
+$escaped_prioritaet = htmlspecialchars($prioritaet_number);
+
+    ?></p>
+
                     <?php
-                if ($getObject['prioritaet'] > 0)
+                if ($escaped_prioritaet > 0)
                 { ?>
                     <img title='Decrease priority' onclick="lowerPrio(<?=$getObject['aufgabeId']; ?>)"
                         src='images/down.png' alt=''>

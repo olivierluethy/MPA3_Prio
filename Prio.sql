@@ -24,8 +24,8 @@ CREATE TABLE aufgabe (
   titel VARCHAR(100) NOT NULL,
   beschreibung TEXT NOT NULL,
   motivation TEXT NOT NULL,
-  deadline DATE,
-  prioritaet INT NOT NULL,
+  deadline VARCHAR(255) NOT NULL,
+  prioritaet VARCHAR(255) NOT NULL,
   status INT NOT NULL DEFAULT 0, /* Nicht erledigt: 0, Erledigt: 1 */
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   fk_benutzerId INT NOT NULL,
