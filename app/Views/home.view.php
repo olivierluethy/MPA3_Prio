@@ -18,65 +18,6 @@
     <?php
 $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
 include ("header.php");
-
-// Set the encryption method
-$encryption_method = "AES-256-CBC";
-
-// Set the secret key and iv
-$secret_key = 'my_secret_key';
-$secret_iv = 'my_secret_iv';
-
-// Hash the secret key and iv
-$key = hash('sha256', $secret_key);
-$iv = substr(hash('sha256', $secret_iv) , 0, 16);
-
-
-
-function decryptDate($encrypted_date) {
-    // Set the encryption method
-    $encryption_method = "AES-256-CBC";
-
-    // Set the secret key and iv
-    $secret_key = 'my_secret_key';
-    $secret_iv = 'my_secret_iv';
-
-    // Hash the secret key and iv
-    $key = hash('sha256', $secret_key);
-    $iv = substr(hash('sha256', $secret_iv), 0, 16);
-
-    // Decode the encrypted date
-    $decoded_date = base64_decode($encrypted_date);
-
-    // Decrypt the date
-    $decrypted_date = openssl_decrypt($decoded_date, $encryption_method, $key, 0, $iv);
-
-    // Convert the decrypted date to the correct format
-    $date = date('dS M Y', strtotime($decrypted_date));
-
-    return $date;
-}
-
-function decryptData($encrypted_data){
-    // Set the encryption method
-    $encryption_method = "AES-256-CBC";
-
-    // Set the secret key and iv
-    $secret_key = 'my_secret_key';
-    $secret_iv = 'my_secret_iv';
-
-    // Hash the secret key and iv
-    $key = hash('sha256', $secret_key);
-    $iv = substr(hash('sha256', $secret_iv), 0, 16);
-
-    // Decode the encrypted date
-    $decoded_date = base64_decode($encrypted_data);
-
-    // Decrypt the date
-    $data = openssl_decrypt($decoded_date, $encryption_method, $key, 0, $iv);
-
-    return $data;
-}
-
 ?>
 
     <?php
@@ -213,17 +154,17 @@ else if ($_SESSION['role'] == 0)
             <tr>
                 <th>
                 <h1>
-                    <?= decryptData($getObject['titel']);?>
+                    <?= $Task->decryptData($getObject['titel']); ?>
                 </h1>
 
                 </th>
                 <th><textarea readonly class="ckeditor" name="description"
-                        id="description_open"><?= decryptData($getObject['beschreibung']) ?></textarea></th>
+                        id="description_open"><?= $Task->decryptData($getObject['beschreibung']) ?></textarea></th>
 
                 <th><textarea readonly class="ckeditor" name=""
-                        id="motivation_open"><?= decryptData($getObject['motivation']); ?></textarea></th>
+                        id="motivation_open"><?= $Task->decryptData($getObject['motivation']); ?></textarea></th>
                 <!-- Format date -->
-                <th><?= decryptDate($getObject['deadline']); ?></th><?php
+                <th><?= $Task->decryptDate($getObject['deadline']); ?></th><?php
                 /* Check if task as been created under 24 hours */
                 if (strtotime($getObject['created_at']) >= strtotime('-1 day'))
                 {
@@ -252,10 +193,10 @@ else if ($_SESSION['role'] == 0)
                 <th>
                     <img title='Increase priority' onclick="higherPrio(<?=$getObject['aufgabeId']; ?>)"
                         src='images/up.png' alt=''><br>
-                        <p><?= decryptData($getObject['prioritaet']);?></p>
+                        <p><?= $Task->decryptData($getObject['prioritaet']);?></p>
 
                     <?php
-                if (decryptData($getObject['prioritaet']) > 0)
+                if ($Task->decryptData($getObject['prioritaet']) > 0)
                 { ?>
                     <img title='Decrease priority' onclick="lowerPrio(<?=$getObject['aufgabeId']; ?>)"
                         src='images/down.png' alt=''>

@@ -19,16 +19,7 @@
 $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
 include ("header.php");
 
-// Set the encryption method
-$encryption_method = "AES-256-CBC";
-
-// Set the secret key and iv
-$secret_key = 'my_secret_key';
-$secret_iv = 'my_secret_iv';
-
-// Hash the secret key and iv
-$key = hash('sha256', $secret_key);
-$iv = substr(hash('sha256', $secret_iv), 0, 16);
+$Task = new Task();
 ?>
 
     <!-- Zeiterfassungen -->
@@ -64,9 +55,9 @@ $iv = substr(hash('sha256', $secret_iv), 0, 16);
                         echo 
                         "<div>
                             <!-- Das ID Attribut frisst keine Leerschläge aka Whitespaces -->
-                            <table class='data' id=". str_replace(' ','',$getTitleOfTask2['titel']) .">
+                            <table class='data' id=". str_replace(' ','', $Task->decryptData($getTitleOfTask2['titel'])) .">
                                 <tr>
-                                    <th style='font-style: italic; text-shadow: 4px 4px 2px rgba(0,0,0,0.6); font-size: 1.2rem;'><p>" . $getTitleOfTask2['titel'] . "</p></th>
+                                    <th style='font-style: italic; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); font-size: 1.2rem;'><p>" . $Task->decryptData($getTitleOfTask2['titel']) . "</p></th>
                                     <th>When</th>
                                     <th>Duration</th>
                                     <th>Edit / Delete</th>
@@ -139,15 +130,12 @@ $iv = substr(hash('sha256', $secret_iv), 0, 16);
                     }
                 }
             }
-            if($rapportCounter == 0) {
-                $encrypted_titel = base64_decode($getTitleOfTask2['titel']);
-                $decrypted_titel = openssl_decrypt($encrypted_titel, $encryption_method, $key, 0, $iv);
-                $escaped_titel = htmlspecialchars($decrypted_titel);?>
+            if($rapportCounter == 0) {?>
                 <div>
-                    <table class='data' id="<?= $escaped_titel ?>">
+                    <table class='data' id="<?= $Task->decryptData($getTitleOfTask2['titel']) ?>">
                         <tr>
                             <th>
-                                <p><?= $escaped_titel ?></p>
+                                <p><?= $Task->decryptData($getTitleOfTask2['titel']) ?></p>
                             </th>
                         </tr>
                         <tr>

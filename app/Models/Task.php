@@ -9,26 +9,37 @@ class Task
     }
 
 	public function getAllTasks(){
+		$encryption_method = "AES-256-CBC";
 		$secret_key = 'my_secret_key';
-		
-		$statement = $this->db->prepare('SELECT 
-        aufgabeId, 
-        AES_ENCRYPT(titel, :secret_key) as encrypted_titel, 
-        AES_ENCRYPT(beschreibung, :secret_key) as encrypted_beschreibung, 
-        AES_ENCRYPT(motivation, :secret_key) as encrypted_motivation, 
-        AES_ENCRYPT(deadline, :secret_key) as encrypted_deadline, 
-        AES_ENCRYPT(prioritaet, :secret_key) as encrypted_prioritaet, 
-        status, 
-        created_at 
-			FROM aufgabe 
-			WHERE fk_BenutzerId = :id 
-			ORDER BY prioritaet');
-
+		$secret_iv = 'my_secret_iv';
+		$key = hash('sha256', $secret_key);
+		$iv = substr(hash('sha256', $secret_iv), 0, 16);
+	
+		$statement = $this->db->prepare("
+		SELECT 
+		aufgabeId, 
+		AES_ENCRYPT(titel, :title_key) as encrypted_titel, 
+		AES_ENCRYPT(beschreibung, :beschreibung_key) as encrypted_beschreibung, 
+		AES_ENCRYPT(motivation, :motivation_key) as encrypted_motivation, 
+		AES_ENCRYPT(deadline, :deadline_key) as encrypted_deadline, 
+		AES_ENCRYPT(prioritaet, :prioritaet_key) as encrypted_prioritaet, 
+		status, 
+		created_at 
+		FROM aufgabe 
+		WHERE fk_BenutzerId = :id 
+		ORDER BY CAST(AES_DECRYPT(encrypted_prioritaet, :prioritaet_key) AS UNSIGNED) ASC, created_at DESC
+				");
+	
+		$statement->bindParam(':title_key', $key, PDO::PARAM_STR);
+		$statement->bindParam(':beschreibung_key', $key, PDO::PARAM_STR);
+		$statement->bindParam(':motivation_key', $key, PDO::PARAM_STR);
+		$statement->bindParam(':deadline_key', $key, PDO::PARAM_STR);
+		$statement->bindParam(':prioritaet_key', $key, PDO::PARAM_STR);
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
-		$statement->bindParam(':secret_key', $secret_key, PDO::PARAM_STR);
+	
 		$statement->execute();
 		return $statement;
-	}
+	}	
 
 	/* For OPEN TASKS */
 	public function getAllTasksOpen(){
@@ -219,4 +230,51 @@ class Task
         $statement->execute();
         return $statement;
     }
+
+	// Um das Datum zu entschlüsseln
+	function decryptDate($encrypted_date) {
+		// Set the encryption method
+		$encryption_method = "AES-256-CBC";
+	
+		// Set the secret key and iv
+		$secret_key = 'my_secret_key';
+		$secret_iv = 'my_secret_iv';
+	
+		// Hash the secret key and iv
+		$key = hash('sha256', $secret_key);
+		$iv = substr(hash('sha256', $secret_iv), 0, 16);
+	
+		// Decode the encrypted date
+		$decoded_date = base64_decode($encrypted_date);
+	
+		// Decrypt the date
+		$decrypted_date = openssl_decrypt($decoded_date, $encryption_method, $key, 0, $iv);
+	
+		// Convert the decrypted date to the correct format
+		$date = date('dS M Y', strtotime($decrypted_date));
+	
+		return $date;
+	}
+	
+	// Um die restlichen Daten zu entschlüsseln
+	function decryptData($encrypted_data){
+		// Set the encryption method
+		$encryption_method = "AES-256-CBC";
+	
+		// Set the secret key and iv
+		$secret_key = 'my_secret_key';
+		$secret_iv = 'my_secret_iv';
+	
+		// Hash the secret key and iv
+		$key = hash('sha256', $secret_key);
+		$iv = substr(hash('sha256', $secret_iv), 0, 16);
+	
+		// Decode the encrypted date
+		$decoded_date = base64_decode($encrypted_data);
+	
+		// Decrypt the date
+		$data = openssl_decrypt($decoded_date, $encryption_method, $key, 0, $iv);
+	
+		return $data;
+	}
 }
