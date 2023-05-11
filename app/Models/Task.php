@@ -78,7 +78,7 @@ class Task
 		$encrypted_deadline = base64_encode($encrypted_deadline);
 
 		// Encrypt the priority
-		$encrypted_prioritaet = openssl_encrypt(strval($prioritaet), $encryption_method, $key, 0, $iv);
+		$encrypted_prioritaet = openssl_encrypt($prioritaet, $encryption_method, $key, 0, $iv);
 		$encrypted_prioritaet = base64_encode($encrypted_prioritaet);
 
 		$statement = $this->db->prepare("INSERT INTO `aufgabe` (titel, beschreibung, motivation, deadline, prioritaet, fk_benutzerId) VALUES (:titel, :beschreibung, :motivation, :deadline, :prioritaet, :id)");
@@ -86,7 +86,7 @@ class Task
 		$statement->bindParam(':beschreibung', $encrypted_beschreibung, PDO::PARAM_STR);
 		$statement->bindParam(':motivation', $encrypted_motivation, PDO::PARAM_STR);
 		$statement->bindParam(':deadline', $encrypted_deadline, PDO::PARAM_STR);
-		$statement->bindParam(':prioritaet', $encrypted_prioritaet, PDO::PARAM_INT);
+		$statement->bindParam(':prioritaet', $encrypted_prioritaet, PDO::PARAM_STR);
 		$statement->bindParam(':id', $_SESSION['id'], PDO::PARAM_STR);
 		$statement->execute();
 	}
@@ -121,7 +121,7 @@ class Task
 		$encrypted_deadline = base64_encode($encrypted_deadline);
 
 		// Encrypt the priority
-		$encrypted_prioritaet = openssl_encrypt(strval($prioritaet), $encryption_method, $key, 0, $iv);
+		$encrypted_prioritaet = openssl_encrypt($prioritaet, $encryption_method, $key, 0, $iv);
 		$encrypted_prioritaet = base64_encode($encrypted_prioritaet);
 
 		$statement = $this->db->prepare('UPDATE aufgabe SET titel = :titel, beschreibung = :beschreibung, motivation = :motivation, deadline = :deadline, prioritaet = :prioritaet WHERE aufgabeId = :id');
@@ -129,7 +129,7 @@ class Task
 		$statement->bindParam(':beschreibung', $encrypted_beschreibung, PDO::PARAM_STR);
 		$statement->bindParam(':motivation', $encrypted_motivation, PDO::PARAM_STR);
 		$statement->bindParam(':deadline', $encrypted_deadline, PDO::PARAM_STR);
-		$statement->bindParam(':prioritaet', $encrypted_prioritaet, PDO::PARAM_INT);
+		$statement->bindParam(':prioritaet', $encrypted_prioritaet, PDO::PARAM_STR);
 		$statement->bindParam(':id', $id, PDO::PARAM_STR);
 		$statement->execute();
 	}

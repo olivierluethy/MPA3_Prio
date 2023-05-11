@@ -24,7 +24,7 @@
         <div class="hero-text">
             <h1 style="font-size:50px">Welcome To Prio</h1>
             <h2>Set your priorities <strong>quickly</strong> and <strong>correctly</strong> to meet all your goals.</h2>
-            <p>That is our motto.</p>
+            <p>This is our mission.</p>
         </div>
     </div>
     <h1 style="text-align:center;">What is this project about?</h1>
