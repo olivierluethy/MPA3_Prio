@@ -277,4 +277,23 @@ class Task
 	
 		return $data;
 	}
+
+	// Um die Zeit zu entschlüsseln
+	public function decryptTime($encrypted_data){
+		$encryption_method = "AES-256-CBC";
+		$secret_key = 'my_secret_key';
+		$secret_iv = 'my_secret_iv';
+		$key = hash('sha256', $secret_key);
+		$iv = substr(hash('sha256', $secret_iv), 0, 16);
+	
+		$decoded_time = base64_decode($encrypted_data);
+		$decrypted_time = openssl_decrypt($decoded_time, $encryption_method, $key, 0, $iv);
+	
+		// Convert the decrypted timestamp to seconds
+		$time_in_seconds = strtotime($decrypted_time) - strtotime('00:00:00');
+	
+		// Return the formatted time
+		return gmdate('H:i:s', $time_in_seconds);
+	}
+	
 }

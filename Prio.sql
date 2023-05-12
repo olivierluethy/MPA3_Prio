@@ -52,7 +52,7 @@ CREATE TABLE essays (
 CREATE TABLE rapport (
   rapportId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   rapport VARCHAR(255) NOT NULL,
-  zeit TIME NOT NULL,
+  zeit VARCHAR(255) NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   fk_aufgabeId INT NOT NULL,
   FOREIGN KEY (fk_aufgabeId) REFERENCES aufgabe(aufgabeId)

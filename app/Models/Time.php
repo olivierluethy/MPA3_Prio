@@ -9,10 +9,28 @@ class Time
     }
 
 	public function addTimeRecord($rapport, $time, $id){
-        // $beschreibung = e(post('beschreibung'));
+		// Set the encryption method
+		$encryption_method = "AES-256-CBC";
+
+		// Set the secret key and iv
+		$secret_key = 'my_secret_key';
+		$secret_iv = 'my_secret_iv';
+
+		// Hash the secret key and iv
+		$key = hash('sha256', $secret_key);
+		$iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+		// Encrypt the rapport
+		$encrypted_rapport = openssl_encrypt($rapport, $encryption_method, $key, 0, $iv);
+		$encrypted_rapport = base64_encode($encrypted_rapport);
+
+		// Encrypt the rapport
+		$encrypted_time = openssl_encrypt($time, $encryption_method, $key, 0, $iv);
+		$encrypted_time = base64_encode($encrypted_time);
+
 		$statement = $this->db->prepare('INSERT INTO `rapport` (rapport, zeit, fk_aufgabeId) VALUES (:rapport, :zeit, :fk_aufgabeId)');
-		$statement->bindParam(':rapport', $rapport, PDO::PARAM_STR);
-		$statement->bindParam(':zeit', $time, PDO::PARAM_STR);
+		$statement->bindParam(':rapport', $encrypted_rapport, PDO::PARAM_STR);
+		$statement->bindParam(':zeit', $encrypted_time, PDO::PARAM_STR);
 		$statement->bindParam(':fk_aufgabeId', $id, PDO::PARAM_STR);
 		$statement->execute();
 	}

@@ -65,14 +65,14 @@ $Task = new Task();
 
         <!-- Display all essential informations about task -->
         <tr>
-            <td><?= $getRapports2['rapport']; ?></td>
+            <td><?= $Task->decryptData($getRapports2['rapport']) ?></td>
             <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
             <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
-            <td><i class="fas fa-clock"></i> <?=$getRapports2['zeit']; ?></td>
+            <td><i class="fas fa-clock"></i> <?= $Task->decryptTime($getRapports2['zeit']); ?></td>
 
             <?php
                                     // Converting the time into seconds
-                                    $timeinsec = strtotime($getRapports2['zeit']) - $sum;
+                                    $timeinsec = strtotime($Task->decryptTime($getRapports2['zeit'])) - $sum;
     
                                     // Sum the time with previous value
                                     $totaltime = $totaltime + $timeinsec;
@@ -101,14 +101,14 @@ $Task = new Task();
                         } else { ?>
             <!-- Display all essential informations about task -->
         <tr>
-            <td><?= $getRapports2['rapport']; ?></td>
+            <td><?= $Task->decryptData($getRapports2['rapport']) ?></td>
             <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
             <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
-            <td><i class="fas fa-clock"></i> <?=$getRapports2['zeit']; ?></td>
+            <td><i class="fas fa-clock"></i> <?= $Task->decryptTime($getRapports2['zeit']) ?></td>
 
             <?php
                                 // Converting the time into seconds
-                                $timeinsec = strtotime($getRapports2['zeit']) - $sum;
+                                $timeinsec = strtotime($Task->decryptTime($getRapports2['zeit'])) - $sum;
 
                                 // Sum the time with previous value
                                 $totaltime = $totaltime + $timeinsec;
@@ -156,7 +156,7 @@ $Task = new Task();
 
                 $s = $totaltime - ($m * 60);
 
-                $timeinsec = strtotime($getRapports2['zeit']) - $sum;
+                $timeinsec = strtotime($Task->decryptTime($getRapports2['zeit'])) - $sum;
 
                 $totaltime = $totaltime + $timeinsec;
 
