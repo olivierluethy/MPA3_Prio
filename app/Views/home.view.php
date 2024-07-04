@@ -9,6 +9,13 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
+
+    <script defer src="public/js/responsive.js"></script>
+    <script defer src="public/js/routes.js"></script>
+    <script defer src="public/js/openDone.js"></script>
+    <script defer src="public/js/time_recording.js"></script>
+    <script defer src="public/js/footer.js"></script>
+
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Home</title>
 </head>
@@ -253,12 +260,6 @@ else if ($_SESSION['role'] == 0)
         <script>
         CKEDITOR.replace('essay_content');
         </script>
-
-        <script src="public/js/responsive.js"></script>
-        <script src="public/js/ValidEssay.js"></script>
-        <script src="public/js/routes.js"></script>
-        <script src="public/js/openDone.js"></script>
-        <script src="public/js/time_recording.js"></script>
 
         <?php include ('app/Views/addRapportModal.view.php'); ?>
         <?php include ('app/Views/footer.view.php'); ?>

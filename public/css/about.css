@@ -3,15 +3,17 @@ html {
   height: 100%;
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
+  color: white;
 }
 body .hero-image,
 html .hero-image {
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(../../images/logo.png);
-  height: 100%;
+  height: 100vh;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   position: relative;
+  background-attachment: fixed; /* This creates the parallax effect */
 }
 body .hero-image .hero-text,
 html .hero-image .hero-text {
@@ -21,4 +23,23 @@ html .hero-image .hero-text {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
+}
+body .hero-image h1,
+html .hero-image h1 {
+  font-size: 50px;
+}
+body .description,
+html .description {
+  background-color: #000;
+  padding: 50px 0;
+}
+body .description h1,
+html .description h1 {
+  margin-left: 2rem;
+  color: #fff;
+}
+body .description h3,
+html .description h3 {
+  margin-left: 2rem;
+  color: gray;
 }/*# sourceMappingURL=about.css.map */

@@ -9,6 +9,12 @@
     <link rel="stylesheet" href="public/css/zeituebersicht.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
+
+    <script defer src="public/js/searchTask.js"></script>
+    <script defer src="public/js/responsive.js"></script>
+    <script defer src="public/js/routes.js"></script>
+    <script defer src="public/js/footer.js"></script>
+
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Time Records</title>
 </head>
@@ -16,9 +22,9 @@
 <body>
     <!-- Navigation Bar -->
     <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-include ("header.php");
-?>
+        $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+        include ("header.php");
+    ?>
 
     <!-- Zeiterfassungen -->
     <?php if (count($getTitleOfTask) > 0) { ?>
@@ -170,15 +176,21 @@ include ("header.php");
         }
         ?>
     </div>
+    <?php }
+    else{?>
+    <div class="noData">
+        <h1>No tasks therefore no records</h1>
+        <p>Add a task, work on it by creating a record and then you'll find it here</p>
+    </div>
     <?php } ?>
     <div id="nothingFound">
         <h1>Nothing found</h1>
         <img src="images/sad_smiley.png" alt="">
     </div>
-
-    <script src="public/js/searchTask.js"></script>
-    <script src="public/js/responsive.js"></script>
-    <script src="public/js/routes.js"></script>
+    </div>
+    </table>
+    </div>
+    </div>
     <?php include ('app/Views/footer.view.php'); ?>
 </body>
 

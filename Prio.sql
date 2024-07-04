@@ -57,10 +57,3 @@ CREATE TABLE rapport (
   fk_aufgabeId INT NOT NULL,
   FOREIGN KEY (fk_aufgabeId) REFERENCES aufgabe(aufgabeId)
 );
-
-/* Beispiel Benutzer */
-INSERT INTO `benutzer` (`email`, `password`, `role`, `created_at`) VALUES
-/* Admin */
-('kauz@kauz.ch', '$2y$10$obgm5U7eZWbqYcDoC4YcB.EMC1yAuhj8d0jx1MEK/IURpIrIbzED.', 1, '2022-08-05 13:55:59'), /* Passwort: Kauz123 */
-/* Normaler Benutzer */
-('test@test.ch', '$2y$10$obgm5U7eZWbqYcDoC4YcB.EMC1yAuhj8d0jx1MEK/IURpIrIbzED.', 0, '2022-08-05 13:55:59');

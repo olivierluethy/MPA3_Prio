@@ -111,6 +111,7 @@
   width: 96.4%;
   margin-right: 2.3rem;
   margin-left: 2.3rem;
+  color: white;
 }
 .order tr td form select {
   -webkit-appearance: none;
@@ -125,6 +126,8 @@
   font-size: 1.5rem;
   margin-top: 1.3rem;
   cursor: pointer;
+  color: black;
+  background-color: white;
 }
 .order tr td form button {
   background-color: #4CAF50;

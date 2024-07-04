@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
+    <script defer src="public/js/routes.js"></script>
+    <script defer src="public/js/validation.js"></script>
+    <script defer src="public/js/footer.js"></script>
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Home</title>
 </head>
@@ -22,26 +25,34 @@
 
     <div class="hero-image">
         <div class="hero-text">
-            <h1 style="font-size:50px">Welcome To Prio</h1>
-            <h2>Set your priorities <strong>quickly</strong> and <strong>correctly</strong> to meet all your goals.</h2>
-            <p>That is our motto.</p>
+            <h1>Welcome to Prio</h1>
+            <h2>Prioritize <strong>efficiently</strong> and <strong>accurately</strong> to achieve your goals.</h2>
+            <p>That’s our promise.</p>
         </div>
     </div>
-    <h1 style="text-align:center;">What is this project about?</h1>
-    <h3 style="margin-left:2rem; color: gray;">
-        This project is concretely about accomplishing tasks that you set for yourself.
-        Usually, people set too many new goals for the new year, or for the new age. The problem is, most of them are
-        not described in a meaningful way so that they are realistic and achievable.
-        This app is designed to help fix that problem as best it can.
+    <div class="description">
+        <h1>About This Project</h1>
+        <h3>
+            Prio is designed to help you accomplish the tasks you set for yourself. Many people set numerous goals for the new year or a new phase of life but often fail to define them in a realistic and achievable way. Prio aims to address this issue effectively.
+        </h3>
+        <h3>
+            With Prio, you can add tasks or goals you want to achieve. Define a title, describe your objective, and explain the motivation behind it. Ask yourself:
+            <ul>
+                <li>Why do I want to achieve this?</li>
+                <li>What benefits will it bring?</li>
+                <li>Is it for personal growth, professional development, or just for fun?</li>
+            </ul>
+        </h3>
+        <h1>Set Meaningful Goals</h1>
+        <h3>Consider your goals carefully and ensure they are significant and attainable.</h3>
+        
+        <h1>Track Your Progress Intuitively</h1>
+        <h3>Forget about constantly checking the clock or lists. Our intuitive dashboard offers a seamless time management solution.</h3>
+        
+        <h1>Achieve Your Goals Quickly</h1>
+        <h3>Achieving your goals, especially when learning new skills, requires dedication. Prio’s dashboard helps you track the time spent on each task and monitor your progress effectively.</h3>
+    </div>
 
-        In this app you can add tasks or goals that you would like to have done or achieved. You define a title and
-        describe what you would like to achieve and the motivation behind it.
-        Why do you want to achieve it and where are the benefits?
-        What will it bring me in the future, or am I just doing it for fun?
-
-        These are the questions you should ask yourself before you set a new goal.</h3>
-    <script src="public/js/routes.js"></script>
-    <script src="public/js/validation.js"></script>
     <?php include('app/Views/footer.view.php'); ?>
 </body>
 

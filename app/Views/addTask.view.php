@@ -38,6 +38,7 @@
     <script src="public/js/validationAddTask.js"></script>
     <script src="ckeditor/ckeditor.js"></script>
     <script src="public/js/routes.js"></script>
+    <script src="public/js/footer.js"></script>
 
     <script>
     CKEDITOR.replace('description');

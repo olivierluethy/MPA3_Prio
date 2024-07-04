@@ -10,7 +10,7 @@
                 border-radius: 50%;
                 background-color: royalblue;
                 border: 1px solid royalblue;
-                box-shadow: 0px 0px 27px 0px #000000;
+                box-shadow: 0px 0px 27px 0px gray;
                 transition-duration: 0.4s;
                 cursor: pointer;
                 i {
@@ -41,7 +41,7 @@
   margin-bottom: 2rem;
   font-size: 1.5rem;
   text-align: center;
-  box-shadow: 0px 0px 30px 2px #000000;
+  box-shadow: 0px 0px 30px 2px gray;
   transition-duration: 0.8s;
   outline: none;
   &:focus{
@@ -49,10 +49,24 @@
   }
 }
 
-#nothingFound {
+.noData{
     text-align: center;
+    h1{
+        color: red;
+    }
+    p{
+        color: white;
+    }
+}
+
+#nothingFound {
+    margin-left: auto;
+    margin-right: auto;
     color: red;
     display: none;
+    img{
+        filter: invert(1) grayscale(1) brightness(2);
+    }
 }
 
 .data,
@@ -68,12 +82,12 @@ th {
         .data {
             border-spacing: 0;
             background-color: lightgray;
-            box-shadow: 0px 0px 30px 2px #000000;
+            box-shadow: 0px 0px 30px 2px gray;
             border-radius: 20px;
             margin-left: 2.5rem;
             margin-bottom: 2rem;
             tr {
-                border: solid 5px #000;
+                border: solid 5px gray;
                 padding: 20px;
                 td {
                     button {

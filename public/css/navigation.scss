@@ -5,14 +5,15 @@ body {
     padding: 0;
     font-family: sans-serif;
     overflow-x: hidden;
-    background-color: rgb(255, 255, 255);
+    background-color: black;
     nav {
         display: flex;
         width: 100%;
-        background-color: lightblue;
+        background-color: white;
         box-shadow: 2px 3px 5px grey;
         position: -webkit-sticky;
         position: sticky;
+        color: black;
         top: 0;
         z-index: 100;
         .part1 {

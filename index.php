@@ -1,5 +1,6 @@
 <?php
 require 'core/bootstrap.php';
+require_once 'core/db_config.php';
 
 $routes = [
 	/* Startseite */
@@ -40,9 +41,9 @@ $routes = [
 ];
 
 $db = [
-	'name'     => 'prio',
-	'username' => 'root',
-	'password' => '',
+	'name'     => DB_NAME,
+    'username' => DB_USERNAME,
+    'password' => DB_PASSWORD,
 ];
 
 $router = new Router($routes);

@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
+
+    <script defer src="public/js/responsive.js"></script>
+    <script defer src="public/js/routes.js"></script>
     <title>History</title>
 </head>
 
@@ -39,9 +42,6 @@ include ("header.php");
         <?php } ?>
 
     </table>
-
-    <script src="public/js/responsive.js"></script>
-    <script src="public/js/routes.js"></script>
     <?php include ('app/Views/footer.view.php'); ?>
 </body>
 
