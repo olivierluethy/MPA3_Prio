@@ -9,6 +9,12 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
+
+    <script defer src="public/js/validationAddTask.js"></script>
+    <script defer src="ckeditor/ckeditor.js"></script>
+    <script defer src="public/js/routes.js"></script>
+    <script defer src="public/js/footer.js"></script>
+
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Add Task</title>
 </head>
@@ -16,7 +22,7 @@
 <body>
     <!-- Navigation Bar -->
     <?php
-    $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+    $actual_link = basename(__FILE__);
     include("header.php");
     ?>
 
@@ -34,11 +40,6 @@
         <input type="number" id="priority" name="priority" id="prioritaet"><br>
         <input type="submit" class="" name="addTask" value="Add task"><br><br>
     </form>
-
-    <script src="public/js/validationAddTask.js"></script>
-    <script src="ckeditor/ckeditor.js"></script>
-    <script src="public/js/routes.js"></script>
-    <script src="public/js/footer.js"></script>
 
     <script>
     CKEDITOR.replace('description');

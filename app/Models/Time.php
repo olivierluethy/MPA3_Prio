@@ -9,6 +9,10 @@ class Time
     }
 
 	public function addTimeRecord($rapport, $time, $id){
+		$rapport = htmlspecialchars($rapport);
+		$time = htmlspecialchars($time);
+		$id = htmlspecialchars($id);
+
 		$statement = $this->db->prepare('INSERT INTO `rapport` (rapport, zeit, fk_aufgabeId) VALUES (:rapport, :zeit, :fk_aufgabeId)');
 		$statement->bindParam(':rapport', $rapport, PDO::PARAM_STR);
 		$statement->bindParam(':zeit', $time, PDO::PARAM_STR);
@@ -32,12 +36,16 @@ class Time
 	}
 
 	public function delete_time($id){
+		$id = htmlspecialchars($id);
+
 		$statement = $this->db->prepare('DELETE FROM `rapport` WHERE rapportId = :id');
         $statement->bindParam(':id', $id, PDO::PARAM_STR);
         $statement->execute();
 	}
 
 	public function getRapport($id){
+		$id = htmlspecialchars($id);
+
 		$statement = $this->db->prepare('SELECT * FROM rapport WHERE rapportId = :id');
 		$statement->bindParam(':id', $id, PDO::PARAM_STR);
 		$statement->execute();
@@ -45,6 +53,10 @@ class Time
 	}
 
 	public function edit_time($id, $rapport, $time){
+		$id = htmlspecialchars($id);
+		$rapport = htmlspecialchars($rapport);
+		$time = htmlspecialchars($time);
+
 		$statement = $this->db->prepare('UPDATE rapport SET rapport = :rapport, zeit = :time WHERE rapportId = :id');
 		$statement->bindParam(':rapport', $rapport, PDO::PARAM_STR);
 		$statement->bindParam(':time', $time, PDO::PARAM_STR);
@@ -53,6 +65,8 @@ class Time
 	}
 
 	public function getHistorys($id){
+		$id = htmlspecialchars($id);
+
 		$statement = $this->db->prepare('SELECT aufgabe.titel, rapport.rapport, rapport.zeit, rapport.created_at FROM rapport 
 		INNER JOIN aufgabe ON aufgabe.aufgabeId = rapport.fk_aufgabeId
 		WHERE fk_aufgabeId = :id');

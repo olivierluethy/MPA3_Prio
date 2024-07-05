@@ -9,10 +9,12 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
+
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/validation.js"></script>
     <script defer src="public/js/footer.js"></script>
     <script defer src="public/js/parallax.js"></script>
+    
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <title>Home</title>
@@ -21,17 +23,10 @@
 <body>
     <!-- Navigation Bar -->
     <?php
-    $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+    $actual_link = basename(__FILE__);
     include("header.php");
     ?>
 
-    <!-- <div class="hero-image">
-        <div class="hero-text">
-            <h1>Welcome to Prio</h1>
-            <h2>Prioritize <strong>efficiently</strong> and <strong>accurately</strong> to achieve your goals.</h2>
-            <p>That’s our promise.</p>
-        </div>
-    </div> -->
     <!-- Parallax Scroll -->
     <section class='parallax-image'>
         <img src='images/logo-parallax.png' />

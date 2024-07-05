@@ -9,6 +9,12 @@
     <link rel="stylesheet" href="public/css/admin.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
+
+    <script defer src="public/js/routes.js"></script>
+    <script defer src="public/js/time_recording.js"></script>
+    <script defer src="public/js/validation.js"></script>
+    <script defer src="public/js/footer.js"></script>
+
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Admin</title>
 </head>
@@ -17,7 +23,7 @@
 
     <!-- Navigation Bar -->
     <?php
-    $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+    $actual_link = basename(__FILE__);
     include("header.php");
     ?>
 
@@ -41,10 +47,6 @@
                   </div>";
     }
     ?>
-
-    <script src="public/js/routes.js"></script>
-    <script src="public/js/time_recording.js"></script>
-    <script src="public/js/validation.js"></script>
     <?php include('app/Views/footer.view.php'); ?>
 </body>
 

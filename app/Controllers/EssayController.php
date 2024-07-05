@@ -13,8 +13,6 @@ class EssayController
 		/* Admin */
 		if($_SESSION['role'] == 1){
 			$Essay = new Essay();
-			$pdo = connectDatabase();
-			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 			/* Get all essays */
 			$getEssays = $Essay -> getEssays() -> fetchAll();
@@ -34,8 +32,6 @@ class EssayController
 		}
 
 		$Essay = new Essay();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		$id = $_GET['id'];
 
@@ -58,8 +54,6 @@ class EssayController
 		}
 
 		$Essay = new Essay();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$title = e(post('title'));
@@ -84,8 +78,6 @@ class EssayController
 		$userId = $_GET['userId'];
 
 		$Essay = new Essay();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		$Essay->accept_essay($essayId, $userId);
 
@@ -104,8 +96,6 @@ class EssayController
 		$userId = $_GET['userId'];
 
 		$Essay = new Essay();
-		$pdo = connectDatabase();
-		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		$Essay->refuse_essay($essayId, $userId);
 

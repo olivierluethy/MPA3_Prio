@@ -131,20 +131,62 @@ class Task
 	/* To set a task a higher priority */
 	public function higherPrio($task){
 		$task = htmlspecialchars($task);
+	
+		// Zählt die Anzahl der vorhandenen Aufgaben
+		$countStatement = $this->db->prepare('SELECT COUNT(*) as totalTasks FROM aufgabe WHERE status = 0');
+		$countStatement->execute();
+		$result = $countStatement->fetch(PDO::FETCH_ASSOC);
+		$totalTasks = $result['totalTasks'];
+	
+		// Überprüft die aktuelle Priorität der Aufgabe
+		$prioStatement = $this->db->prepare('SELECT prioritaet FROM aufgabe WHERE aufgabeId = :task');
+		$prioStatement->bindParam(':task', $task, PDO::PARAM_STR);
+		$prioStatement->execute();
+		$currentPrio = $prioStatement->fetch(PDO::FETCH_ASSOC)['prioritaet'];
+	
+		// Erhöht die Priorität nur, wenn sie innerhalb der erlaubten Grenze bleibt
+		if ($currentPrio < $totalTasks) {
+			$updateStatement = $this->db->prepare('UPDATE aufgabe SET prioritaet = prioritaet + 1 WHERE aufgabeId = :task');
+			$updateStatement->bindParam(':task', $task, PDO::PARAM_STR);
+			$updateStatement->execute();
 
-		$statement = $this->db->prepare('UPDATE aufgabe SET prioritaet = prioritaet + 1 WHERE aufgabeId = :task');
-		$statement->bindParam(':task', $task, PDO::PARAM_STR);
-		$statement->execute();
-	}
+			header('Location: home');
+		} else {
+			echo "<script>
+                alert('The priority cannot be increased because it has already reached the maximum number of $totalTasks tasks.');
+                window.location.href = 'home';
+              </script>";
+		}
+	}	
 
 	/* To set a task a lower priority */
 	public function lowerPrio($task){
 		$task = htmlspecialchars($task);
+	
+		// Zählt die Anzahl der vorhandenen Aufgaben
+		$countStatement = $this->db->prepare('SELECT COUNT(*) as totalTasks FROM aufgabe WHERE status = 0');
+		$countStatement->execute();
+		$result = $countStatement->fetch(PDO::FETCH_ASSOC);
+		$totalTasks = $result['totalTasks'];
+	
+		// Überprüft die aktuelle Priorität der Aufgabe
+		$prioStatement = $this->db->prepare('SELECT prioritaet FROM aufgabe WHERE aufgabeId = :task');
+		$prioStatement->bindParam(':task', $task, PDO::PARAM_STR);
+		$prioStatement->execute();
+		$currentPrio = $prioStatement->fetch(PDO::FETCH_ASSOC)['prioritaet'];
+	
+		// Senkt die Priorität nur, wenn sie größer als 1 ist
+		if ($currentPrio > 1) {
+			$updateStatement = $this->db->prepare('UPDATE aufgabe SET prioritaet = prioritaet - 1 WHERE aufgabeId = :task');
+			$updateStatement->bindParam(':task', $task, PDO::PARAM_STR);
+			$updateStatement->execute();
 
-		$statement = $this->db->prepare('UPDATE aufgabe SET prioritaet = prioritaet - 1 WHERE aufgabeId = :task');
-		$statement->bindParam(':task', $task, PDO::PARAM_STR);
-		$statement->execute();
-	}
+			header('Location: home');
+		} else {?>
+			<script>alert('The priority cannot be lowered because it has already reached the lowest number of <?= $totalTasks ?> tasks.'); window.location.href = 'home';</script>
+			<?php
+		}
+	}	
 
 	/* To get the amount of deficiency points */
 	public function getDeficiencyPoints(){

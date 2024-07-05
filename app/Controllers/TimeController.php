@@ -11,8 +11,6 @@ class TimeController
 		}
 
 		$Time = new Time();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$rapport = e(post('rapport'));
@@ -34,8 +32,6 @@ class TimeController
 		}
 
 		$Time = new Time();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		/* Get title and id of task */
 		$getTitleOfTask = $Time -> getTitleOfTask() -> fetchAll(); // title, aufgabeId
@@ -55,8 +51,6 @@ class TimeController
 		}
 
 		$Time = new Time();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		$id = $_GET['id'];
 
@@ -74,8 +68,6 @@ class TimeController
         $id = $_GET['id'];
 
         $title = '';
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$rapport = e(post('rapport'));
@@ -99,9 +91,6 @@ class TimeController
         session_start();
 
         $id = $_GET['id'];
-
-		$pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		/* Get all rapports from task */
 		$getHistorys = $Time -> getHistorys($id)-> fetchAll();

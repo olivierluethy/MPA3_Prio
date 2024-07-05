@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
+
+    <script defer src="public/js/routes.js"></script>
+    <script defer src="public/js/validationAddTask.js"></script>
+    <script defer src="public/js/footer.js"></script>
+
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Edit Task</title>
 </head>
@@ -43,9 +48,6 @@
     </script>
 
     <?php include('app/Views/footer.view.php'); ?>
-
-    <script src="public/js/routes.js"></script>
-    <script src="public/js/validationAddTask.js"></script>
 </body>
 
 </html>

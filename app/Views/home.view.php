@@ -27,8 +27,9 @@
     include "header.php";
     ?>
 
-    <?php /* If the user is blocked from the site */
-    if ($_SESSION["role"] == 2) { ?>
+     /* If the user is blocked from the site */<?php
+
+if ($_SESSION["role"] == 2) { ?>
     <div class='write_essay'>
             <h1>You don't have access anymore!</h1>
             <p>You have completed a task 10 times too late. That's why you don't have access anymore.</p>
@@ -40,8 +41,7 @@
                 <button type='submit'>Send essay</button>
             </form>
         </div>
-<?php }
-    /* If the user isn't blocked from the site */ elseif (
+<?php } /* If the user isn't blocked from the site */ elseif (
         $_SESSION["role"] == 0
     ) {
         if (count($getAllTasks) > 0) {
@@ -157,8 +157,9 @@
                     "dS M Y",
                     strtotime($getObject["deadline"])
                 ); ?>
-                <th><?php echo $date; ?></th><?php /* Check if task as been created under 24 hours */
-if (strtotime($getObject["created_at"]) >= strtotime("-1 day")) {
+                <th><?php echo $date; ?></th><?php
+
+            if (strtotime($getObject["created_at"]) >= strtotime("-1 day")) {
     /* Task is younger than 24 hours */
     echo "
                                                 <th>

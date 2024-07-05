@@ -4,19 +4,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function adjustFooterPosition() {
         var windowHeight = window.innerHeight;
+        var windowWidth = window.innerWidth;
         var bodyHeight = body.scrollHeight;
 
-        // Überprüfe, ob die gesamte Seite vollständig geladen ist
+        // Anpassung der Position des Footers basierend auf der Fensterhöhe und -breite
         if (windowHeight >= bodyHeight) {
             footer.style.position = "fixed";
+            footer.style.bottom = "0"; // Footer unten fixieren
+            footer.style.width = windowWidth + "px"; // Breite des Footers an Fensterbreite anpassen
         } else {
             footer.style.position = "static";
         }
     }
 
-    // Initial adjustment of footer position
+    // Initiale Anpassung der Position des Footers
     adjustFooterPosition();
 
-    // Adjust footer position on window resize
+    // Anpassung der Position des Footers bei Änderung der Fenstergröße
     window.addEventListener("resize", adjustFooterPosition);
 });

@@ -3,27 +3,17 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* The Modal (background) */
 .modal {
     display: none;
-    /* Hidden by default */
     position: fixed;
-    /* Stay in place */
     z-index: 1;
-    /* Sit on top */
     padding-top: 100px;
-    /* Location of the box */
     left: 25%;
     top: 0;
     width: 50%;
-    /* Full width */
     height: 100%;
-    /* Full height */
     overflow: auto;
-    /* Black w/ opacity */
 }
-
-/* Modal Content */
 .modal-content {
     position: relative;
     background-color: #fefefe;

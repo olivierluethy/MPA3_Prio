@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="assets/favicon.ico">
+
+    <script defer src="public/js/routes.js"></script>
+    <script defer src="public/js/validationEditRapport.js"></script>
+    <script defer src="public/js/footer.js"></script>
+
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Benutzer bearbeiten</title>
 </head>
@@ -30,9 +35,6 @@
     </form>
 
     <?php include('app/Views/footer.view.php'); ?>
-
-    <script src="public/js/routes.js"></script>
-    <script src="public/js/validationEditRapport.js"></script>
 </body>
 
 </html>

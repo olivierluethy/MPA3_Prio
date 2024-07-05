@@ -14,8 +14,6 @@ class TaskController
 			header("location: admin");
 		}else {
 			$Task = new Task();
-			$pdo = connectDatabase();
-			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	
 			/* Get all tasks */
 			$getAllTasks = $Task -> getAllTasks()-> fetchAll();
@@ -46,9 +44,7 @@ class TaskController
 		}
 
 		$Task = new Task();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+        
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titel = e(post('title'));
 			$beschreibung = e(post('description'));
@@ -74,8 +70,6 @@ class TaskController
 		$id = $_GET['id'];
 
 		$Task = new Task();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titel = e(post('title'));
@@ -103,14 +97,12 @@ class TaskController
 		}
 
 		$Task = new Task();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		$id = $_GET['id'];
 
 		$Task->deleteTask($id);
         
-        header('Location: home');	
+        header('Location: home');
 	}
 
 	public function higherPrio(){
@@ -122,14 +114,10 @@ class TaskController
 		}
 
 		$Task = new Task();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		$id = $_GET['id'];
 
 		$Task->higherPrio($id);
-        
-        header('Location: home');
 	}
 
 	public function lowerPrio(){
@@ -141,14 +129,10 @@ class TaskController
 		}
 
 		$Task = new Task();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		$id = $_GET['id'];
 
 		$Task->lowerPrio($id);
-        
-        header('Location: home');
 	}
 
 	public function complete_task(){
@@ -160,8 +144,6 @@ class TaskController
 		}
 
 		$Task = new Task();
-        $pdo = connectDatabase();
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		/* Get Data to edit */
 		$getDeadtime = $Task -> getDeadtime($_GET['id']) -> fetchAll();;
