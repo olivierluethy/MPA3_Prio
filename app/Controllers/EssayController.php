@@ -17,7 +17,7 @@ class EssayController
 			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 			/* Get all essays */
-			$getEssays = $Essay -> getEssays() -> fetchAll();;
+			$getEssays = $Essay -> getEssays() -> fetchAll();
 
 			require 'app/Views/admin.view.php';	
 		}else {

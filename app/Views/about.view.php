@@ -12,7 +12,9 @@
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/validation.js"></script>
     <script defer src="public/js/footer.js"></script>
+    <script defer src="public/js/parallax.js"></script>
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <title>Home</title>
 </head>
 
@@ -23,14 +25,22 @@
     include("header.php");
     ?>
 
-    <div class="hero-image">
+    <!-- <div class="hero-image">
         <div class="hero-text">
             <h1>Welcome to Prio</h1>
             <h2>Prioritize <strong>efficiently</strong> and <strong>accurately</strong> to achieve your goals.</h2>
             <p>That’s our promise.</p>
         </div>
-    </div>
-    <div class="description">
+    </div> -->
+    <!-- Parallax Scroll -->
+    <section class='parallax-image'>
+        <img src='images/logo-parallax.png' />
+        <h1>Welcome to Prio</h1>
+        <h2>Prioritize <strong>efficiently</strong> and <strong>accurately</strong> to achieve your goals.</h2>
+        <p>That’s our promise.</p>
+    </section>
+
+    <main>
         <h1>About This Project</h1>
         <h3>
             Prio is designed to help you accomplish the tasks you set for yourself. Many people set numerous goals for the new year or a new phase of life but often fail to define them in a realistic and achievable way. Prio aims to address this issue effectively.
@@ -51,7 +61,7 @@
         
         <h1>Achieve Your Goals Quickly</h1>
         <h3>Achieving your goals, especially when learning new skills, requires dedication. Prio’s dashboard helps you track the time spent on each task and monitor your progress effectively.</h3>
-    </div>
+    </main>
 
     <?php include('app/Views/footer.view.php'); ?>
 </body>

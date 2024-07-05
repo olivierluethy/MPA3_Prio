@@ -17,6 +17,16 @@ function post(string $key, $default = '')
     return $_POST[$key] ?? $default;
 }
 
+function get(string $key, $default = '', callable $filter = null)
+{
+    $value = $_GET[$key] ?? $default;
+    if ($filter) {
+        $value = $filter($value);
+    }
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
+
 /**
  * Stellt eine Verbindung zur Datenbank her und gibt die
  * Datenbankverbindung als PDO zurück.

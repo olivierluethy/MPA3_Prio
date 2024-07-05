@@ -22,8 +22,8 @@
 <body>
     <!-- Navigation Bar -->
     <?php
-        $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
-        include ("header.php");
+    $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+    include "header.php";
     ?>
 
     <!-- Zeiterfassungen -->
@@ -42,142 +42,163 @@
 
     <div class="flex-container">
 
-        <?php 
-        foreach ($getTitleOfTask as $getTitleOfTask2) {
+        <?php foreach ($getTitleOfTask as $getTitleOfTask2) {
             $totaltime = 0;
-            $sum = strtotime('00:00:00');
+            $sum = strtotime("00:00:00");
             $rapportCounter = 0;
-            foreach ($getRapports as $getRapports2)
-            {
+            foreach ($getRapports as $getRapports2) {
                 /* Check if rapport belongs to task */
-                if ($getRapports2['fk_aufgabeId'] == $getTitleOfTask2['aufgabeId'])
-                {
+                if (
+                    $getRapports2["fk_aufgabeId"] ==
+                    $getTitleOfTask2["aufgabeId"]
+                ) {
                     $rapportCounter++;
-                    
+
                     /* Check if currently no data has been given out */
-                    if($rapportCounter == 1){
-                        echo 
-                        "<div>
+                    if ($rapportCounter == 1) {
+                        echo "<div>
                             <!-- Das ID Attribut frisst keine Leerschläge aka Whitespaces -->
-                            <table class='data' id=". str_replace(' ','',$getTitleOfTask2['titel']) .">
+                            <table class='data' id=" .
+                            str_replace(" ", "", $getTitleOfTask2["titel"]) .
+                            ">
                                 <tr>
-                                    <th style='font-style: italic; text-shadow: 4px 4px 2px rgba(0,0,0,0.6); font-size: 1.2rem;'><p>" . $getTitleOfTask2['titel'] . "</p></th>
+                                    <th style='font-style: italic; text-shadow: 4px 4px 2px rgba(0,0,0,0.6); font-size: 1.2rem;'><p>" .
+                            $getTitleOfTask2["titel"] .
+                            "</p></th>
                                     <th>When</th>
                                     <th>Duration</th>
                                     <th>Edit / Delete</th>
-                                </tr>";?>
+                                </tr>"; ?>
 
         <!-- Display all essential informations about task -->
         <tr>
-            <td><?= $getRapports2['rapport']; ?></td>
-            <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
+            <td><?= $getRapports2["rapport"] ?></td>
+            <?php $date = date(
+                "dS M Y",
+                strtotime($getRapports2["created_at"])
+            ); ?>
             <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
-            <td><i class="fas fa-clock"></i> <?=$getRapports2['zeit']; ?></td>
+            <td><i class="fas fa-clock"></i> <?= $getRapports2["zeit"] ?></td>
 
             <?php
-                                    // Converting the time into seconds
-                                    $timeinsec = strtotime($getRapports2['zeit']) - $sum;
-    
-                                    // Sum the time with previous value
-                                    $totaltime = $totaltime + $timeinsec;
-                                    
-                                    /* Check if task as been created under 24 hours */
-                                    if (strtotime($getRapports2['created_at']) >= strtotime('-1 day')) {
-                                        /* Task is younger than 24 hours */
-                                        echo "<td class='editDelete'>
-                                                <img onclick='editTime(" . $getRapports2["rapportId"] . ")'
+            // Converting the time into seconds
+            $timeinsec = strtotime($getRapports2["zeit"]) - $sum;
+
+            // Sum the time with previous value
+            $totaltime = $totaltime + $timeinsec;
+
+            /* Check if task as been created under 24 hours */
+            if (strtotime($getRapports2["created_at"]) >= strtotime("-1 day")) {
+                /* Task is younger than 24 hours */
+                echo "<td class='editDelete'>
+                                                <img onclick='editTime(" .
+                    $getRapports2["rapportId"] .
+                    ")'
                                                 title='Edit rapport and time' src='images/edit.png' alt=''> / <img title='Delete rapport and time'
-                                                onclick='deleteTime(" . $getRapports2['rapportId'] . ")' src='images/delete.png' alt=''>
+                                                onclick='deleteTime(" .
+                    $getRapports2["rapportId"] .
+                    ")' src='images/delete.png' alt=''>
                                             </td>";
-                                    }
-                                    /* When task is or older than 24 hours */
-                                    else{
-                                        echo "<td></td>";
-                                    }
-                        ?>
+            } /* When task is or older than 24 hours */ else {
+                echo "<td></td>";
+            }
+            ?>
             <?php
                     } else {
                         /* Check if their are already 5 rows of data */
-                        if ($rapportCounter == 5)
-                        {
-                            echo "<tr><td><button title='Look into the history' onclick='showHistory(". $getTitleOfTask2['aufgabeId'] .")'><i class='fa fa-archive'></i>&nbsp History</button></td><td></td><td></td></tr>";
+                        if ($rapportCounter == 5) {
+                            echo "<tr><td><button title='Look into the history' onclick='showHistory(" .
+                                $getTitleOfTask2["aufgabeId"] .
+                                ")'><i class='fa fa-archive'></i>&nbsp History</button></td><td></td><td></td></tr>";
                             break;
-                        } else { ?>
+                        } else {
+                             ?>
             <!-- Display all essential informations about task -->
         <tr>
-            <td><?= $getRapports2['rapport']; ?></td>
-            <?php $date = date('dS M Y', strtotime($getRapports2['created_at'])); ?>
+            <td><?= $getRapports2["rapport"] ?></td>
+            <?php $date = date(
+                "dS M Y",
+                strtotime($getRapports2["created_at"])
+            ); ?>
             <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
-            <td><i class="fas fa-clock"></i> <?=$getRapports2['zeit']; ?></td>
+            <td><i class="fas fa-clock"></i> <?= $getRapports2["zeit"] ?></td>
 
             <?php
-                                // Converting the time into seconds
-                                $timeinsec = strtotime($getRapports2['zeit']) - $sum;
+            // Converting the time into seconds
+            $timeinsec = strtotime($getRapports2["zeit"]) - $sum;
 
-                                // Sum the time with previous value
-                                $totaltime = $totaltime + $timeinsec;
-                                
-                                /* Check if task as been created under 24 hours */
-                                if (strtotime($getRapports2['created_at']) >= strtotime('-1 day')) {
-                                    /* Task is younger than 24 hours */
-                                    echo "<td class='editDelete'>
-                                            <img onclick='editTime(" . $getRapports2["rapportId"] . ")'
+            // Sum the time with previous value
+            $totaltime = $totaltime + $timeinsec;
+
+            /* Check if task as been created under 24 hours */
+            if (strtotime($getRapports2["created_at"]) >= strtotime("-1 day")) {
+                /* Task is younger than 24 hours */
+                echo "<td class='editDelete'>
+                                            <img onclick='editTime(" .
+                    $getRapports2["rapportId"] .
+                    ")'
                                             title='Edit rapport and time' src='images/edit.png' alt=''> / <img title='Delete rapport and time'
-                                            onclick='deleteTime(" . $getRapports2['rapportId'] . ")' src='images/delete.png' alt=''>
+                                            onclick='deleteTime(" .
+                    $getRapports2["rapportId"] .
+                    ")' src='images/delete.png' alt=''>
                                         </td>";
-                                }
-                                /* When task is or older than 24 hours */
-                                else{
-                                    echo "<td></td>";
-                                }
+            } /* When task is or older than 24 hours */ else {
+                echo "<td></td>";
+            }
+
                         }
                     }
                 }
             }
-            if($rapportCounter == 0) {
-                echo
-                "<div>
-                    <table class='data' id=" . $getTitleOfTask2['titel'] . ">
-                        <tr><th><p>" . $getTitleOfTask2['titel'] . "</p></th></tr>
+            if ($rapportCounter == 0) {
+                echo "<div>
+                    <table class='data' id=" .
+                    $getTitleOfTask2["titel"] .
+                    ">
+                        <tr><th><p>" .
+                    $getTitleOfTask2["titel"] .
+                    "</p></th></tr>
                         <tr>
+                            <td style='color:red; text-align:center;'><strong>No rapports found</strong></td>
                             <td></td>
-                            <td><font color='red'><strong>No rapports found</strong></font></td>
                             <td></td>
                             <td></td>
                         </tr>
                     </table>
                 </div>";
             }
-            if($rapportCounter < 5 && $rapportCounter != 0){
+            if ($rapportCounter < 5 && $rapportCounter != 0) {
+
                 $h = intval($totaltime / 3600);
 
-                $totaltime = $totaltime - ($h * 3600);
+                $totaltime = $totaltime - $h * 3600;
 
                 $m = intval($totaltime / 60);
 
-                $s = $totaltime - ($m * 60);
+                $s = $totaltime - $m * 60;
 
-                $timeinsec = strtotime($getRapports2['zeit']) - $sum;
+                $timeinsec = strtotime($getRapports2["zeit"]) - $sum;
 
                 $totaltime = $totaltime + $timeinsec;
 
                 // Printing the result
                 echo "
                     <tr>
-                        <td><strong>Total time spent: <font color='red'>"?>
+                        <td><strong>Total time spent: <font color='red'>";
+                ?>
             <?php
-                        $Time = new TimeController();
-                        $Time->formatTimeOutput($h, $m, $s);?><?php echo "</font></strong></td>
+            $Time = new TimeController();
+            $Time->formatTimeOutput($h, $m, $s);
+            echo "</font></strong></td>
                         <td></td>
                         <td></td>
                         <td></td>
                     </tr>";
+
             }
-        }
-        ?>
+        } ?>
     </div>
-    <?php }
-    else{?>
+    <?php } else { ?>
     <div class="noData">
         <h1>No tasks therefore no records</h1>
         <p>Add a task, work on it by creating a record and then you'll find it here</p>
@@ -191,7 +212,7 @@
     </table>
     </div>
     </div>
-    <?php include ('app/Views/footer.view.php'); ?>
+    <?php include "app/Views/footer.view.php"; ?>
 </body>
 
 </html>

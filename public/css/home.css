@@ -313,6 +313,9 @@ main .task table th:nth-child(9) img:hover {
 .noData h1 {
   color: red;
 }
+.noData p {
+  color: white;
+}
 .noData button {
   background-color: #4CAF50;
   border: 1px solid #4CAF50;

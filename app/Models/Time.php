@@ -9,7 +9,6 @@ class Time
     }
 
 	public function addTimeRecord($rapport, $time, $id){
-        // $beschreibung = e(post('beschreibung'));
 		$statement = $this->db->prepare('INSERT INTO `rapport` (rapport, zeit, fk_aufgabeId) VALUES (:rapport, :zeit, :fk_aufgabeId)');
 		$statement->bindParam(':rapport', $rapport, PDO::PARAM_STR);
 		$statement->bindParam(':zeit', $time, PDO::PARAM_STR);

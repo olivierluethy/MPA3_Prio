@@ -90,6 +90,7 @@ th {
                 border: solid 5px gray;
                 padding: 20px;
                 td {
+                    padding: 5px;
                     button {
                         background-color: royalblue;
                         border: 1px solid royalblue;
@@ -118,8 +119,10 @@ th {
                     }
                 }
                 .editDelete {
-                    font-size: 40px;
+                    width: 17%;
+                    font-size: 3rem;
                     img {
+                        width: 20%;
                         transition-duration: 0.4s;
                         cursor: pointer;
                         &:hover {
@@ -135,14 +138,67 @@ th {
     }
 }
 
-th,
-td {
-    padding: 15px;
+
+th{
+    padding: 5px;
 }
 
 .noData {
     text-align: center;
     h1 {
         color: red;
+    }
+}
+
+/* Media Query for Tablets and Smaller Screens */
+@media (max-width: 768px) {
+    .search {
+        padding: 30px; /* Reduce padding */
+        font-size: 1rem; /* Further reduce font size */
+    }
+
+    .flex-container > div {
+        .data {
+            margin-left: 0.5rem; /* Adjust margin */
+            margin-right: 0.5rem; /* Adjust margin */
+            tr {
+                padding: 0;
+                .editDelete{
+                    img{
+                        width: 50%;
+                    }
+                }
+                td{
+                    padding: 0;
+                }
+            }
+        }
+    }
+}
+
+/* Media Query for Mobile Phones */
+@media (max-width: 480px) {
+    .search {
+        padding: 10px; /* Reduce padding */
+        font-size: 0.9rem; /* Further reduce font size */
+    }
+
+    .flex-container > div {
+        .data {
+            margin-left: 0.2rem; /* Adjust margin */
+            margin-right: 0.2rem; /* Adjust margin */
+        }
+    }
+
+    .noData {
+        h1 {
+            font-size: 1.5rem; /* Adjust font size */
+        }
+    }
+
+    #nothingFound {
+        img {
+            width: 40px; /* Adjust image size */
+        }
     }
 }
