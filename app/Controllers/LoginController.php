@@ -102,108 +102,126 @@ class LoginController{
         }
     }
 
-    public function register(){
+    public function register() {
         // Initialize the session
         session_start();
-
+    
         $pdo = connectDatabase();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    
         // Check if the user is already logged in, if yes then redirect him to index page
         if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
             header("location: home");
             exit;
-        }else if($_SERVER['REQUEST_METHOD'] !== 'POST'){
+        } else if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("location: login");
-        }else if ($_SERVER["REQUEST_METHOD"] == "POST"){
+            exit;
+        } else if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Define variables and initialize with empty values
-            $username = $password = $confirm_password = "";
-            $username_err = $password_err = $confirm_password_err = "";
-        
-            // Processing form data when form is submitted
-            // Prepare a select statement
-            $sql = "SELECT benutzerId FROM benutzer WHERE email = :email";
-            
-            if($stmt = $pdo->prepare($sql)){
-                // Bind variables to the prepared statement as parameters
-                $stmt->bindParam(":email", $param_email, PDO::PARAM_STR);
-                
-                // Set parameters
-                $param_email = trim($_POST["email"]);
-
-                // Close statement
-                unset($stmt);
+            $email = $password = $confirm_password = "";
+            $email_err = $password_err = $confirm_password_err = "";
+    
+            // Validate email
+            if (empty(trim($_POST["email"]))) {
+                $email_err = "Bitte geben Sie eine E-Mail-Adresse ein.";
+            } else {
+                $email = strtolower(trim($_POST["email"])); // Email to lowercase
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $email_err = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
+                } else {
+                    // Check if email already exists
+                    $sql = "SELECT email, salt FROM benutzer";
+                    if ($result = $pdo->query($sql)) {
+                        $email_exists = false;
+                        while ($row = $result->fetch()) {
+                            $stored_email_hash = $row['email'];
+                            $stored_salt = $row['salt'];
+                            $check_email_hash = hash_hmac('sha256', $email, $stored_salt);
+                            if ($stored_email_hash === $check_email_hash) {
+                                $email_exists = true;
+                                break;
+                            }
+                        }
+    
+                        if ($email_exists) {
+                            $email_err = "Diese E-Mail-Adresse ist bereits vergeben.";
+                        }
+                    } else {
+                        echo "Oops! Something went wrong. Please try again later.";
+                    }
+                }
             }
-            
+    
             // Validate password
-            if(empty(trim($_POST["password"]))){
-                $password_err = "Please enter a password.";     
-            } elseif(strlen(trim($_POST["password"])) < 6){
-                $password_err = "Password must have atleast 6 characters.";
-            } else{
+            if (empty(trim($_POST["password"]))) {
+                $password_err = "Bitte geben Sie ein Passwort ein.";
+            } elseif (strlen(trim($_POST["password"])) < 6) {
+                $password_err = "Das Passwort muss mindestens 6 Zeichen haben.";
+            } else {
                 $password = trim($_POST["password"]);
             }
-            
+    
             // Validate confirm password
-            if(empty(trim($_POST["verypass"]))){
-                $confirm_password_err = "Please confirm password.";     
-            } else{
+            if (empty(trim($_POST["verypass"]))) {
+                $confirm_password_err = "Bitte bestätigen Sie das Passwort.";
+            } else {
                 $confirm_password = trim($_POST["verypass"]);
-                if(empty($password_err) && ($password != $confirm_password)){
-                    $confirm_password_err = "Password did not match.";
+                if (empty($password_err) && ($password != $confirm_password)) {
+                    $confirm_password_err = "Die Passwörter stimmen nicht überein.";
                 }
             }
     
             // Check input errors before inserting in database
-            // The rule is 0 so the user is automatically a normal user and not an admin
-            if(empty($username_err) && empty($password_err) && empty($confirm_password_err)){
+            if (empty($email_err) && empty($password_err) && empty($confirm_password_err)) {
+                // Generate salt
+                $salt = bin2hex(random_bytes(16)); // 16 bytes = 128 bits
+                // Hash the email with the salt
+                $email_hash = hash_hmac('sha256', $email, $salt);
+                // Hash the password
+                $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
+                // Hash the role
+                $role = 0; // Assuming role 0 for normal user
+                $role_hash = hash_hmac('sha256', $role, $salt);
+    
                 // Prepare an insert statement
-                $sql = "INSERT INTO benutzer (email, password, role) VALUES (:email, :password, 0)";
-                
-                if($stmt = $pdo->prepare($sql)){
+                $sql = "INSERT INTO benutzer (email, password, salt, role) VALUES (:email, :password, :salt, :role)";
+                if ($stmt = $pdo->prepare($sql)) {
                     // Bind variables to the prepared statement as parameters
-                    $stmt->bindParam(":email", $param_email, PDO::PARAM_STR);
+                    $stmt->bindParam(":email", $email_hash, PDO::PARAM_STR);
                     $stmt->bindParam(":password", $param_password, PDO::PARAM_STR);
-                    
-                    // Set parameters
-                    $param_email = $param_email;
-                    $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
-                    
+                    $stmt->bindParam(":salt", $salt, PDO::PARAM_STR);
+                    $stmt->bindParam(":role", $role_hash, PDO::PARAM_STR);
+    
                     // Attempt to execute the prepared statement
-                    if($stmt->execute()){
-                        
+                    if ($stmt->execute()) {
                         // Prepare a select statement
                         $sql = "SELECT benutzerId, email, password, role FROM benutzer WHERE email = :email";
-
-                        /* After registration log user automatically in */
-                        if($stmt = $pdo->prepare($sql)){
+                        if ($stmt = $pdo->prepare($sql)) {
                             // Bind variables to the prepared statement as parameters
-                            $stmt->bindParam(":email", $email, PDO::PARAM_STR);
-                            
-                            // Set parameters
-                            $email = $param_email;
-                            
+                            $stmt->bindParam(":email", $email_hash, PDO::PARAM_STR);
+    
                             // Attempt to execute the prepared statement
-                            if($stmt->execute()){
+                            if ($stmt->execute()) {
                                 // After register is successful, auto login
-                                if($stmt->rowCount() == 1){
-                                    if($row = $stmt->fetch()){
+                                if ($stmt->rowCount() == 1) {
+                                    if ($row = $stmt->fetch()) {
                                         $id = $row["benutzerId"];
                                         $email = $row["email"];
                                         $hashed_password = $row["password"];
                                         $role = $row["role"];
-                                        if(password_verify($password, $hashed_password)){
+                                        if (password_verify($password, $hashed_password)) {
                                             // Password is correct, so start a new session
                                             session_start();
-                
+    
                                             // Store data in session variables
                                             $_SESSION["loggedin"] = true;
                                             $_SESSION["id"] = $id;
                                             $_SESSION["email"] = $email;
                                             $_SESSION["role"] = $role;
-                
+    
                                             // Redirect user to index page
                                             header("location: home");
+                                            exit;
                                         }
                                     }
                                 } else {
@@ -214,11 +232,11 @@ class LoginController{
                             } else {
                                 echo "Oops! Something went wrong. Please try again later.";
                             }
-                
+    
                             // Close statement
                             unset($stmt);
                         }
-                    } else{
+                    } else {
                         echo "Oops! Something went wrong. Please try again later.";
                     }
                     // Close statement
@@ -227,8 +245,9 @@ class LoginController{
             }
             // Close connection
             unset($pdo);
-        }    
+        }
     }
+    
 
     /* Damit sich der eingeloggte Benutzer wieder ausloggen kann */
     public function logout(){

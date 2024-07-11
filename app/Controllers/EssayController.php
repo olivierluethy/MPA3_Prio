@@ -18,7 +18,7 @@ class EssayController
 			$getEssays = $Essay -> getEssays() -> fetchAll();
 
 			require 'app/Views/admin.view.php';	
-		}else {
+		} else {
 			header('Location: login');
 		}
 	}
@@ -40,7 +40,7 @@ class EssayController
 
 		if(count($getEssay) == 0){
 			header('Location: login');
-		}else{
+		} else{
 			require 'app/Views/essay.view.php';
 		}
 	}

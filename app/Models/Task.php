@@ -1,4 +1,5 @@
 <?php
+use Dotenv\Dotenv;
 class Task
 {
     public $db;
@@ -8,29 +9,26 @@ class Task
         $this->db = connectDatabase();
     }
 
-	public function getAllTasks(){
-		$statement = $this->db->prepare('SELECT * FROM aufgabe WHERE fk_BenutzerId = :id ORDER BY prioritaet');
+	public function getSalt() {
+		$statement = $this->db->prepare('SELECT salt FROM benutzer WHERE benutzerId = :id');
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
 		$statement->execute();
-        return $statement;
-	}
+		
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+		return $result ? $result['salt'] : null;
+	}	
 
-	/* For OPEN TASKS */
-	public function getAllTasksOpen(){
-		$statement = $this->db->prepare('SELECT * FROM aufgabe WHERE fk_BenutzerId = :id AND status = 0
-		ORDER BY prioritaet DESC');
-		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
-		$statement->execute();
-        return $statement;
-	}
+	// Funktion zur Verschlüsselung
+    private function encrypt($data, $key, $iv) {
+        return openssl_encrypt($data, 'aes-256-cbc', $key, 0, $iv);
+    }
 
-	/* For DONE TASKS */
-	public function getAllTasksDone(){
-		$statement = $this->db->prepare('SELECT * FROM aufgabe WHERE fk_BenutzerId = :id AND status = 1
-		ORDER BY prioritaet DESC');
-		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
-		$statement->execute();
-        return $statement;
+	public function decrypt($data, $key, $iv) {
+		$decrypted = openssl_decrypt($data, 'aes-256-cbc', $key, 0, $iv);
+		if ($decrypted === false) {
+			return 'Decryption error'; // Fehlerhinweis bei Fehlschlag
+		}
+		return $decrypted;
 	}
 
 	/* To add one task */
@@ -40,7 +38,19 @@ class Task
 		$beschreibung = htmlspecialchars($beschreibung);
 		$motivation = htmlspecialchars($motivation);
 		$deadline = htmlspecialchars($deadline);
-		$prioritaet = intval($prioritaet); // Make sure priority is an integer
+		$prioritaet = intval($prioritaet);
+
+		// Initialisierungsvektor (IV) generieren
+		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+	
+		require_once __DIR__ . '/../../vendor/autoload.php'; // Pfad anpassen, falls notwendig
+
+		// Laden der .env-Datei
+		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../'); // Pfad anpassen, falls notwendig
+		$dotenv->load();
+
+		// Hole den Verschlüsselungsschlüssel aus der .env-Datei
+		$encryption_key = getenv('ENCRYPTION_KEY');
 	
 		// Count the total number of tasks
 		$countStatement = $this->db->prepare('SELECT COUNT(*) as totalTasks FROM aufgabe WHERE status = 0 AND fk_benutzerId = :id');
@@ -48,15 +58,29 @@ class Task
 		$countStatement->execute();
 		$result = $countStatement->fetch(PDO::FETCH_ASSOC);
 		$totalTasks = intval($result['totalTasks']);
+
+		$created_at = time();
+
+		// Daten verschlüsseln
+		$encrypted_titel = $this->encrypt($titel, $encryption_key, $iv);
+		$encrypted_beschreibung = $this->encrypt($beschreibung, $encryption_key, $iv);
+		$encrypted_motivation = $this->encrypt($motivation, $encryption_key, $iv);
+		$encrypted_deadline = $this->encrypt($deadline, $encryption_key, $iv);
+		$encrypted_prioritaet = $this->encrypt($prioritaet, $encryption_key, $iv);
+		$encrypted_status = $this->encrypt(0, $encryption_key, $iv);
+		$encrypted_created_at = $this->encrypt($created_at, $encryption_key, $iv);
 	
 		// Check if the new priority is within the allowed range (1 to totalTasks + 1)
 		if ($prioritaet >= 1 && $prioritaet <= $totalTasks + 1) {
-			$statement = $this->db->prepare("INSERT INTO `aufgabe` (titel, beschreibung, motivation, deadline, prioritaet, fk_benutzerId) VALUES (:titel, :beschreibung, :motivation, :deadline, :prioritaet, :id)");
-			$statement->bindParam(':titel', $titel, PDO::PARAM_STR);
-			$statement->bindParam(':beschreibung', $beschreibung, PDO::PARAM_STR);
-			$statement->bindParam(':motivation', $motivation, PDO::PARAM_STR);
-			$statement->bindParam(':deadline', $deadline, PDO::PARAM_STR);
-			$statement->bindParam(':prioritaet', $prioritaet, PDO::PARAM_INT);
+			$statement = $this->db->prepare("INSERT INTO `aufgabe` (titel, beschreibung, motivation, deadline, prioritaet, status, iv, created_at, fk_benutzerId) VALUES (:titel, :beschreibung, :motivation, :deadline, :prioritaet, :status, :iv, :created_at, :id)");
+			$statement->bindParam(':titel', $encrypted_titel, PDO::PARAM_STR);
+			$statement->bindParam(':beschreibung', $encrypted_beschreibung, PDO::PARAM_STR);
+			$statement->bindParam(':motivation', $encrypted_motivation, PDO::PARAM_STR);
+			$statement->bindParam(':deadline', $encrypted_deadline, PDO::PARAM_STR);
+			$statement->bindParam(':prioritaet', $encrypted_prioritaet, PDO::PARAM_STR);
+			$statement->bindParam(':status', $encrypted_status, PDO::PARAM_STR);
+			$statement->bindParam(':iv', $iv_base64, PDO::PARAM_STR);
+			$statement->bindParam(':created_at', $encrypted_created_at, PDO::PARAM_STR);
 			$statement->bindParam(':id', $_SESSION['id'], PDO::PARAM_INT);
 			$statement->execute();
 	
@@ -252,7 +276,7 @@ class Task
     public function sortTask($sort_option){
 		$sort_option = htmlspecialchars($sort_option);
 
-        $statement = $this->db->prepare("SELECT * FROM aufgabe WHERE fk_benutzerId = :benutzerId AND status = 0 ORDER BY $sort_option");
+        $statement = $this->db->prepare("SELECT * FROM aufgabe WHERE fk_benutzerId = :benutzerId ORDER BY $sort_option");
         $statement->bindParam(':benutzerId', $_SESSION["id"], PDO::PARAM_INT);
 		/* Bind Param fügt alles mit zusätzlichen Gänsefüschen zu, um SQL-Injection zu verhindern "" */
         $statement->execute();

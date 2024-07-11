@@ -8,11 +8,11 @@ USE prio;
 
 CREATE TABLE benutzer (
   benutzerId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  email VARCHAR(50) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  mangelpunkte INT,
-  role TINYINT(2), /* Normaler Benutzer: 0, Admin: 1, Gesperrt: 2 */
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  email VARCHAR(256) NOT NULL UNIQUE,
+  password VARCHAR(256) NOT NULL,
+  mangelpunkte VARCHAR(256),
+  role VARCHAR(256) NOT NULL, /* Normaler Benutzer: 0, Admin: 1, Gesperrt: 2 */
+  salt VARCHAR(256) NOT NULL UNIQUE
 );
 
 --
@@ -21,13 +21,14 @@ CREATE TABLE benutzer (
 
 CREATE TABLE aufgabe (
   aufgabeId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  titel VARCHAR(100) NOT NULL,
-  beschreibung TEXT NOT NULL,
-  motivation TEXT NOT NULL,
-  deadline DATE,
-  prioritaet INT NOT NULL,
-  status INT NOT NULL DEFAULT 0, /* Nicht erledigt: 0, Erledigt: 1 */
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  titel VARCHAR(256) NOT NULL,
+  beschreibung VARCHAR(256) NOT NULL,
+  motivation VARCHAR(256) NOT NULL,
+  deadline VARCHAR(256) NOT NULL,
+  prioritaet VARCHAR(256) NOT NULL,
+  status VARCHAR(256) NOT NULL, /* Nicht erledigt: 0, Erledigt: 1 */
+  iv VARCHAR(256) NOT NULL,
+  created_at VARCHAR(256) NOT NULL,
   fk_benutzerId INT NOT NULL,
   FOREIGN KEY (fk_benutzerId) REFERENCES benutzer(benutzerId)
 );
@@ -38,9 +39,10 @@ CREATE TABLE aufgabe (
 
 CREATE TABLE essays (
   essayId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  titel VARCHAR(255) NOT NULL,
-  essay TEXT NOT NULL,
-  status INT NOT NULL, /* Offen: 1, Geschlossen: 2 */
+  titel VARCHAR(256) NOT NULL,
+  essay VARCHAR(256) NOT NULL,
+  status VARCHAR(256) NOT NULL, /* Offen: 1, Geschlossen: 2 */
+  iv VARCHAR(256) NOT NULL,
   fk_benutzerId INT NOT NULL,
   FOREIGN KEY (fk_benutzerId) REFERENCES benutzer(benutzerId)
 );
@@ -51,9 +53,9 @@ CREATE TABLE essays (
 
 CREATE TABLE rapport (
   rapportId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  rapport VARCHAR(255) NOT NULL,
-  zeit TIME NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  rapport VARCHAR(256) NOT NULL,
+  zeit VARCHAR(256) NOT NULL,
+  iv VARCHAR(256) NOT NULL,
   fk_aufgabeId INT NOT NULL,
   FOREIGN KEY (fk_aufgabeId) REFERENCES aufgabe(aufgabeId)
 );

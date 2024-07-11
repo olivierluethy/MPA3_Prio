@@ -1,36 +1,77 @@
 <?php
+use Dotenv\Dotenv;
 
 class TaskController
 {
-	public function home(){
-		// Initialize the session
-        session_start();
-
-		if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-			header('Location: about');
-		}
-		else if(isset($_SESSION["role"])){
-			/* Admin */
-			if($_SESSION['role'] == 1){
-				header("location: admin");
+	public function home() {
+		try {
+			// Initialize the session
+			session_start();
+	
+			// Check if user is not logged in
+			if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+				header('Location: about');
+				exit;
 			}
-			else {
+	
+			// Check if user has a role
+			if (isset($_SESSION["role"])) {
 				$Task = new Task();
-		
-				/* Get all tasks */
-				$getAllTasks = $Task -> getAllTasks()-> fetchAll();
-				
-				/* Get all open tasks */
-				$getAllTasksOpen = $Task -> getAllTasksOpen() -> fetchAll();;
-		
-				// Done Tasks
-				/* Get all tasks */
-				$getAllTasksDone = $Task -> getAllTasksDone() -> fetchAll();;
+				$salt = $Task->getSalt();
+	
+				// Check if salt is retrieved successfully
+				if ($salt !== null) {
+					$role_hash = hash_hmac('sha256', 1, $salt);
+	
+					// Load environment variables
+					require_once __DIR__ . '/../../vendor/autoload.php';
+					$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+					$dotenv->load();
+	
+					// Get encryption key from environment
+					$encryption_key = getenv('ENCRYPTION_KEY');
+	
+					// Check if user is an admin
+					if ($_SESSION['role'] == $role_hash) {
+						header("Location: admin");
+						exit;
+					} else {
+						// Default sorting option
+						$sort_option = "prioritaet DESC";
+	
+						// Check and set sorting options from GET parameter
+						if (isset($_GET["sort"])) {
+							switch ($_GET["sort"]) {
+								case "alphabet":
+									$sort_option = "titel, beschreibung, motivation";
+									break;
+								case "priority":
+									$sort_option = "prioritaet ASC";
+									break;
+								case "deadline":
+									$sort_option = "deadline ASC";
+									break;
+								default:
+									// Handle invalid sort options gracefully
+									throw new Exception("Invalid sort option");
+							}
+						}
+	
+						// Fetch sorted tasks
+						$getObjects = $Task->sortTask($sort_option);
+						$getObjects = $getObjects->fetchAll();
+					}
+				}
 			}
+	
+			// Load the view
+			require 'app/Views/home.view.php';
+		} catch (Exception $e) {
+			// Handle any unexpected exceptions
+			// Log the error or redirect to an error page
+			echo "Error: " . $e->getMessage();
 		}
-		 
-		require 'app/Views/home.view.php';
-	}
+	}	
 
 	public function about(){
 		// Initialize the session

@@ -1,3 +1,16 @@
+<?php
+// Function to decrypt data
+function decrypt($data, $key, $iv) {
+    $decrypted = openssl_decrypt($data, 'aes-256-cbc', $key, 0, $iv);
+    if ($decrypted === false) {
+        error_log("Decryption error: " . openssl_error_string()); // Log OpenSSL errors
+        return 'Decryption error';
+    }
+    return $decrypted;
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,14 +22,12 @@
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
     <link rel="shortcut icon" href="images/favicon.ico">
-
+    <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <script defer src="public/js/responsive.js"></script>
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/openDone.js"></script>
     <script defer src="public/js/time_recording.js"></script>
     <script defer src="public/js/footer.js"></script>
-
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <title>Home</title>
 </head>
 
@@ -27,9 +38,8 @@
     include "header.php";
     ?>
 
-<?php
-if ($_SESSION["role"] == 2) { ?>
-    <div class='write_essay'>
+    <?php if ($_SESSION["role"] == hash_hmac('sha256', 2, $salt)) { ?>
+        <div class='write_essay'>
             <h1>You don't have access anymore!</h1>
             <p>You have completed a task 10 times too late. That's why you don't have access anymore.</p>
             <button id='showEssayField' onclick='write_essay()'>Write an essay to get access again</button>
@@ -40,243 +50,157 @@ if ($_SESSION["role"] == 2) { ?>
                 <button type='submit'>Send essay</button>
             </form>
         </div>
-<?php } /* If the user isn't blocked from the site */ elseif (
-        $_SESSION["role"] == 0
-    ) {
-        if (count($getAllTasks) > 0) {
-            echo "<table class='switch'>
-                    <tr>
-                        <th><button id='openButton' onclick='navSwitch(1)'>Open ";
-            if (count($getAllTasksOpen) == 0) {
-                echo "(empty) </button></th>";
-            } else {
-                echo "(" . count($getAllTasksOpen) . ")</th>";
-            }
-            echo "<th></th>
-                        <th><button id='doneButton' onclick='navSwitch(2)'>Completed ";
-            if (count($getAllTasksDone) == 0) {
-                echo "(empty) </button></th>";
-            } else {
-                echo "(" . count($getAllTasksDone) . ")";
-            }
-            echo "</tr>
-                </table>";
-            /* For open tasks */
-            echo "<div id='open'>";
-            if (count($getAllTasksOpen) > 0) { ?>
-    <table class="order">
-        <tr>
-            <td>
-                <h2>All open tasks sorted by:</h2>
-            </td>
-            <td>
-                <!-- Choose sorting option -->
-                <form action="" method="GET">
-                    <select name="sort">
-                        <option value="priority"
-                            <?php if (
-                                isset($_GET["sort"]) &&
-                                $_GET["sort"] == "priority"
-                            ) {
-                                echo "selected";
-                            } ?>>
-                            Priority</option>
-                        <option value="alphabet"
-                            <?php if (
-                                isset($_GET["sort"]) &&
-                                $_GET["sort"] == "alphabet"
-                            ) {
-                                echo "selected";
-                            } ?>>
-                            Alphabet</option>
-                        <option value="deadline"
-                            <?php if (
-                                isset($_GET["sort"]) &&
-                                $_GET["sort"] == "deadline"
-                            ) {
-                                echo "selected";
-                            } ?>>
-                            Deadline</option>
-                    </select>
-                    <button title='Sort all tasks' type='submit'>Sort <i class='fa fa-sort'></i></button>
-                </form>
-            </td>
-            <td><button title='Click on this button to add a task' class='plus' onclick='addTask()'><i
-                        class='fa fa-plus'></i></button></td>
-        </tr>
-    </table>
-    <main>
-        <?php
-        // make a connector
-        $sort_option = "prioritaet DESC";
-        if (isset($_GET["sort"])) {
-            if ($_GET["sort"] == "alphabet") {
-                $sort_option = "titel, beschreibung, motivation";
-            } elseif ($_GET["sort"] == "priority") {
-                $sort_option = "prioritaet ASC";
-            } elseif ($_GET["sort"] == "deadline") {
-                $sort_option = "deadline ASC";
+    <?php } elseif ($_SESSION["role"] == hash_hmac('sha256', 0, $salt)) { 
+        $open_tasks_counter = 0;
+        $done_tasks_counter = 0;
+
+        foreach ($getObjects as $object) {
+            $iv = base64_decode($object['iv']);
+            $decrypted_status = decrypt($object['status'], $encryption_key, $iv);
+            if ($decrypted_status === '0') {
+                $open_tasks_counter++;
+            } elseif ($decrypted_status === '1') {
+                $done_tasks_counter++;
             }
         }
+        ?>
 
-        $Task = new Task();
-        $getObjects = $Task->sortTask($sort_option);
-        $getObjects = $getObjects->fetchAll();
-
-        $rowCounter = 0;
-        foreach ($getObjects as $getObject) {
-
-            $rowCounter++;
-            if ($rowCounter == 1) {
-                echo "<div class='task' style='background-color: #FFD700;'>";
-            } elseif ($rowCounter == 2) {
-                echo "<div class='task' style='background-color: #C0C0C0;'>";
-            } elseif ($rowCounter == 3) {
-                echo "<div class='task' style='background-color: #CD7F32;'>";
-            } else {
-                echo "<div class='task' style='background-color: #99CCFF;'>";
-            }
-            ?>
-
-        <table>
+        <table class='switch'>
             <tr>
                 <th>
-                    <h1><?= $getObject["titel"] ?></h1>
+                    <button id='openButton' onclick='navSwitch(1)'>
+                        Open (<?= $open_tasks_counter ?: 'empty' ?>)
+                    </button>
                 </th>
-                <th><textarea readonly class="ckeditor" name="description"
-                        id="description_open"><?php echo $getObject[
-                            "beschreibung"
-                        ]; ?></textarea></th>
-                <th><textarea readonly class="ckeditor" name=""
-                        id="motivation_open"><?php echo $getObject[
-                            "motivation"
-                        ]; ?></textarea></th>
-                <!-- Format date -->
-                <?php $date = date(
-                    "dS M Y",
-                    strtotime($getObject["deadline"])
-                ); ?>
-                <th><?php echo $date; ?></th><?php
-
-            if (strtotime($getObject["created_at"]) >= strtotime("-1 day")) {
-    /* Task is younger than 24 hours */
-    echo "
-                                                <th>
-                                                    <img title='Edit task' onclick='editTask(" .
-        $getObject["aufgabeId"] .
-        ")' src='images/edit.png' alt=''>
-                                                    <img title='Delete task' onclick='deleteTask(" .
-        $getObject["aufgabeId"] .
-        ")' src='images/delete.png' alt=''>
-                                                </th>";
-} /* When task is or older than 24 hours */ else {
-    echo "<th></th>";
-} ?>
+                <th></th>
                 <th>
-                    <h1 id='active_time<?= $getObject[
-                        "aufgabeId"
-                    ] ?>'>00:00:00</h1>
-                </th>
-                <th>
-                    <img title='Start recording' id='start<?= $getObject[
-                        "aufgabeId"
-                    ] ?>'
-                        onclick="start_recording(<?= $getObject[
-                            "aufgabeId"
-                        ] ?>)" src='images/clock off.png' alt=''>
-                </th>
-                <th><button title='Complete task' id='completeBtn'
-                        onclick="completeTask(<?= $getObject[
-                            "aufgabeId"
-                        ] ?>)">Complete task <i
-                            class='fa fa-check'></i></button></th>
-                <th>
-                    <img title='Increase priority' onclick="higherPrio(<?= $getObject[
-                        "aufgabeId"
-                    ] ?>)"
-                        src='images/up.png' alt=''><br>
-                    <p><?= $getObject["prioritaet"] ?></p>
-                    <?php if ($getObject["prioritaet"] > 0) { ?>
-                    <img title='Decrease priority' onclick="lowerPrio(<?= $getObject[
-                        "aufgabeId"
-                    ] ?>)"
-                        src='images/down.png' alt=''>
-                    <?php } ?>
+                    <button id='doneButton' onclick='navSwitch(2)'>
+                        Completed (<?= $done_tasks_counter ?: 'empty' ?>)
+                    </button>
                 </th>
             </tr>
         </table>
-        </div><?php
-        }
 
-        echo "</main>";
-        } else {echo "<div class='noData'>
-                            <h1>No tasks available yet</h1>
-                            <button onclick='addTask()'>Add task &nbsp<i class='fa fa-plus'></i></button>
-                        </div>";}
-            echo "</div>";
-            /* For done tasks */
-            echo "<div id='done'>";
-            if (count($getAllTasksDone) > 0) {
-                echo "
-                        <table class='order'>
-                            <tr>
-                                <td><h2>All done tasks</h2></td>
-                            </tr>
-                        </table>
-                    <main>";
-                foreach ($getAllTasksDone as $getAllTasksDone2) {
+        <!-- Open Tasks -->
+        <div id='open'>
+            <?php if ($open_tasks_counter > 0) { ?>
+                <table class="order">
+                    <tr>
+                        <td><h2>All open tasks sorted by:</h2></td>
+                        <td>
+                            <form action="" method="GET">
+                                <select name="sort">
+                                    <option value="priority" <?= (isset($_GET["sort"]) && $_GET["sort"] == "priority") ? "selected" : "" ?>>Priority</option>
+                                    <option value="alphabet" <?= (isset($_GET["sort"]) && $_GET["sort"] == "alphabet") ? "selected" : "" ?>>Alphabet</option>
+                                    <option value="deadline" <?= (isset($_GET["sort"]) && $_GET["sort"] == "deadline") ? "selected" : "" ?>>Deadline</option>
+                                </select>
+                                <button title='Sort all tasks' type='submit'>Sort <i class='fa fa-sort'></i></button>
+                            </form>
+                        </td>
+                        <td><button title='Click on this button to add a task' class='plus' onclick='addTask()'><i class='fa fa-plus'></i></button></td>
+                    </tr>
+                </table>
 
-                    echo "<div class='task'>
+                <main>
+                    <?php 
+                    $open_task_index = 0;
+                    foreach ($getObjects as $task) { 
+                        $iv = base64_decode($task['iv']);
+                        $decrypted_status = decrypt($task['status'], $encryption_key, $iv);
+                        if ($decrypted_status !== '0') continue; // Skip non-open tasks
+                        
+                        $rowClass = $open_task_index % 2 === 0 ? "task-even" : "task-odd";
+                        $open_task_index++;
+                    ?>
+                        <div class='task <?= $rowClass ?>'>
                             <table>
                                 <tr>
+                                    <?php echo "Titel: " . $task['titel'];?><br>
+                                    <?php echo "IV: " . $task['iv'];?><br>
+                                    <?php echo "Key: " . $encryption_key;?><br>
+                                    <th><h1><?= decrypt($task["titel"], $encryption_key, $iv) ?></h1></th>
+                                    <th><textarea readonly class="ckeditor" name="description" id="description_open"><?= decrypt($task["beschreibung"], $encryption_key, $iv) ?></textarea></th>
+                                    <th><textarea readonly class="ckeditor" name="motivation" id="motivation_open"><?= decrypt($task["motivation"], $encryption_key, $iv) ?></textarea></th>
+                                    <th><?= date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))) ?></th>
+                                    <?php if (strtotime(decrypt($task["created_at"], $encryption_key, $iv)) >= strtotime("-1 day")) { ?>
+                                        <th>
+                                            <img title='Edit task' onclick='editTask(<?= $task["aufgabeId"] ?>)' src='images/edit.png' alt=''>
+                                            <img title='Delete task' onclick='deleteTask(<?= $task["aufgabeId"] ?>)' src='images/delete.png' alt=''>
+                                        </th>
+                                    <?php } else { ?>
+                                        <th></th>
+                                    <?php } ?>
+                                    <th><h1 id='active_time<?= $task["aufgabeId"] ?>'>00:00:00</h1></th>
+                                    <th><img title='Start recording' id='start<?= $task["aufgabeId"] ?>' onclick="start_recording(<?= $task["aufgabeId"] ?>)" src='images/clock off.png' alt=''></th>
+                                    <th><button title='Complete task' id='completeBtn' onclick="completeTask(<?= $task["aufgabeId"] ?>)">Complete task <i class='fa fa-check'></i></button></th>
                                     <th>
-                                        <h1>" .
-                        $getAllTasksDone2["titel"] .
-                        "</h1>
+                                        <img title='Increase priority' onclick="higherPrio(<?= $task["aufgabeId"] ?>)" src='images/up.png' alt=''><br>
+                                        <p><?= decrypt($task["prioritaet"], $encryption_key, $iv) ?></p>
+                                        <?php if (decrypt($task["prioritaet"], $encryption_key, $iv) > 0) { ?>
+                                            <img title='Decrease priority' onclick="lowerPrio(<?= $task["aufgabeId"] ?>)" src='images/down.png' alt=''>
+                                        <?php } ?>
                                     </th>
-                                    <th><textarea readonly class='ckeditor' name='description' id='description_done'>";
-                    echo $getAllTasksDone2["beschreibung"] .
-                        "</textarea></th>
-                                    <th><textarea readonly class='ckeditor' name='description' id='motivation_done'>";
-                    echo $getAllTasksDone2["motivation"] . "</textarea></th>";
-                    $date = date(
-                        "dS M Y",
-                        strtotime($getAllTasksDone2["deadline"])
-                    );
-                    ?>
-        <th><?php echo $date; ?></th><?php echo "
-                                    <th><img title='Delete task' onclick='deleteTask(" .
-    $getAllTasksDone2["aufgabeId"] .
-    ")' src='images/delete.png' alt=''></th>
                                 </tr>
                             </table>
-                        </div>";
-                }
-                echo "</main>";
-                echo "</div>";
-            } else {
-                echo "<div class='noData'>
-                            <h1>No tasks have been completed yet</h1>
-                            <p>When you complete an open task, it will appear here!</p>
-                          </div>";
-            }
-            echo "</div>";
-        } else {
-            echo "<div class='noData'>
-                    <h1>Currently no task available</h1>
-                    <button title='Click on this button to add a task' onclick='addTask()'>Add task <i class='fa fa-plus'></i></button>
-                 </div>";
-        }
-    } ?>
+                        </div>
+                    <?php } ?>
+                </main>
+            <?php } else { ?>
+                <div class='noData'>
+                    <h1>No tasks available yet</h1>
+                    <button onclick='addTask()'>Add task &nbsp<i class='fa fa-plus'></i></button>
+                </div>
+            <?php } ?>
+        </div>
 
-        <script src="ckeditor/ckeditor.js"></script>
+        <!-- Completed Tasks -->
+        <div id='done'>
+            <?php if ($done_tasks_counter > 0) { ?>
+                <table class='order'>
+                    <tr>
+                        <td><h2>All done tasks</h2></td>
+                    </tr>
+                </table>
+                <main>
+                    <?php 
+                    foreach ($getObjects as $task) { 
+                        $iv = base64_decode($task['iv']);
+                        $decrypted_status = decrypt($task['status'], $encryption_key, $iv);
+                        if ($decrypted_status !== '1') continue; // Skip non-completed tasks
+                    ?>
+                        <div class='task'>
+                            <table>
+                                <tr>
+                                    <th><h1><?= decrypt($task["titel"], $encryption_key, $iv) ?></h1></th>
+                                    <th><textarea readonly class='ckeditor' name='description' id='description_done'><?= decrypt($task["beschreibung"], $encryption_key, $iv) ?></textarea></th>
+                                    <th><textarea readonly class='ckeditor' name='motivation' id='motivation_done'><?= decrypt($task["motivation"], $encryption_key, $iv) ?></textarea></th>
+                                    <th><?= date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))) ?></th>
+                                    <th><img title='Delete task' onclick='deleteTask(<?= $task["aufgabeId"] ?>)' src='images/delete.png' alt=''></th>
+                                    <th>
+                                        <h1><?= decrypt($task["total_time"], $encryption_key, $iv) ?></h1>
+                                        <h2>Total time</h2>
+                                    </th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </table>
+                        </div>
+                    <?php } ?>
+                </main>
+            <?php } else { ?>
+                <div class='noData'>
+                    <h1>No tasks completed yet</h1>
+                </div>
+            <?php } ?>
+        </div>
+    <?php } ?>
+    <script src="ckeditor/ckeditor.js"></script>
 
         <script>
         CKEDITOR.replace('essay_content');
         </script>
-
-        <?php include "app/Views/addRapportModal.view.php"; ?>
-        <?php include "app/Views/footer.view.php"; ?>
+    <?php include "app/Views/footer.view.php"; ?>
 </body>
 
 </html>

@@ -1,18 +1,24 @@
 <?php
-/* Database credentials. Assuming you are running MySQL
-server with default setting (user 'root' with no password) */
+require_once __DIR__ . '/../vendor/autoload.php'; // Pfad anpassen, falls notwendig
 
+use Dotenv\Dotenv;
+
+// Laden der .env-Datei
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../'); // Pfad anpassen, falls notwendig
+$dotenv->load();
+
+/* Database credentials aus Umgebungsvariablen */
 if (!defined('DB_SERVER')) {
-    define('DB_SERVER', 'localhost'); // Ersetzen Sie dies durch die IP-Adresse aus den Access Hosts
+    define('DB_SERVER', $_ENV['DB_SERVER']); // Ersetzen Sie dies durch die IP-Adresse aus den Access Hosts
 }
 if (!defined('DB_USERNAME')) {
-    define('DB_USERNAME', 'root');
+    define('DB_USERNAME', $_ENV['DB_USERNAME']);
 }
 if (!defined('DB_PASSWORD')) {
-    define('DB_PASSWORD', '');
+    define('DB_PASSWORD', $_ENV['DB_PASSWORD']);
 }
 if (!defined('DB_NAME')) {
-    define('DB_NAME', 'prio');
+    define('DB_NAME', $_ENV['DB_NAME']);
 }
 
 /* Attempt to connect to MySQL database */
