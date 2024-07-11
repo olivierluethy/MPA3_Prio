@@ -14,6 +14,7 @@
     <script defer src="public/js/validation.js"></script>
     <script defer src="public/js/footer.js"></script>
     <script defer src="public/js/parallax.js"></script>
+    <script defer src="public/js/responsive.js"></script>
     
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
@@ -49,10 +50,13 @@
             </ul>
         </h3>
         <h1>Set Meaningful Goals</h1>
-        <h3>Consider your goals carefully and ensure they are significant and attainable.</h3>
+        <h3>Consider your goals carefully and ensure they are significant and attainable.<br>
+        To help you do that, you need to enter a brief description of your task and your motivation. Why do you want to do it and how hard do you want to do it?
+        </h3>
         
         <h1>Track Your Progress Intuitively</h1>
-        <h3>Forget about constantly checking the clock or lists. Our intuitive dashboard offers a seamless time management solution.</h3>
+        <h3>Forget about constantly checking the clock or lists. Our intuitive dashboard offers a seamless time management solution.<br>
+        For those who take it seriously, they can see the entire history on a spreadsheet of what they've all done, how long the day took and the total amount calculated and displayed all for you.</h3>
         
         <h1>Achieve Your Goals Quickly</h1>
         <h3>Achieving your goals, especially when learning new skills, requires dedication. Prio’s dashboard helps you track the time spent on each task and monitor your progress effectively.</h3>

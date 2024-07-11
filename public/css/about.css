@@ -69,4 +69,81 @@ main h1 {
 main h3 {
   margin-left: 2rem;
   color: gray;
+}
+
+/* Responsive styling for mobile devices */
+@media screen and (max-width: 1000px) {
+  .parallax-image {
+    padding-top: 70%;
+  }
+  .parallax-image h1 {
+    font-size: 40px;
+    width: 90%;
+    padding: 10px;
+    top: 20%;
+    left: 50%;
+  }
+  .parallax-image h2 {
+    font-size: 25px;
+    width: 90%;
+    padding: 10px;
+    top: 35%;
+    left: 50%;
+  }
+  .parallax-image p {
+    font-size: 18px;
+    width: 90%;
+    padding: 10px;
+    top: 45%;
+    left: 50%;
+  }
+  main {
+    padding: 50px 10px;
+  }
+  main h1 {
+    margin-left: 1rem;
+    font-size: 24px;
+  }
+  main h3 {
+    margin-left: 1rem;
+    font-size: 18px;
+  }
+}
+/* Responsive styling for mobile devices */
+@media screen and (max-width: 515px) {
+  .parallax-image {
+    padding-top: 70%;
+  }
+  .parallax-image h1 {
+    font-size: 40px;
+    width: 90%;
+    padding: 10px;
+    top: 8%;
+    left: 50%;
+  }
+  .parallax-image h2 {
+    font-size: 25px;
+    width: 90%;
+    padding: 10px;
+    top: 43%;
+    left: 50%;
+  }
+  .parallax-image p {
+    font-size: 18px;
+    width: 90%;
+    padding: 10px;
+    top: 70%;
+    left: 50%;
+  }
+  main {
+    padding: 50px 10px;
+  }
+  main h1 {
+    margin-left: 1rem;
+    font-size: 24px;
+  }
+  main h3 {
+    margin-left: 1rem;
+    font-size: 18px;
+  }
 }/*# sourceMappingURL=about.css.map */

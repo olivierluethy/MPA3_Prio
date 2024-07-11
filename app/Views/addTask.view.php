@@ -11,7 +11,6 @@
     <link rel="shortcut icon" href="images/favicon.ico">
 
     <script defer src="public/js/validationAddTask.js"></script>
-    <script defer src="ckeditor/ckeditor.js"></script>
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/footer.js"></script>
 
@@ -36,10 +35,16 @@
         <textarea name="motivation" id="motivation"></textarea><br>
         <label for="lname">Deadline:</label><br>
         <input type="date" id="deadline" name="deadline"><br>
-        <label for="lname">Priority:</label><br>
-        <input type="number" id="priority" name="priority" id="prioritaet"><br>
+        <label for="lname">Select the Priority:</label><br>
+        <select id="priority" name="priority" style="width:200px;height:25px;">
+            <?php foreach ($possiblePriorities as $priority): ?>
+                <option value="<?php echo $priority; ?>"><?php echo $priority; ?></option>
+            <?php endforeach; ?>
+        </select><br>
         <input type="submit" class="" name="addTask" value="Add task"><br><br>
     </form>
+
+    <script src="ckeditor/ckeditor.js"></script>
 
     <script>
     CKEDITOR.replace('description');

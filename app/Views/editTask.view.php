@@ -21,7 +21,7 @@
 <body>
     <!-- Navigation Bar -->
     <?php
-    $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+    $actual_link = basename(__FILE__);
     include("header.php");
     ?>
 
@@ -35,8 +35,14 @@
         <textarea name="motivation" id="motivation"><?= $getTask[0][3] ?></textarea><br>
         <label for="deadline">Deadline:</label><br>
         <input type="date" id="deadline" name="deadline" value="<?= $getTask[0][4] ?>"><br>
-        <label for="priority">Priorität:</label><br>
-        <input type="number" id="priority" name="priority" id="priority" value="<?= $getTask[0][5] ?>"><br>
+        <label for="lname">Select the Priority:</label><br>
+        <select id="priority" name="priority" style="width:200px;height:25px;">
+            <?php foreach ($possiblePriorities as $priority): ?>
+                <option value="<?php echo $priority; ?>" <?php echo ($priority == $getTask[0][5]) ? 'selected' : ''; ?>>
+                    <?php echo $priority; ?>
+                </option>
+            <?php endforeach; ?>
+        </select><br>
         <input type="submit" class="" name="addTask" value="Edit task"><br><br>
     </form>
 

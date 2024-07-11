@@ -10,6 +10,12 @@ class LoginController{
             header("location: about");
             exit;
         }
+        // Unset all of the session variables
+        $_SESSION = array();
+
+        // Destroy the session.
+        session_destroy();
+        
         $pdo = connectDatabase();
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -97,6 +103,9 @@ class LoginController{
     }
 
     public function register(){
+        // Initialize the session
+        session_start();
+
         $pdo = connectDatabase();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -223,9 +232,6 @@ class LoginController{
 
     /* Damit sich der eingeloggte Benutzer wieder ausloggen kann */
     public function logout(){
-        // Initialize the session
-        session_start();
-
         $pdo = connectDatabase();
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

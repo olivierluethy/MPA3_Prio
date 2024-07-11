@@ -9,22 +9,26 @@ class TaskController
 		if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 			header('Location: about');
 		}
-		/* Admin */
-		if($_SESSION['role'] == 1){
-			header("location: admin");
-		}else {
-			$Task = new Task();
-	
-			/* Get all tasks */
-			$getAllTasks = $Task -> getAllTasks()-> fetchAll();
-			
-			/* Get all open tasks */
-			$getAllTasksOpen = $Task -> getAllTasksOpen() -> fetchAll();;
-	
-			// Done Tasks
-			/* Get all tasks */
-			$getAllTasksDone = $Task -> getAllTasksDone() -> fetchAll();;
+		else if(isset($_SESSION["role"])){
+			/* Admin */
+			if($_SESSION['role'] == 1){
+				header("location: admin");
+			}
+			else {
+				$Task = new Task();
+		
+				/* Get all tasks */
+				$getAllTasks = $Task -> getAllTasks()-> fetchAll();
+				
+				/* Get all open tasks */
+				$getAllTasksOpen = $Task -> getAllTasksOpen() -> fetchAll();;
+		
+				// Done Tasks
+				/* Get all tasks */
+				$getAllTasksDone = $Task -> getAllTasksDone() -> fetchAll();;
+			}
 		}
+		 
 		require 'app/Views/home.view.php';
 	}
 
@@ -53,9 +57,9 @@ class TaskController
 			$prioritaet = e(post('priority'));
 
             $Task->add_task($titel, $beschreibung, $motivation, $deadline, $prioritaet);
- 
-            header('Location: home');
-        }
+        } else{
+			$possiblePriorities = $Task->ShowPossiblePriorities();
+		}
 		require 'app/Views/addTask.view.php';
 	}
 
@@ -79,11 +83,10 @@ class TaskController
 			$prioritaet = e(post('priority'));
         
 			$Task->edit_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $id);
-
-            header('Location: home');	
         }else{
 			/* Get Data to edit */
-			$getTask = $Task -> getTask($id) -> fetchAll();;
+			$getTask = $Task -> getTask($id) -> fetchAll();
+			$possiblePriorities = $Task->ShowPossiblePriorities();
         }
 		require 'app/Views/editTask.view.php';
 	}
@@ -158,9 +161,9 @@ class TaskController
 		}
 
 		/* Get amount of deficiency points */
-		$getDeficiencyPoints = $Task -> getDeficiencyPoints() -> fetchAll();;
+		$getDeficiencyPoints = $Task -> getDeficiencyPoints() -> fetchAll();
 
-		if($getDeficiencyPoints[0][0] == 10){
+		if($getDeficiencyPoints[0][0] <= 10){
 			$Task->lowerRole();
 			header('Location: logout');
 		}else if($getDeficiencyPoints[0][0] < 10){

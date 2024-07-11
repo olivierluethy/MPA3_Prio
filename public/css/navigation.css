@@ -6,23 +6,26 @@ body {
   overflow-x: hidden;
   background-color: black;
 }
-body nav {
+
+nav {
   display: flex;
   width: 100%;
   background-color: white;
   box-shadow: 2px 3px 5px grey;
   position: sticky;
-  color: black;
   top: 0;
   z-index: 100;
+  color: black;
 }
-body nav .part1 {
+
+.part1 {
   margin-left: 2rem;
   display: flex;
-  width: 20%;
+  width: 25%;
   cursor: pointer;
 }
-body nav .part1 img {
+
+.part1 img {
   -o-object-fit: contain;
      object-fit: contain;
   width: 20%;
@@ -31,46 +34,60 @@ body nav .part1 img {
   min-width: 40px;
   transition: 500ms;
 }
-body nav .part1 img:hover {
+
+.part1 img:hover {
   transform: scale(1.1);
   transition: 500ms;
 }
-body nav .part1 h1 {
+
+.part1 h1 {
   margin-top: auto;
   margin-bottom: auto;
   margin-left: 1rem;
   transition-duration: 0.4s;
 }
-body nav .part1 h1:hover {
+
+.part1 h1:hover {
   text-shadow: 2px 2px lightgray;
 }
-body nav .part2 {
+
+.burger {
+  color: black;
+  display: none;
+  font-size: 3rem;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: 2rem;
+  cursor: pointer;
+}
+
+.part2 {
   width: 80%;
   margin-top: auto;
   margin-bottom: auto;
   text-align: right;
   margin-right: 2rem;
 }
-body nav .part2 a {
+
+.part2 a {
   font-weight: bold;
   text-decoration: none;
   color: black;
   margin-left: 2rem;
   transition-duration: 0.4s;
 }
-body nav .part2 a:hover {
+
+.part2 a:hover {
   font-style: italic;
   color: white;
 }
-body nav .part2 a.active {
+
+.part2 a.active {
   color: yellow;
   font-style: italic;
 }
-body nav .part2 .icon {
-  display: none;
-  font-size: 2rem;
-}
-body nav .part2 button {
+
+.part2 button {
   background-color: royalblue;
   border: 2px solid royalblue;
   color: white;
@@ -85,40 +102,53 @@ body nav .part2 button {
   transition-duration: 0.4s;
   cursor: pointer;
 }
-body nav .part2 button:hover {
-  background-color: lightblue;
+
+.part2 button:hover {
+  background-color: white;
   color: royalblue;
   border: 2px solid royalblue;
 }
-body nav .part2 button.active {
+
+.part2 button.active {
   border: 2px solid white;
   background-color: white;
   color: royalblue;
 }
 
-@media screen and (max-width: 769px) {
-  body nav .part2 button {
-    display: none;
+/* Responsive styling for mobile devices */
+@media screen and (max-width: 767px) {
+  nav {
+    justify-content: space-between; /* Ensure space between part1 and burger */
   }
-  body nav .part2 .icon {
+  .burger {
     display: block;
+    margin-right: 1rem; /* Adjust the margin as needed */
   }
-}
-@media screen and (max-width: 769px) {
-  body nav {
-    display: block;
-  }
-  body nav .part2.responsive {
-    position: relative;
-  }
-  body nav .part2.responsive .icon {
+  .part2 {
+    display: none; /* Hide the menu by default */
+    width: 100%;
+    background-color: #333;
     position: absolute;
-    right: 0;
-    top: 0;
+    top: 55px; /* Adjust based on your header height */
+    left: 0;
+    text-align: center;
+    flex-direction: column;
   }
-  body nav .part2.responsive button {
-    float: none;
+  .part2.responsive {
+    display: flex;
+    height: 29vh;
+    box-shadow: -1px 24px 37px -10px rgba(255, 255, 255, 0.68);
+    -webkit-box-shadow: -1px 24px 37px -10px rgba(255, 255, 255, 0.68);
+    -moz-box-shadow: -1px 24px 37px -10px rgba(255, 255, 255, 0.68);
+  }
+  .part2 a, .part2 button {
     display: block;
-    text-align: left;
+    padding: 10px 0;
+    color: white;
+    text-decoration: none;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+    margin-top: 1rem;
   }
 }/*# sourceMappingURL=navigation.css.map */

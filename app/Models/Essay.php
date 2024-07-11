@@ -26,9 +26,6 @@ class Essay
 	}
 
 	public function add_essay($title, $essay){
-		$title = e(post($title));
-		$essay = e(post($essay));
-
 		$statement = $this->db->prepare("INSERT INTO `essays` (titel, essay, status, fk_benutzerId) VALUES (:titel, :essay, 1, :id)");
 		$statement->bindParam(':titel', $title, PDO::PARAM_STR);
 		$statement->bindParam(':essay', $essay, PDO::PARAM_STR);

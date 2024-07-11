@@ -26,7 +26,7 @@
     <?php
     $actual_link = basename(__FILE__);
     define('__ROOT__', dirname(dirname(__FILE__)));
-    require_once(__ROOT__.'\header.php');
+    require_once(__ROOT__.'/header.php');
     ?>
 
     <div class="login">

@@ -19,7 +19,7 @@
 
 <!-- Navigation Bar -->
 <?php
-$actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+$actual_link = basename(__FILE__);
 include ("header.php");
 ?>
 <h1>The history of task: <?= $getHistorys[0][0];?></h1>
@@ -37,7 +37,7 @@ include ("header.php");
             <td>Duration: <?= $getHistory['zeit']; ?></td>
             
             <?php $date = date('dS M Y', strtotime($getHistory['created_at'])); ?>
-            <td>Created on the <?php echo $date ?></td>
+            <td>Created on the <?= $date ?></td>
         </tr>
         <?php } ?>
 

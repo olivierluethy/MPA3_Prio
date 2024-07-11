@@ -23,12 +23,11 @@
 <body>
     <!-- Navigation Bar -->
     <?php
-    $actual_link = basename(__FILE__); // aktueller dateiname (wird für header.php benötigt)
+    $actual_link = basename(__FILE__);
     include "header.php";
     ?>
 
-     /* If the user is blocked from the site */<?php
-
+<?php
 if ($_SESSION["role"] == 2) { ?>
     <div class='write_essay'>
             <h1>You don't have access anymore!</h1>

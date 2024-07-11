@@ -70,7 +70,7 @@ body {
 
 .modal-header {
     padding: 2px 16px;
-    background-color: lightblue;
+    background-color: royalblue;
     color: white;
 }
 
@@ -125,7 +125,7 @@ input[type=submit]:hover {
             <form action="addTimeRecord" method="POST">
                 <br>
                 <label for="rapport">Rapport:</label><br>
-                <input id="rapport" type="text" name="rapport" /><br><br>
+                <input placeholder="What did you achieve?" id="rapport" type="text" name="rapport" /><br><br>
                 <label for="passwort">Time:</label><br>
                 <input id="appt-time" type="time" name="time" step="2" readonly /><br>
                 <input style="display: none;" id="taskId" type="text" name="taskId" /><br>

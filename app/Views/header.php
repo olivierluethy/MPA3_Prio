@@ -4,6 +4,9 @@
         <img src="images/logo.png" alt="">
         <h1>Prio</h1>
     </div>
+    <div class="burger" onclick="responsive()">
+            <i class="fas fa-bars"></i>
+        </div>
     <div class="part2" id="nav">
         <?php
         $navigationFiller = "/";
