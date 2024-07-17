@@ -22,8 +22,8 @@ CREATE TABLE benutzer (
 CREATE TABLE aufgabe (
   aufgabeId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   titel VARCHAR(256) NOT NULL,
-  beschreibung VARCHAR(256) NOT NULL,
-  motivation VARCHAR(256) NOT NULL,
+  beschreibung TEXT NOT NULL,
+  motivation TEXT NOT NULL,
   deadline VARCHAR(256) NOT NULL,
   prioritaet VARCHAR(256) NOT NULL,
   status VARCHAR(256) NOT NULL, /* Nicht erledigt: 0, Erledigt: 1 */
@@ -40,7 +40,7 @@ CREATE TABLE aufgabe (
 CREATE TABLE essays (
   essayId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   titel VARCHAR(256) NOT NULL,
-  essay VARCHAR(256) NOT NULL,
+  essay TEXT NOT NULL,
   status VARCHAR(256) NOT NULL, /* Offen: 1, Geschlossen: 2 */
   iv VARCHAR(256) NOT NULL,
   fk_benutzerId INT NOT NULL,

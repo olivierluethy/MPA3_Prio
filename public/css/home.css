@@ -144,7 +144,7 @@
   cursor: pointer;
 }
 .order tr td form button:hover {
-  background-color: transparent;
+  background-color: white;
   color: #4CAF50;
 }
 .order tr td:nth-child(1) {

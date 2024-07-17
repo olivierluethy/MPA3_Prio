@@ -51,6 +51,9 @@ class Task
 
 		// Hole den Verschlüsselungsschlüssel aus der .env-Datei
 		$encryption_key = getenv('ENCRYPTION_KEY');
+
+		// IV kodieren, damit es in der Datenbank gespeichert werden kann
+		$iv_base64 = base64_encode($iv);
 	
 		// Count the total number of tasks
 		$countStatement = $this->db->prepare('SELECT COUNT(*) as totalTasks FROM aufgabe WHERE status = 0 AND fk_benutzerId = :id');
