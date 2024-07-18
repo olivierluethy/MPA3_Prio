@@ -5,8 +5,8 @@
         <h1>Prio</h1>
     </div>
     <div class="burger" onclick="responsive()">
-            <i class="fas fa-bars"></i>
-        </div>
+        <i class="fas fa-bars"></i>
+    </div>
     <div class="part2" id="nav">
         <?php
         $navigationFiller = "/";
@@ -19,8 +19,7 @@
 
         // Login
         if (!isset($_SESSION['email']) || $_SESSION['email'] == "") {
-            $a = '<button class="loginBtn" onclick="goToLogin()"';
-            $a .= '>Login <i class="fas fa-sign-in-alt"></i></button>';
+            $a = '<button class="loginBtn" onclick="goToLogin()">Login <i class="fas fa-sign-in-alt"></i></button>';
             echo $a;
         } else {
             /* For About Page */
@@ -32,7 +31,7 @@
             echo $a;
 
             /* For Admin User */
-            if ($_SESSION['role'] == 1) {
+            if ($_SESSION['role'] == hash_hmac('sha256', 1, $salt)) {
                 /* Link For Admin Area */
                 $a = '<a title="Go to the admin area" href="' . $navigationFiller . 'admin"';
                 if (preg_match("/admin/i", $actual_link)) {
@@ -41,7 +40,8 @@
                 $a .= '>Admin Area</a>';
                 echo $a;
             }
-            /* For Normal And Blocked User */ else if ($_SESSION['role'] == 2 || $_SESSION['role'] == 0) {
+            /* For Normal And Blocked User */
+            else if ($_SESSION['role'] == hash_hmac('sha256', 2, $salt) || $_SESSION['role'] == hash_hmac('sha256', 0, $salt)) {
                 /* If User Is Blocked */
                 $a = '<button title="See all your tasks" onclick="aufgaben()"';
                 if (preg_match("/home/i", $actual_link)) {
@@ -51,7 +51,7 @@
                 echo $a;
 
                 /* For Normal User */
-                if ($_SESSION['role'] == 0) {
+                if ($_SESSION['role'] == hash_hmac('sha256', 0, $salt)) {
                     /* Link For Time records */
                     $a = '<button title="See all time records" onclick="zeiterfassung()"';
                     if (preg_match("/zeituebersicht/i", $actual_link)) {

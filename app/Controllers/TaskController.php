@@ -60,15 +60,13 @@ class TaskController
 						// Fetch sorted tasks
 						$getObjects = $Task->sortTask($sort_option);
 						$getObjects = $getObjects->fetchAll();
+
+						// Load the view
+						require 'app/Views/home.view.php';
 					}
 				}
 			}
-	
-			// Load the view
-			require 'app/Views/home.view.php';
 		} catch (Exception $e) {
-			// Handle any unexpected exceptions
-			// Log the error or redirect to an error page
 			echo "Error: " . $e->getMessage();
 		}
 	}	
@@ -76,6 +74,9 @@ class TaskController
 	public function about(){
 		// Initialize the session
         session_start();
+
+		$Task = new Task();
+		$salt = $Task->getSalt();
 
 		require 'app/Views/about.view.php';
 	}
@@ -89,6 +90,7 @@ class TaskController
 		}
 
 		$Task = new Task();
+		$salt = $Task->getSalt();
         
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titel = e(post('title'));

@@ -1,3 +1,17 @@
+<?php
+// Funktion zur Entschlüsselung
+function decrypt($data, $key, $iv) {
+    $decrypted = openssl_decrypt($data, 'aes-256-cbc', $key, 0, $iv);
+    if ($decrypted === false) {
+        return 'Decryption error'; // Fehlerhinweis bei Fehlschlag
+    }
+    return $decrypted;
+}
+// Rollenwerte vorab berechnen
+$blockedRole = hash_hmac('sha256', 2, $salt);
+$normalRole = hash_hmac('sha256', 0, $salt);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -46,24 +60,22 @@
             $totaltime = 0;
             $sum = strtotime("00:00:00");
             $rapportCounter = 0;
+            $ivTitle = base64_decode($getTitleOfTask2['iv']);
             foreach ($getRapports as $getRapports2) {
+                $ivRapp = base64_decode($getRapports2['iv']);
+                
                 /* Check if rapport belongs to task */
-                if (
-                    $getRapports2["fk_aufgabeId"] ==
-                    $getTitleOfTask2["aufgabeId"]
-                ) {
+                if ($getRapports2["fk_aufgabeId"] == $getTitleOfTask2["aufgabeId"]) {
                     $rapportCounter++;
 
                     /* Check if currently no data has been given out */
                     if ($rapportCounter == 1) {
                         echo "<div>
                             <!-- Das ID Attribut frisst keine Leerschläge aka Whitespaces -->
-                            <table class='data' id=" .
-                            str_replace(" ", "", $getTitleOfTask2["titel"]) .
-                            ">
+                            <table class='data' id=" .str_replace(" ", "", decrypt($getTitleOfTask2["titel"], $encryption_key, $ivTitle)) .">
                                 <tr>
                                     <th style='font-style: italic; text-shadow: 4px 4px 2px rgba(0,0,0,0.6); font-size: 1.2rem;'><p>" .
-                            $getTitleOfTask2["titel"] .
+                            decrypt($getTitleOfTask2["titel"], $encryption_key, $ivTitle) .
                             "</p></th>
                                     <th>When</th>
                                     <th>Duration</th>
@@ -72,23 +84,23 @@
 
         <!-- Display all essential informations about task -->
         <tr>
-            <td><?= $getRapports2["rapport"] ?></td>
+            <td><?= decrypt($getRapports2["rapport"], $encryption_key, $ivRapp) ?></td>
             <?php $date = date(
                 "dS M Y",
-                strtotime($getRapports2["created_at"])
+                strtotime(decrypt($getRapports2["created_at"], $encryption_key, $ivRapp))
             ); ?>
             <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
-            <td><i class="fas fa-clock"></i> <?= $getRapports2["zeit"] ?></td>
+            <td><i class="fas fa-clock"></i> <?= decrypt($getRapports2["zeit"], $encryption_key, $ivRapp) ?></td>
 
             <?php
             // Converting the time into seconds
-            $timeinsec = strtotime($getRapports2["zeit"]) - $sum;
+            $timeinsec = strtotime(decrypt($getRapports2["zeit"], $encryption_key, $ivRapp)) - $sum;
 
             // Sum the time with previous value
             $totaltime = $totaltime + $timeinsec;
 
             /* Check if task as been created under 24 hours */
-            if (strtotime($getRapports2["created_at"]) >= strtotime("-1 day")) {
+            if (strtotime(decrypt($getRapports2["created_at"], $encryption_key, $ivRapp)) >= strtotime("-1 day")) {
                 /* Task is younger than 24 hours */
                 echo "<td class='editDelete'>
                                                 <img onclick='editTime(" .
@@ -115,23 +127,23 @@
                              ?>
             <!-- Display all essential informations about task -->
         <tr>
-            <td><?= $getRapports2["rapport"] ?></td>
+            <td><?= decrypt($getRapports2["rapport"], $encryption_key, $ivRapp) ?></td>
             <?php $date = date(
                 "dS M Y",
-                strtotime($getRapports2["created_at"])
+                strtotime(decrypt($getRapports2["created_at"], $encryption_key, $ivRapp))
             ); ?>
             <td><i class="fas fa-calendar-days"></i> <?= $date ?></td>
-            <td><i class="fas fa-clock"></i> <?= $getRapports2["zeit"] ?></td>
+            <td><i class="fas fa-clock"></i> <?= decrypt($getRapports2["zeit"], $encryption_key, $ivRapp) ?></td>
 
             <?php
             // Converting the time into seconds
-            $timeinsec = strtotime($getRapports2["zeit"]) - $sum;
+            $timeinsec = strtotime(decrypt($getRapports2["zeit"], $encryption_key, $ivRapp)) - $sum;
 
             // Sum the time with previous value
             $totaltime = $totaltime + $timeinsec;
 
             /* Check if task as been created under 24 hours */
-            if (strtotime($getRapports2["created_at"]) >= strtotime("-1 day")) {
+            if (strtotime(decrypt($getRapports2["created_at"], $encryption_key, $ivRapp)) >= strtotime("-1 day")) {
                 /* Task is younger than 24 hours */
                 echo "<td class='editDelete'>
                                             <img onclick='editTime(" .
@@ -153,10 +165,10 @@
             if ($rapportCounter == 0) {
                 echo "<div>
                     <table class='data' id=" .
-                    $getTitleOfTask2["titel"] .
+                    decrypt($getTitleOfTask2["titel"], $encryption_key, $ivTitle) .
                     ">
                         <tr><th><p>" .
-                    $getTitleOfTask2["titel"] .
+                        decrypt($getTitleOfTask2["titel"], $encryption_key, $ivTitle) .
                     "</p></th></tr>
                         <tr>
                             <td style='color:red; text-align:center;'><strong>No rapports found</strong></td>
@@ -177,7 +189,7 @@
 
                 $s = $totaltime - $m * 60;
 
-                $timeinsec = strtotime($getRapports2["zeit"]) - $sum;
+                $timeinsec = strtotime(decrypt($getRapports2["zeit"], $encryption_key, $ivRapp)) - $sum;
 
                 $totaltime = $totaltime + $timeinsec;
 

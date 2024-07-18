@@ -1,5 +1,5 @@
 <?php
-
+use Dotenv\Dotenv;
 class TimeController
 {
 	public function addTimeRecord(){
@@ -32,6 +32,17 @@ class TimeController
 		}
 
 		$Time = new Time();
+
+		$Task = new Task();
+		$salt = $Task->getSalt();
+
+		// Load environment variables
+		require_once __DIR__ . '/../../vendor/autoload.php';
+		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+		$dotenv->load();
+
+		// Get encryption key from environment
+		$encryption_key = getenv('ENCRYPTION_KEY');
 
 		/* Get title and id of task */
 		$getTitleOfTask = $Time -> getTitleOfTask() -> fetchAll(); // title, aufgabeId

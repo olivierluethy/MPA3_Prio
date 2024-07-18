@@ -56,6 +56,7 @@ CREATE TABLE rapport (
   rapport VARCHAR(256) NOT NULL,
   zeit VARCHAR(256) NOT NULL,
   iv VARCHAR(256) NOT NULL,
+  created_at VARCHAR(256) NOT NULL,
   fk_aufgabeId INT NOT NULL,
   FOREIGN KEY (fk_aufgabeId) REFERENCES aufgabe(aufgabeId)
 );

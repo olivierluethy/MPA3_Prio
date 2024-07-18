@@ -1,138 +1,242 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="public/css/home.css">
-    <link rel="stylesheet" href="public/css/navigation.css">
-    <link rel="stylesheet" href="public/css/footer.css">
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <link rel="stylesheet" href="public/fontawesome/css/all.css">
-    <script defer src="public/js/responsive.js"></script>
-    <script defer src="public/js/routes.js"></script>
-    <script defer src="public/js/openDone.js"></script>
-    <script defer src="public/js/time_recording.js"></script>
-    <script defer src="public/js/footer.js"></script>
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <?php include "header.php"; ?>
+<?php
 
-    <?php if ($_SESSION["role"] === $blockedRole) { ?>
-        <!-- Benutzer mit gesperrter Rolle -->
-        <div class='write_essay'>
-            <h1>You don't have access anymore!</h1>
-            <p>You have completed a task 10 times too late. That's why you don't have access anymore.</p>
-            <button id='showEssayField' onclick='write_essay()'>Write an essay to get access again</button>
-            <form id='essay' action='add_essay' method='POST'>
-                <label>Title:</label><br>
-                <input id='title' type='text' name='title'><br>
-                <textarea name='essay' id='essay_content'></textarea><br>
-                <button type='submit'>Send essay</button>
-            </form>
-        </div>
-    <?php } elseif ($_SESSION["role"] === $normalRole) { ?>
-        <!-- Benutzer mit normaler Rolle -->
-        <?php if (count($getObjects) > 0) { ?>
-            <!-- Schalter für offene und abgeschlossene Aufgaben -->
-            <table class='switch'>
-                <tr>
-                    <th><button id='openButton' onclick='navSwitch(1)'>Open (<?= $open_tasks_counter ?>)</button></th>
-                    <th></th>
-                    <th><button id='doneButton' onclick='navSwitch(2)'>Completed (<?= $done_tasks_counter ?>)</button></th>
-                </tr>
-            </table>
+class LoginController{
+    public function login() {
+        // Initialize the session
+        session_start();
+    
+        // Check if the user is already logged in, if yes then redirect to home page
+        if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+            header("location: home");
+            exit;
+        }
+    
+        // Include config file
+        include __DIR__ . '/../../core/db_config.php';
+    
+        // Define variables and initialize with empty values
+        $email = $password = "";
+        $email_err = $password_err = "";
+    
+        // Processing form data when form is submitted
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            // Check if email is empty
+            if (empty(trim($_POST["email"]))) {
+                $email_err = "Bitte geben Sie eine E-Mail-Adresse ein.";
+            } else {
+                $email = strtolower(trim($_POST["email"]));
+            }
+    
+            // Check if password is empty
+            if (empty(trim($_POST["password"]))) {
+                $password_err = "Bitte geben Sie Ihr Passwort ein.";
+            } else {
+                $password = trim($_POST["password"]);
+            }
+    
+            // Validate credentials
+            if (empty($email_err) && empty($password_err)) {
+                // Prepare a select statement to get salt and email hash
+                $sql = "SELECT benutzerId, email, password, salt, role FROM benutzer";
+            
+                if ($result = mysqli_query($link, $sql)) {
+                    $found = false;
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $generated_hash = hash_hmac('sha256', $email, $row['salt']);
+            
+                        if ($generated_hash === $row['email']) {
+                            $found = true;
+                            if (password_verify($password, $row['password'])) {
+                                // Password is correct, start a new session
+                                session_start();
+            
+                                // Store data in session variables
+                                $_SESSION["loggedin"] = true;
+                                $_SESSION["id"] = $row['benutzerId'];
+                                $_SESSION["email"] = $email;
+                                $_SESSION["role"] = $row['role'];
+            
+                                // Redirect user to home page
+                                header("location: home");
+                                exit();
+                            } else {
+                                // Display an error message if password is not valid
+                                $password_err = "Das Passwort ist nicht gültig.";
+                            }
+                        }
+                    }
+                    if (!$found) {
+                        // Display an error message if email doesn't exist
+                        $email_err = "Kein Konto mit dieser E-Mail-Adresse gefunden.";
+                    }
+                } else {
+                    echo "Oops! Something went wrong. Please try again later.";
+                }
+            
+                // Free result set
+                mysqli_free_result($result);
+            }            
+    
+            // Close connection
+            mysqli_close($link);
+        }
+    
+        // Load login view with appropriate error messages
+        require 'app/Views/login/login.view.php';
+    }
 
-            <!-- Offene Aufgaben -->
-            <div id='open'>
-                <?php if ($open_tasks_counter > 0) { ?>
-                    <table class="order">
-                        <tr>
-                            <td><h2>All open tasks sorted by:</h2></td>
-                            <td>
-                                <form action="" method="GET">
-                                    <select name="sort">
-                                        <option value="priority" <?= ($_GET["sort"] ?? '') == "priority" ? "selected" : "" ?>>Priority</option>
-                                        <option value="alphabet" <?= ($_GET["sort"] ?? '') == "alphabet" ? "selected" : "" ?>>Alphabet</option>
-                                        <option value="deadline" <?= ($_GET["sort"] ?? '') == "deadline" ? "selected" : "" ?>>Deadline</option>
-                                    </select>
-                                    <button type='submit'>Sort <i class='fa fa-sort'></i></button>
-                                </form>
-                            </td>
-                            <td><button class='plus' onclick='addTask()'><i class='fa fa-plus'></i></button></td>
-                        </tr>
-                    </table>
+    public function register() {
+        // Initialize the session
+        session_start();
+    
+        $pdo = connectDatabase();
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+        // Check if the user is already logged in, if yes then redirect him to index page
+        if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+            header("location: home");
+            exit;
+        } else if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("location: login");
+            exit;
+        } else if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            // Define variables and initialize with empty values
+            $email = $password = $confirm_password = "";
+            $email_err = $password_err = $confirm_password_err = "";
+    
+            // Validate email
+            if (empty(trim($_POST["email"]))) {
+                $email_err = "Bitte geben Sie eine E-Mail-Adresse ein.";
+            } else {
+                $email = strtolower(trim($_POST["email"])); // Email to lowercase
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $email_err = "Bitte geben Sie eine gültige E-Mail-Adresse ein.";
+                } else {
+                    // Check if email already exists
+                    $sql = "SELECT email, salt FROM benutzer";
+                    if ($result = $pdo->query($sql)) {
+                        $email_exists = false;
+                        while ($row = $result->fetch()) {
+                            $stored_email_hash = $row['email'];
+                            $stored_salt = $row['salt'];
+                            $check_email_hash = hash_hmac('sha256', $email, $stored_salt);
+                            if ($stored_email_hash === $check_email_hash) {
+                                $email_exists = true;
+                                break;
+                            }
+                        }
+    
+                        if ($email_exists) {
+                            $email_err = "Diese E-Mail-Adresse ist bereits vergeben.";
+                        }
+                    } else {
+                        echo "Oops! Something went wrong. Please try again later.";
+                    }
+                }
+            }
+    
+            // Validate password
+            if (empty(trim($_POST["password"]))) {
+                $password_err = "Bitte geben Sie ein Passwort ein.";
+            } elseif (strlen(trim($_POST["password"])) < 6) {
+                $password_err = "Das Passwort muss mindestens 6 Zeichen haben.";
+            } else {
+                $password = trim($_POST["password"]);
+            }
+    
+            // Validate confirm password
+            if (empty(trim($_POST["verypass"]))) {
+                $confirm_password_err = "Bitte bestätigen Sie das Passwort.";
+            } else {
+                $confirm_password = trim($_POST["verypass"]);
+                if (empty($password_err) && ($password != $confirm_password)) {
+                    $confirm_password_err = "Die Passwörter stimmen nicht überein.";
+                }
+            }
+    
+            // Check input errors before inserting in database
+            if (empty($email_err) && empty($password_err) && empty($confirm_password_err)) {
+                // Generate salt
+                $salt = bin2hex(random_bytes(16)); // 16 bytes = 128 bits
+                // Hash the email with the salt
+                $email_hash = hash_hmac('sha256', $email, $salt);
+                // Hash the password
+                $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
+                // Hash the role
+                $role = 0; // Assuming role 0 for normal user
+                $role_hash = hash_hmac('sha256', $role, $salt);
+    
+                // Prepare an insert statement
+                $sql = "INSERT INTO benutzer (email, password, salt, role) VALUES (:email, :password, :salt, :role)";
+                if ($stmt = $pdo->prepare($sql)) {
+                    // Bind variables to the prepared statement as parameters
+                    $stmt->bindParam(":email", $email_hash, PDO::PARAM_STR);
+                    $stmt->bindParam(":password", $param_password, PDO::PARAM_STR);
+                    $stmt->bindParam(":salt", $salt, PDO::PARAM_STR);
+                    $stmt->bindParam(":role", $role_hash, PDO::PARAM_STR);
+    
+                    // Attempt to execute the prepared statement
+                    if ($stmt->execute()) {
+                        // Prepare a select statement
+                        $sql = "SELECT benutzerId, email, password, role FROM benutzer WHERE email = :email";
+                        if ($stmt = $pdo->prepare($sql)) {
+                            // Bind variables to the prepared statement as parameters
+                            $stmt->bindParam(":email", $email_hash, PDO::PARAM_STR);
+    
+                            // Attempt to execute the prepared statement
+                            if ($stmt->execute()) {
+                                // After register is successful, auto login
+                                if ($stmt->rowCount() == 1) {
+                                    if ($row = $stmt->fetch()) {
+                                        $id = $row["benutzerId"];
+                                        $email = $row["email"];
+                                        $hashed_password = $row["password"];
+                                        $role = $row["role"];
+                                        if (password_verify($password, $hashed_password)) {
+                                            // Password is correct, so start a new session
+                                            session_start();
+    
+                                            // Store data in session variables
+                                            $_SESSION["loggedin"] = true;
+                                            $_SESSION["id"] = $id;
+                                            $_SESSION["email"] = $email;
+                                            $_SESSION["role"] = $role;
+    
+                                            // Redirect user to index page
+                                            header("location: home");
+                                            exit;
+                                        }
+                                    }
+                                } else {
+                                    // Display an error message if email doesn't exist
+                                    echo "<h2>No account found with that email.</h2>";
+                                    echo "<a href='loginRegister'><button class='back'>Try again</button></a>";
+                                }
+                            } else {
+                                echo "Oops! Something went wrong. Please try again later.";
+                            }
+    
+                            // Close statement
+                            unset($stmt);
+                        }
+                    } else {
+                        echo "Oops! Something went wrong. Please try again later.";
+                    }
+                    // Close statement
+                    unset($stmt);
+                }
+            }
+            // Close connection
+            unset($pdo);
+        }
+    }
+    
 
-                    <main>
-                        <?php foreach ($getObjects as $task) {
-                            $iv = base64_decode($task['iv']);
-                            $decrypted_status = decrypt($task['status'], $encryption_key, $iv);
-                            if ($decrypted_status !== '0') continue; // Nur offene Aufgaben anzeigen
-                        ?>
-                            <div class='task'>
-                                <table>
-                                    <tr>
-                                        <th>Title: <?php echo htmlspecialchars(decrypt($task["titel"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></th>
-                                        <td><?php echo htmlspecialchars(decrypt($task["beschreibung"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo htmlspecialchars(decrypt($task["motivation"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo "Datum: " . htmlspecialchars(date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8'); ?></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        <?php } ?>
-                    </main>
-                <?php } else { ?>
-                    <div class='noData'>
-                        <h1>No tasks available yet</h1>
-                        <button onclick='addTask()'>Add task &nbsp<i class='fa fa-plus'></i></button>
-                    </div>
-                <?php } ?>
-            </div>
+    /* Damit sich der eingeloggte Benutzer wieder ausloggen kann */
+    public function logout(){
+        $pdo = connectDatabase();
+		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            <!-- Abgeschlossene Aufgaben -->
-            <div id='done'>
-                <?php if ($done_tasks_counter > 0) { ?>
-                    <table class='order'>
-                        <tr>
-                            <td><h2>All done tasks</h2></td>
-                        </tr>
-                    </table>
-                    <main>
-                        <?php foreach ($getObjects as $task) {
-                            $iv = base64_decode($task['iv']);
-                            $decrypted_status = decrypt($task['status'], $encryption_key, $iv);
-                            if ($decrypted_status !== '1') continue; // Nur abgeschlossene Aufgaben anzeigen
-                        ?>
-                            <div class='task'>
-                                <table>
-                                    <tr>
-                                        <th>Title: <?php echo htmlspecialchars(decrypt($task["titel"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></th>
-                                        <td><?php echo htmlspecialchars(decrypt($task["beschreibung"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo htmlspecialchars(decrypt($task["motivation"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></td>
-                                        <td><?php echo "Datum: " . htmlspecialchars(date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8'); ?></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        <?php } ?>
-                    </main>
-                <?php } else { ?>
-                    <div class='noData'>
-                        <h1>No done tasks yet</h1>
-                    </div>
-                <?php } ?>
-            </div>
-        <?php } else { ?>
-            <!-- Fallback: Keine Aufgaben gefunden -->
-            <div class='noData'>
-                <h1>No tasks available yet</h1>
-                <button onclick='addTask()'>Add task &nbsp<i class='fa fa-plus'></i></button>
-            </div>
-        <?php } ?>
-    <?php } ?>
-
-    <!-- Footer -->
-    <?php include "footer.php"; ?>
-</body>
-</html>
+        require 'app/Views/login/logout.view.php';
+    }
+}
