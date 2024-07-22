@@ -48,7 +48,7 @@
                 <label for="email">Email:</label><br>
                 <input type="email" id="email_register" name="email" placeholder="Enter Email"><br>
                 <label for="password">Password:</label><br>
-                <input type="password" onkeyup="trigger()" id="password_register" name="password" placeholder="Enter Email"><br>
+                <input type="password" onkeyup="trigger()" id="password_register" name="password" placeholder="Enter Password"><br>
                 <div class="password_strength_area">
                     <div class="indicator">
                         <span class="weak"></span>
