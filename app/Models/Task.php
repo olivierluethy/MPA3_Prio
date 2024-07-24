@@ -189,37 +189,38 @@ class Task
 	/* If task completed on point user receives one minus point */
 	public function complete_task($id) {
 		$id = htmlspecialchars($id);
-	
-		// Initialisierungsvektor (IV) generieren
-		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
-	
+		
 		require_once __DIR__ . '/../../vendor/autoload.php'; // Pfad anpassen, falls notwendig
-	
+		
 		// Laden der .env-Datei
 		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../'); // Pfad anpassen, falls notwendig
 		$dotenv->load();
-	
+		
 		// Hole den Verschlüsselungsschlüssel aus der .env-Datei
 		$encryption_key = getenv('ENCRYPTION_KEY');
-	
-		// IV kodieren, damit es in der Datenbank gespeichert werden kann
-		$iv_base64 = base64_encode($iv);
-	
-		// Status verschlüsseln
-		$encrypted_status = $this->encrypt('1', $encryption_key, $iv);
-	
-		// Update-Statement für aufgabe mit verschlüsseltem Status
-		$statement = $this->db->prepare('UPDATE aufgabe SET status = :status, iv = :iv WHERE aufgabeId = :id');
-		$statement->bindParam(':status', $encrypted_status, PDO::PARAM_STR);
-		$statement->bindParam(':iv', $iv_base64, PDO::PARAM_STR);
+		
+		// Zuerst IV von der Datenbank holen
+		$statement = $this->db->prepare('SELECT iv FROM aufgabe WHERE aufgabeId = :id');
 		$statement->bindParam(':id', $id, PDO::PARAM_INT);
 		$statement->execute();
-	
-		// Update-Statement für benutzer
-		$statement2 = $this->db->prepare('UPDATE benutzer SET mangelpunkte = mangelpunkte - 1 WHERE benutzerId = :id');
-		$statement2->bindParam(':id', $_SESSION['id'], PDO::PARAM_INT);
-		$statement2->execute();
-	}
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+		
+		if (!$result) {
+			throw new Exception('Aufgabe nicht gefunden');
+		}
+		
+		// IV dekodieren
+		$iv = base64_decode($result['iv']);
+		
+		// Status verschlüsseln
+		$encrypted_status = $this->encrypt('1', $encryption_key, $iv);
+		
+		// Update-Statement für Aufgabe mit verschlüsseltem Status
+		$statement = $this->db->prepare('UPDATE aufgabe SET status = :status WHERE aufgabeId = :id');
+		$statement->bindParam(':status', $encrypted_status, PDO::PARAM_STR);
+		$statement->bindParam(':id', $id, PDO::PARAM_INT);
+		$statement->execute();
+	}	
 
 	public function complete_task_past($id) {
 		$id = htmlspecialchars($id);
@@ -246,23 +247,65 @@ class Task
 		$statement->bindParam(':status', $encrypted_status, PDO::PARAM_STR);
 		$statement->bindParam(':id', $id, PDO::PARAM_INT);
 		$statement->execute();
+
+		// Holen der aktuellen Mangelpunkte und des IV-Werts des Benutzers
+		$statement2 = $this->db->prepare('SELECT mangelpunkte, iv FROM benutzer WHERE benutzerId = :id');
+		$statement2->bindParam(':id', $_SESSION['id'], PDO::PARAM_INT);
+		$statement2->execute();
+		$user_result = $statement2->fetch(PDO::FETCH_ASSOC);
 	
-		// Benutzer-Mangelpunkte aktualisieren
-		$statement2 = $this->db->prepare('UPDATE benutzer SET mangelpunkte = mangelpunkte + 1 WHERE benutzerId = :id');
+		if (!$user_result) {
+			throw new Exception('Benutzer nicht gefunden');
+		}
+	
+		// Entschlüsseln der aktuellen Mangelpunkte
+		$iv = base64_decode($user_result['iv']);
+		$current_mangelpunkte = (int) $this->decrypt($user_result['mangelpunkte'], $encryption_key, $iv);
+	
+		// Mangelpunkte erhöhen
+		$new_mangelpunkte = $current_mangelpunkte + 1;
+	
+		// Verschlüsseln der neuen Mangelpunkte
+		$encrypted_mangelpunkte = $this->encrypt($new_mangelpunkte, $encryption_key, $iv);
+	
+		// Aktualisieren der Mangelpunkte in der Datenbank
+		$statement2 = $this->db->prepare('UPDATE benutzer SET mangelpunkte = :mangelpunkte WHERE benutzerId = :id');
+		$statement2->bindParam(':mangelpunkte', $encrypted_mangelpunkte, PDO::PARAM_STR);
 		$statement2->bindParam(':id', $_SESSION['id'], PDO::PARAM_INT);
 		$statement2->execute();
 	}
 
 	public function getDeadtime($id){
 		$id = htmlspecialchars($id);
-
-		$statement = $this->db->prepare('SELECT deadline FROM aufgabe WHERE aufgabeId = :task AND fk_BenutzerId = :id');
+	
+		$statement = $this->db->prepare('SELECT deadline, iv FROM aufgabe WHERE aufgabeId = :task AND fk_benutzerId = :id');
 		$statement->bindParam(':task', $id, PDO::PARAM_STR);
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
 		$statement->execute();
-        return $statement;
+	
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+	
+		if ($result) {
+			$encrypted_deadline = $result['deadline'];
+			$iv = $result['iv'];
+	
+			// Load environment variables
+			require_once __DIR__ . '/../../vendor/autoload.php';
+			$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+			$dotenv->load();
+	
+			// Get encryption key from environment
+			$encryption_key = getenv('ENCRYPTION_KEY');
+	
+			$decrypted_deadline = $this->decrypt($encrypted_deadline, $encryption_key, base64_decode($iv));
+	
+			return $decrypted_deadline;
+		}
+	
+		return null; // Ensure null is returned if no result is found
 	}
-
+	
+	
 	/* To set a task a higher priority */
 	public function higherPrio($task) {
 		$task = htmlspecialchars($task);
@@ -388,27 +431,23 @@ class Task
 		$encryption_key = getenv('ENCRYPTION_KEY');
 	
 		// Prepare the SQL statement to get the encrypted role and IV
-		$statement = $this->db->prepare('SELECT role, iv, mangelpunkte FROM benutzer WHERE benutzerId = :id');
+		$statement = $this->db->prepare('SELECT iv, mangelpunkte FROM benutzer WHERE benutzerId = :id');
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
 		$statement->execute();
 		$result = $statement->fetch(PDO::FETCH_ASSOC);
 	
 		if ($result) {
-			// Decrypt the role value
-			$encrypted_role = $result['role'];
-			$iv = base64_decode($result['iv']);
-			$decrypted_role = openssl_decrypt($encrypted_role, 'aes-256-cbc', $encryption_key, 0, $iv);
+			$iv = hex2bin($result['iv']); // Assuming IV is stored as a hex string in the database
+			$decrypted_mangelpunkte = $this->decrypt($result['mangelpunkte'], $encryption_key, $iv);
 	
-			// Check if the decrypted role matches the plaintext role (0)
-			if ($decrypted_role == 0) {
-				return $result['mangelpunkte'];
-			} else {
-				return null;
-			}
-		} else {
-			return null;
+			// Return the result as an associative array to simulate a result set
+			return [
+				['mangelpunkte' => (int) $decrypted_mangelpunkte]
+			];
 		}
-	}	
+	
+		throw new Exception('User not found');
+	}
 
 	/* If user has 10 deficiency points he gets no access */
 	public function lowerRole() {

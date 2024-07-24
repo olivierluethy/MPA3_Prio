@@ -1,5 +1,5 @@
 <?php
-
+use Dotenv\Dotenv;
 class LoginController{
     public function login() {
         // Initialize the session
@@ -85,6 +85,11 @@ class LoginController{
         require 'app/Views/login/login.view.php';
     }
 
+    // Funktion zur Verschlüsselung
+    private function encrypt($data, $key, $iv) {
+        return openssl_encrypt($data, 'aes-256-cbc', $key, 0, $iv);
+    }
+
     public function register() {
         // Initialize the session
         session_start();
@@ -163,17 +168,36 @@ class LoginController{
                 // Hash the password
                 $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
                 // Hash the role
-                $role = 0; // Assuming role 0 for normal user
+                $role = 0;
                 $role_hash = hash_hmac('sha256', $role, $salt);
+                
+                // Initialisierungsvektor (IV) generieren
+                $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+            
+                require_once __DIR__ . '/../../vendor/autoload.php'; // Pfad anpassen, falls notwendig
+
+                // Laden der .env-Datei
+                $dotenv = Dotenv::createImmutable(__DIR__ . '/../../'); // Pfad anpassen, falls notwendig
+                $dotenv->load();
+
+                // Hole den Verschlüsselungsschlüssel aus der .env-Datei
+                $encryption_key = getenv('ENCRYPTION_KEY');
+
+                // IV kodieren, damit es in der Datenbank gespeichert werden kann
+                $iv_base64 = base64_encode($iv);
+
+                $encrypted_mangelpunkte = $this->encrypt(0, $encryption_key, $iv);
     
                 // Prepare an insert statement
-                $sql = "INSERT INTO benutzer (email, password, salt, role) VALUES (:email, :password, :salt, :role)";
+                $sql = "INSERT INTO benutzer (email, password, salt, mangelpunkte, role, iv) VALUES (:email, :password, :salt, :mangelpunkte, :role, :iv)";
                 if ($stmt = $pdo->prepare($sql)) {
                     // Bind variables to the prepared statement as parameters
                     $stmt->bindParam(":email", $email_hash, PDO::PARAM_STR);
                     $stmt->bindParam(":password", $param_password, PDO::PARAM_STR);
                     $stmt->bindParam(":salt", $salt, PDO::PARAM_STR);
+                    $stmt->bindParam(":mangelpunkte", $encrypted_mangelpunkte, PDO::PARAM_STR);
                     $stmt->bindParam(":role", $role_hash, PDO::PARAM_STR);
+                    $stmt->bindParam(":iv", $iv_base64, PDO::PARAM_STR);
     
                     // Attempt to execute the prepared statement
                     if ($stmt->execute()) {

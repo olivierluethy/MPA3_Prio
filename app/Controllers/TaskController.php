@@ -183,34 +183,44 @@ class TaskController
 
 	public function complete_task(){
 		// Initialize the session
-        session_start();
-
+		session_start();
+	
 		if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 			header('Location: login');
+			exit();
 		}
-
+	
 		$Task = new Task();
-
-		/* Get Data to edit */
-		$getDeadtime = $Task -> getDeadtime($_GET['id']) -> fetchAll();;
-
-		if(new DateTime() > new DateTime($getDeadtime[0][0])){
-			/* Date is in the past */
-			$Task->complete_task_past($_GET['id']);
+	
+		// Get Data to edit
+		$decrypted_deadline = $Task->getDeadtime($_GET['id']);
+	
+		if ($decrypted_deadline === null) {
+			// Handle the case where no deadline is returned
+			header('Location: error'); // Redirect to an error page or handle accordingly
+			exit();
 		}
-		else {
-			/* Date is NOT in the past */
+	
+		if(new DateTime() > new DateTime($decrypted_deadline)){
+			// Date is in the past
+			$Task->complete_task_past($_GET['id']);
+		} else {
+			// Date is NOT in the past
 			$Task->complete_task($_GET['id']);
 		}
+	
+		// Get amount of deficiency points
+		$getDeficiencyPoints = $Task->getDeficiencyPoints();
 
-		/* Get amount of deficiency points */
-		$getDeficiencyPoints = $Task -> getDeficiencyPoints() -> fetchAll();
-
-		if($getDeficiencyPoints[0][0] <= 10){
+		if ($getDeficiencyPoints[0]['mangelpunkte'] >= 10) {
+			// Call the lowerRole function and log out the user
 			$Task->lowerRole();
 			header('Location: logout');
-		}else if($getDeficiencyPoints[0][0] < 10){
+			exit();
+		} else {
+			// Redirect to home if deficiency points are less than 10
 			header('Location: home');
+			exit();
 		}
 	}
 }

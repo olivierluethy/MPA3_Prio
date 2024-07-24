@@ -10,9 +10,10 @@ CREATE TABLE benutzer (
   benutzerId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   email VARCHAR(256) NOT NULL UNIQUE,
   password VARCHAR(256) NOT NULL,
-  mangelpunkte VARCHAR(256),
+  mangelpunkte VARCHAR(256) NOT NULL,
   role VARCHAR(256) NOT NULL, /* Normaler Benutzer: 0, Admin: 1, Gesperrt: 2 */
-  salt VARCHAR(256) NOT NULL UNIQUE
+  salt VARCHAR(256) NOT NULL UNIQUE,
+  iv VARCHAR(256) NOT NULL
 );
 
 --
