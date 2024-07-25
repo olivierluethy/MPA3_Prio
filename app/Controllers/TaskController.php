@@ -117,6 +117,24 @@ class TaskController
 		$id = $_GET['id'];
 
 		$Task = new Task();
+		$salt = $Task->getSalt();
+
+		// Funktion zur Entschlüsselung
+		function decrypt($data, $key, $iv) {
+			$decrypted = openssl_decrypt($data, 'aes-256-cbc', $key, 0, $iv);
+			if ($decrypted === false) {
+				return 'Decryption error'; // Fehlerhinweis bei Fehlschlag
+			}
+			return $decrypted;
+		}
+
+		// Load environment variables
+		require_once __DIR__ . '/../../vendor/autoload.php';
+		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+		$dotenv->load();
+
+		// Get encryption key from environment
+		$encryption_key = getenv('ENCRYPTION_KEY');
 
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titel = e(post('title'));
@@ -126,12 +144,21 @@ class TaskController
 			$prioritaet = e(post('priority'));
         
 			$Task->edit_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $id);
-        }else{
+        } else{
 			/* Get Data to edit */
-			$getTask = $Task -> getTask($id) -> fetchAll();
+			$task = $Task -> getTask($id);
 			$possiblePriorities = $Task->ShowPossiblePriorities();
+
+			$iv = base64_decode($task['iv']);
+
+			$title = htmlspecialchars(decrypt($task['titel'], $encryption_key, $iv));
+			$description = decrypt($task['beschreibung'], $encryption_key, $iv);
+			$motivation = decrypt($task['motivation'], $encryption_key, $iv);
+			$deadline = htmlspecialchars(decrypt($task['deadline'], $encryption_key, $iv));
+			$priority = htmlspecialchars(decrypt($task['prioritaet'], $encryption_key, $iv));
+			require 'app/Views/editTask.view.php';
         }
-		require 'app/Views/editTask.view.php';
+		
 	}
 
 	public function delete_task(){

@@ -60,6 +60,13 @@
         
         <h1>Achieve Your Goals Quickly</h1>
         <h3>Achieving your goals, especially when learning new skills, requires dedication. Prio’s dashboard helps you track the time spent on each task and monitor your progress effectively.</h3>
+
+        <h1>Are there special things?</h1>
+        <h3>Since our app focuses on prioritization and therefore on productivity, the deadline is also very important whether you meet it or not. Just notice how often you don't complete a task within your deadline. If it happens that you don't meet it at all, you're in for a surprise.</h3>
+
+        <h1>How save is this app?</h1>
+        <h3>All data you store within this application is fully encrypted. For user data, we have even added a separate security layer that makes it impossible for us to retrieve user data in clear text. So even if you've added very personal or classified data about something, we can't see it.
+        </h3>
     </main>
 
     <?php include('app/Views/footer.view.php'); ?>

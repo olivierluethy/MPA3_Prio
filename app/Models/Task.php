@@ -109,9 +109,6 @@ class Task
 		$prioritaet = htmlspecialchars($prioritaet);
 		$id = htmlspecialchars($id);
 	
-		// Initialisierungsvektor (IV) generieren
-		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
-	
 		require_once __DIR__ . '/../../vendor/autoload.php'; // Pfad anpassen, falls notwendig
 	
 		// Laden der .env-Datei
@@ -121,8 +118,18 @@ class Task
 		// Hole den Verschlüsselungsschlüssel aus der .env-Datei
 		$encryption_key = getenv('ENCRYPTION_KEY');
 	
-		// IV kodieren, damit es in der Datenbank gespeichert werden kann
-		$iv_base64 = base64_encode($iv);
+		// Zuerst IV von der Datenbank holen
+		$statement = $this->db->prepare('SELECT iv FROM aufgabe WHERE aufgabeId = :id');
+		$statement->bindParam(':id', $id, PDO::PARAM_INT);
+		$statement->execute();
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+	
+		if (!$result) {
+			throw new Exception('Aufgabe nicht gefunden');
+		}
+	
+		// IV dekodieren
+		$iv = base64_decode($result['iv']);
 	
 		// Count the total number of tasks
 		$countStatement = $this->db->prepare('SELECT COUNT(*) as totalTasks FROM aufgabe WHERE status = 0 AND fk_benutzerId = :id');
@@ -134,11 +141,14 @@ class Task
 		// Check if the new priority is within the allowed range
 		if ($prioritaet >= 1 && $prioritaet <= $totalTasks + 1) {
 			// Daten verschlüsseln
-			$encrypted_titel = $this->encrypt($titel, $encryption_key, base64_decode($iv_base64));
-			$encrypted_beschreibung = $this->encrypt($beschreibung, $encryption_key, base64_decode($iv_base64));
-			$encrypted_motivation = $this->encrypt($motivation, $encryption_key, base64_decode($iv_base64));
-			$encrypted_deadline = $this->encrypt($deadline, $encryption_key, base64_decode($iv_base64));
-			$encrypted_prioritaet = $this->encrypt($prioritaet, $encryption_key, base64_decode($iv_base64));
+			$encrypted_titel = $this->encrypt($titel, $encryption_key, $iv);
+			$encrypted_beschreibung = $this->encrypt($beschreibung, $encryption_key, $iv);
+			$encrypted_motivation = $this->encrypt($motivation, $encryption_key, $iv);
+			$encrypted_deadline = $this->encrypt($deadline, $encryption_key, $iv);
+			$encrypted_prioritaet = $this->encrypt($prioritaet, $encryption_key, $iv);
+	
+			// IV wieder base64-kodieren, bevor er gespeichert wird
+			$iv_encoded = base64_encode($iv);
 	
 			$statement = $this->db->prepare('UPDATE aufgabe SET titel = :titel, beschreibung = :beschreibung, motivation = :motivation, deadline = :deadline, prioritaet = :prioritaet, iv = :iv WHERE aufgabeId = :id');
 			$statement->bindParam(':titel', $encrypted_titel, PDO::PARAM_STR);
@@ -146,7 +156,7 @@ class Task
 			$statement->bindParam(':motivation', $encrypted_motivation, PDO::PARAM_STR);
 			$statement->bindParam(':deadline', $encrypted_deadline, PDO::PARAM_STR);
 			$statement->bindParam(':prioritaet', $encrypted_prioritaet, PDO::PARAM_STR);
-			$statement->bindParam(':iv', $iv_base64, PDO::PARAM_STR);
+			$statement->bindParam(':iv', $iv_encoded, PDO::PARAM_STR);
 			$statement->bindParam(':id', $id, PDO::PARAM_INT);
 			$statement->execute();
 	
@@ -162,6 +172,7 @@ class Task
 				  </script>";
 		}
 	}
+	
 
 	/* To delete one task */
 	public function deleteTask($id){
@@ -179,12 +190,12 @@ class Task
 	/* To get all informations about a specific task */
 	public function getTask($id){
 		$id = htmlspecialchars($id);
-
+	
 		$statement = $this->db->prepare('SELECT * FROM aufgabe WHERE aufgabeId = :id');
 		$statement->bindParam(':id', $id, PDO::PARAM_INT);
 		$statement->execute();
-        return $statement;
-	}
+		return $statement->fetch(PDO::FETCH_ASSOC);  // Rückgabe als assoziatives Array
+	}	
 
 	/* If task completed on point user receives one minus point */
 	public function complete_task($id) {
@@ -451,9 +462,6 @@ class Task
 
 	/* If user has 10 deficiency points he gets no access */
 	public function lowerRole() {
-		// Initialisierungsvektor (IV) generieren
-		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
-	
 		require_once __DIR__ . '/../../vendor/autoload.php'; // Pfad anpassen, falls notwendig
 	
 		// Laden der .env-Datei
@@ -463,19 +471,30 @@ class Task
 		// Hole den Verschlüsselungsschlüssel aus der .env-Datei
 		$encryption_key = getenv('ENCRYPTION_KEY');
 	
-		// IV kodieren, damit es in der Datenbank gespeichert werden kann
-		$iv_base64 = base64_encode($iv);
-	
-		// Rolle verschlüsseln
-		$role = '2';
-		$encrypted_role = $this->encrypt($role, $encryption_key, $iv);
-	
-		// Update-Statement für benutzer mit verschlüsselter Rolle
-		$statement = $this->db->prepare('UPDATE benutzer SET role = :role, iv = :iv WHERE benutzerId = :id');
-		$statement->bindParam(':role', $encrypted_role, PDO::PARAM_STR);
-		$statement->bindParam(':iv', $iv_base64, PDO::PARAM_STR);
+		// Hole den aktuellen IV-Wert und die verschlüsselte Rolle aus der Datenbank
+		$statement = $this->db->prepare('SELECT iv, role FROM benutzer WHERE benutzerId = :id');
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
 		$statement->execute();
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+	
+		if ($result) {
+			$iv = hex2bin($result['iv']); // Assuming IV is stored as a hex string in the database
+			$decrypted_role = $this->decrypt($result['role'], $encryption_key, $iv);
+	
+			// Ändere die Rolle
+			$new_role = '2';
+	
+			// Verschlüssle die neue Rolle
+			$encrypted_role = $this->encrypt($new_role, $encryption_key, $iv);
+	
+			// Aktualisiere die verschlüsselte Rolle in der Datenbank
+			$statement = $this->db->prepare('UPDATE benutzer SET role = :role WHERE benutzerId = :id');
+			$statement->bindParam(':role', $encrypted_role, PDO::PARAM_STR);
+			$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
+			$statement->execute();
+		} else {
+			throw new Exception('Benutzer nicht gefunden');
+		}
 	}
 
 	// Sort Algorithm

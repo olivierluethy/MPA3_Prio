@@ -133,8 +133,6 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                                     <?php echo decrypt($task["motivation"], $encryption_key, $iv); ?>
                                 </textarea>
                             </th>
-
-
                             <th><?php echo htmlspecialchars(date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8'); ?></th>
                             <th>
                                 <?php if (strtotime(decrypt($task["created_at"], $encryption_key, $iv)) >= strtotime("-1 day")){ ?>
@@ -195,9 +193,18 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                         <table>
                             <tr>
                                 <th><h1><?php echo htmlspecialchars(decrypt($task["titel"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></h1></th>
-                                <th><textarea readonly class='ckeditor' name='description' id='description_done'><?php echo htmlspecialchars(decrypt($task["beschreibung"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></textarea></th>
-                                <th><?php echo htmlspecialchars(decrypt($task["motivation"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></th>
+                                <th>
+                                    <textarea readonly class='ckeditor' name='description' id='description_open'>
+                                        <?php echo decrypt($task["beschreibung"], $encryption_key, $iv); ?>
+                                    </textarea>
+                                </th>
+                                <th>
+                                    <textarea readonly class='ckeditor' name='motivation' id='motivation_open'>
+                                        <?php echo decrypt($task["motivation"], $encryption_key, $iv); ?>
+                                    </textarea>
+                                </th>
                                 <th><?php echo htmlspecialchars(date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8'); ?></th>
+                                <th><img title='Delete task' onclick='deleteTask($getObject["aufgabeId"])' src='images/delete.png' alt=''></th>
                             </tr>
                         </table>
                     </div>
