@@ -158,7 +158,6 @@ class TaskController
 			$priority = htmlspecialchars(decrypt($task['prioritaet'], $encryption_key, $iv));
 			require 'app/Views/editTask.view.php';
         }
-		
 	}
 
 	public function delete_task(){

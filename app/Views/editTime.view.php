@@ -25,12 +25,12 @@
     include("header.php");
     ?>
 
-    <form action="edit_Time?id=<?= $getRapport[0][0] ?>" method="POST">
+    <form action="edit_Time?id=<?= htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>" method="POST">
         <h2>Edit time record</h2>
         <label for="rapport">Rapport:</label><br>
-        <input id="rapport" type="text" name="rapport" value="<?= $getRapport[0][1] ?>" /><br>
+        <input id="rapport" type="text" name="rapport" value="<?= $rapport ?>" /><br>
         <label for="passwort">Time:</label><br>
-        <input id="appt-time" type="time" name="time" step="2" value="<?= $getRapport[0][2] ?>" /><br>
+        <input id="appt-time" type="time" name="time" step="2" value="<?= $zeit ?>" /><br>
         <input type="submit" value="Edit time"><br>
     </form>
 

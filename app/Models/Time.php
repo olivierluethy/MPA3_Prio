@@ -57,7 +57,7 @@ class Time
 		$statement = $this->db->prepare('SELECT * FROM rapport WHERE rapportId = :id');
 		$statement->bindParam(':id', $id, PDO::PARAM_INT);
 		$statement->execute();
-        return $statement;
+        return $statement->fetch(PDO::FETCH_ASSOC);  // Rückgabe als assoziatives Array
 	}
 
 	/* Get title of task */
@@ -75,36 +75,48 @@ class Time
         return $statement;
 	}
 
+	// Edit rapport with it's time
 	public function edit_time($id, $rapport, $time) {
+		// Eingaben bereinigen
 		$id = htmlspecialchars($id);
 		$rapport = htmlspecialchars($rapport);
 		$time = htmlspecialchars($time);
 	
-		// Initialisierungsvektor (IV) generieren
-		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
-		
+		// Autoload und .env-Datei laden
 		require_once __DIR__ . '/../../vendor/autoload.php';
-	
-		// Laden der .env-Datei
 		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
 		$dotenv->load();
 	
-		// Hole den Verschlüsselungsschlüssel aus der .env-Datei
+		// Verschlüsselungsschlüssel holen
 		$encryption_key = getenv('ENCRYPTION_KEY');
 	
-		// IV kodieren, damit es in der Datenbank gespeichert werden kann
-		$iv_base64 = base64_encode($iv);
-
+		// IV aus der Datenbank holen
+		$statement = $this->db->prepare('SELECT iv FROM rapport WHERE rapportId = :id');
+		$statement->bindParam(':id', $id, PDO::PARAM_INT);
+		$statement->execute();
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+	
+		if (!$result) {
+			throw new Exception('Rapport not found');
+		}
+	
+		// IV dekodieren
+		$iv = base64_decode($result['iv']);
+	
 		$Task = new Task();
 	
 		// Daten verschlüsseln
 		$encrypted_rapport = $Task->encrypt($rapport, $encryption_key, $iv);
 		$encrypted_time = $Task->encrypt($time, $encryption_key, $iv);
 	
+		// IV wieder base64-kodieren
+		$iv_encoded = base64_encode($iv);
+	
+		// Datenbank-Update
 		$statement = $this->db->prepare('UPDATE rapport SET rapport = :rapport, zeit = :time, iv = :iv WHERE rapportId = :id');
 		$statement->bindParam(':rapport', $encrypted_rapport, PDO::PARAM_STR);
 		$statement->bindParam(':time', $encrypted_time, PDO::PARAM_STR);
-		$statement->bindParam(':iv', $iv_base64, PDO::PARAM_STR);
+		$statement->bindParam(':iv', $iv_encoded, PDO::PARAM_STR);
 		$statement->bindParam(':id', $id, PDO::PARAM_INT);
 		$statement->execute();
 	}

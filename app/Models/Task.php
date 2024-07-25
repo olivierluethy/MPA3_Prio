@@ -19,7 +19,7 @@ class Task
 	}	
 
 	// Funktion zur Verschlüsselung
-    private function encrypt($data, $key, $iv) {
+    public function encrypt($data, $key, $iv) {
         return openssl_encrypt($data, 'aes-256-cbc', $key, 0, $iv);
     }
 

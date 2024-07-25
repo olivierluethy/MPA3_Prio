@@ -32,8 +32,8 @@ class TimeController
 		}
 
 		$Time = new Time();
-
 		$Task = new Task();
+		
 		$salt = $Task->getSalt();
 
 		// Load environment variables
@@ -78,7 +78,25 @@ class TimeController
 
         $id = $_GET['id'];
 
-        $title = '';
+		$Task = new Task();
+		$salt = $Task->getSalt();
+
+        // Funktion zur Entschlüsselung
+		function decrypt($data, $key, $iv) {
+			$decrypted = openssl_decrypt($data, 'aes-256-cbc', $key, 0, $iv);
+			if ($decrypted === false) {
+				return 'Decryption error'; // Fehlerhinweis bei Fehlschlag
+			}
+			return $decrypted;
+		}
+
+		// Load environment variables
+		require_once __DIR__ . '/../../vendor/autoload.php';
+		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+		$dotenv->load();
+
+		// Get encryption key from environment
+		$encryption_key = getenv('ENCRYPTION_KEY');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$rapport = e(post('rapport'));
@@ -90,9 +108,15 @@ class TimeController
         }
 		/* Needed data to show data that can be changed */
 		else{
-            $getRapport = $Time->getRapport($id) -> fetchAll();;
+            $getRapport = $Time->getRapport($id);
+
+			$iv = base64_decode($getRapport['iv']);
+
+			$rapport = htmlspecialchars(decrypt($getRapport['rapport'], $encryption_key, $iv));
+			$zeit = decrypt($getRapport['zeit'], $encryption_key, $iv);
+
+			require 'app/Views/editTime.view.php';
         }
-        require 'app/Views/editTime.view.php';
 	}
 
 	public function showHistory(){
