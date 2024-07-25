@@ -1,28 +1,39 @@
-function myFunction() {
-    var input, filter, tables, tr, td, i, txtValue;
+function searchFor() {
+    var input, filter, tables, target;
     input = document.getElementById("myInput");
-    filter = input.value.toUpperCase().replace(/\s/g, "");
+    filter = input.value.toUpperCase();
     tables = document.querySelectorAll(".data");
-    console.log("tables", tables);
-    console.log("filter", filter);
+    target = 0;
 
-    var target = 0;
     tables.forEach(element => {
-        if(element.id.toUpperCase().indexOf(filter) > -1){
+        var tableMatch = element.id.toUpperCase().indexOf(filter) > -1;
+        var rapportMatch = false;
+
+        // Check rapports inside the table
+        var rapports = element.querySelectorAll("tr");
+        rapports.forEach(row => {
+            var cells = row.querySelectorAll("td");
+            cells.forEach(cell => {
+                var txtValue = cell.textContent || cell.innerText;
+                txtValue = txtValue.toUpperCase();
+                if (txtValue.indexOf(filter) > -1) {
+                    rapportMatch = true;
+                }
+            });
+        });
+
+        if (tableMatch || rapportMatch) {
             element.hidden = false;
-            console.log(element.id);
             target++;
-        }else{
+        } else {
             element.hidden = true;
-            console.log(element.id);
         }
     });
 
     /* Check if nothing has been found */
-    if(target == 0){
-        document.getElementById("nothingFound").style="display: block;";
-    }else {
-        document.getElementById("nothingFound").style="display: none;";
+    if (target === 0) {
+        document.getElementById("nothingFound").style.display = "block";
+    } else {
+        document.getElementById("nothingFound").style.display = "none";
     }
-    console.log("target", target);
 }

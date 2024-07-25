@@ -31,6 +31,7 @@
 }
 
 .search {
+  width: 50%;
   margin: auto;
   display: block;
   padding: 15px 232px;
@@ -56,8 +57,7 @@
 }
 
 #nothingFound {
-  margin-left: auto;
-  margin-right: auto;
+  text-align: center;
   color: red;
   display: none;
 }
@@ -71,26 +71,33 @@ th {
   text-align: left;
 }
 
-.flex-container > div {
+.flex-container {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
 }
-.flex-container > div .data {
+.flex-container > div {
+  flex: 1 1 45%;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 1rem;
+}
+.flex-container .data {
   border-spacing: 0;
   background-color: lightgray;
   box-shadow: 0px 0px 30px 2px gray;
   border-radius: 20px;
-  margin-left: 2.5rem;
-  margin-bottom: 2rem;
+  margin: 0.5rem;
+  width: 100%;
 }
-.flex-container > div .data tr {
+.flex-container .data tr {
   border: solid 5px gray;
   padding: 20px;
 }
-.flex-container > div .data tr td {
+.flex-container .data tr td {
   padding: 5px;
 }
-.flex-container > div .data tr td button {
+.flex-container .data tr td button {
   background-color: royalblue;
   border: 1px solid royalblue;
   color: white;
@@ -102,34 +109,34 @@ th {
   transition-duration: 0.4s;
   cursor: pointer;
 }
-.flex-container > div .data tr td button i {
+.flex-container .data tr td button i {
   color: white;
 }
-.flex-container > div .data tr td button:hover {
+.flex-container .data tr td button:hover {
   background-color: transparent;
   color: royalblue;
 }
-.flex-container > div .data tr td button:hover i {
+.flex-container .data tr td button:hover i {
   color: royalblue;
 }
-.flex-container > div .data tr td img {
+.flex-container .data tr td img {
   width: 8%;
   -o-object-fit: contain;
      object-fit: contain;
 }
-.flex-container > div .data tr .editDelete {
+.flex-container .data tr .editDelete {
   width: 17%;
   font-size: 3rem;
 }
-.flex-container > div .data tr .editDelete img {
+.flex-container .data tr .editDelete img {
   width: 20%;
   transition-duration: 0.4s;
   cursor: pointer;
 }
-.flex-container > div .data tr .editDelete img:hover {
+.flex-container .data tr .editDelete img:hover {
   transform: scale(0.7);
 }
-.flex-container > div .data tr .cke_top {
+.flex-container .data tr .cke_top {
   display: none;
 }
 
