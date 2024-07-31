@@ -15,9 +15,10 @@
     <script defer src="public/js/login.js"></script>
     <script defer src="public/js/main.js"></script>
     <script defer src="public/js/footer.js"></script>
+    <script defer src="public/js/responsive.js"></script>
 
-    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="public/fontawesome/css/all.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <title>Login</title>
 </head>
 

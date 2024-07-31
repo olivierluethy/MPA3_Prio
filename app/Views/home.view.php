@@ -70,7 +70,6 @@ $normalRole = hash_hmac('sha256', 0, $salt);
             }
         }
         ?>
-
         <!-- Schalter für offene und abgeschlossene Aufgaben -->
         <table class='switch'>
             <tr>
@@ -90,7 +89,6 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                 <th></th>
             </tr>
         </table>
-
         <!-- Offene Aufgaben -->
         <div id='open'>
             <?php if ($open_tasks_counter > 0) { ?>
@@ -110,7 +108,6 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                         <td><button class='plus' onclick='addTask()'><i class='fa fa-plus'></i></button></td>
                     </tr>
                 </table>
-
                 <main>
                     <?php foreach ($getObjects as $task) {
                         $iv = base64_decode($task['iv']);
@@ -162,7 +159,6 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                             </tr>
                         </table>
                     </div>
-
                     <?php } ?>
                 </main>
             <?php } else { ?>

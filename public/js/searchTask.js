@@ -1,39 +1,26 @@
+// Function to handle search
 function searchFor() {
-    var input, filter, tables, target;
-    input = document.getElementById("myInput");
-    filter = input.value.toUpperCase();
-    tables = document.querySelectorAll(".data");
-    target = 0;
+    // Get the search query and convert it to lowercase
+    const query = document.getElementById('myInput').value.toLowerCase();
 
-    tables.forEach(element => {
-        var tableMatch = element.id.toUpperCase().indexOf(filter) > -1;
-        var rapportMatch = false;
+    // Get all tasks
+    const tasks = document.querySelectorAll('.data');
 
-        // Check rapports inside the table
-        var rapports = element.querySelectorAll("tr");
-        rapports.forEach(row => {
-            var cells = row.querySelectorAll("td");
-            cells.forEach(cell => {
-                var txtValue = cell.textContent || cell.innerText;
-                txtValue = txtValue.toUpperCase();
-                if (txtValue.indexOf(filter) > -1) {
-                    rapportMatch = true;
-                }
-            });
-        });
+    tasks.forEach(task => {
+        // Get the task title
+        const title = task.querySelector('th').innerText.toLowerCase();
 
-        if (tableMatch || rapportMatch) {
-            element.hidden = false;
-            target++;
+        // Check if the title or any rapport contains the search query
+        if (title.includes(query) || Array.from(task.querySelectorAll('td')).some(td => td.innerText.toLowerCase().includes(query))) {
+            // If query matches, display the task
+            task.style.display = '';
         } else {
-            element.hidden = true;
+            // If query does not match, hide the task
+            task.style.display = 'none';
         }
     });
 
-    /* Check if nothing has been found */
-    if (target === 0) {
-        document.getElementById("nothingFound").style.display = "block";
-    } else {
-        document.getElementById("nothingFound").style.display = "none";
-    }
+    // Show 'Nothing Found' message if no tasks are visible
+    const visibleTasks = Array.from(tasks).some(task => task.style.display !== 'none');
+    document.getElementById('nothingFound').style.display = visibleTasks ? 'none' : 'block';
 }

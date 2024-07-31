@@ -27,26 +27,30 @@
     include("header.php");
     ?>
 
-    <?php
-    if (count($getEssays) > 0) {
-        foreach ($getEssays as $getEssays2) {
-            echo "<div class='essay'>
-                        <table>
-                            <tr>
-                                <th>" . $getEssays2['titel'] . "</th>
-                                <th></th>
-                                <th><button onclick='showEssay(" . $getEssays2['essayId'] . ")'>Open &nbsp<i class='fa fa-external-link'></i></button></th>
-                            </tr>
-                        </table>
-                      </div>";
-        }
-    } else {
-        echo "<div class='noData'>
-                    <h1>There are no essays yet!</h1>
-                    <p>As soon as an user has written an essay, it'll appear here!</p>
-                  </div>";
-    }
-    ?>
+    <!-- Essays Display -->
+    <?php if (count($getEssays) > 0): ?>
+        <?php foreach ($getEssays as $getEssays2): ?>
+            <div class='essay'>
+                <table>
+                    <tr>
+                        <th><?= htmlspecialchars($getEssays2['titel'], ENT_QUOTES, 'UTF-8') ?></th>
+                        <th></th>
+                        <th>
+                            <button onclick='showEssay(<?= intval($getEssays2['essayId']) ?>)'>
+                                Open &nbsp;<i class='fa fa-external-link'></i>
+                            </button>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class='noData'>
+            <h1>There are no essays yet!</h1>
+            <p>As soon as a user has written an essay, it'll appear here!</p>
+        </div>
+    <?php endif; ?>
+
     <?php include('app/Views/footer.view.php'); ?>
 </body>
 

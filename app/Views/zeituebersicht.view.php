@@ -123,7 +123,7 @@ include "header.php";
                     <?php if ($rapportCounter == 0): ?>
                         <div>
                             <table class='data' id="<?= $taskTitle ?>">
-                                <tr><th><p><?= $taskTitle ?></p></th></tr>
+                                <tr><th style='font-style: italic; text-shadow: 4px 4px 2px rgba(0,0,0,0.6); font-size: 1.2rem;'><p><?= $taskTitle ?></p></th></tr>
                                 <tr>
                                     <td style='color:red; text-align:center;'><strong>No rapports found</strong></td>
                                 </tr>

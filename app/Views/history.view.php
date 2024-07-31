@@ -35,7 +35,6 @@ include ("header.php");
         <tr>
             <td><?= $getHistory['rapport']; ?></td>
             <td>Duration: <?= $getHistory['zeit']; ?></td>
-            
             <?php $date = date('dS M Y', strtotime($getHistory['created_at'])); ?>
             <td>Created on the <?= $date ?></td>
         </tr>
