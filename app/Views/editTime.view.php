@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="public/css/add.css">
     <link rel="stylesheet" href="public/css/navigation.css">
     <link rel="stylesheet" href="public/css/footer.css">
-    <link rel="shortcut icon" href="assets/favicon.ico">
+    <link rel="shortcut icon" href="images/favicon.ico">
 
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/validationEditRapport.js"></script>

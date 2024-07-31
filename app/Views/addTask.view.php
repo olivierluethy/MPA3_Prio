@@ -47,8 +47,9 @@
     <script src="ckeditor/ckeditor.js"></script>
 
     <script>
-    CKEDITOR.replace('description');
-    CKEDITOR.replace('motivation');
+    ['description', 'motivation'].forEach(function(id) {
+        CKEDITOR.replace(id);
+    });
     </script>
 
     <?php include('app/Views/footer.view.php'); ?>

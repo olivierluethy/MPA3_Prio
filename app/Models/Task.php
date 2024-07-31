@@ -510,13 +510,13 @@ class Task
 
 	// Search for possible priorities
 	public function showPossiblePriorities() {
-		// Initialisierungsvektor (IV) und Verschlüsselungsschlüssel aus der Datenbank oder .env laden
+		// Load encryption key and IV from the database or environment
 		require_once __DIR__ . '/../../vendor/autoload.php';
 		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
 		$dotenv->load();
 		$encryption_key = getenv('ENCRYPTION_KEY');
 	
-		// IV aus der Datenbank laden
+		// Retrieve IV from the database
 		$ivStatement = $this->db->prepare('SELECT iv FROM aufgabe WHERE fk_benutzerId = :id LIMIT 1');
 		$ivStatement->bindParam(':id', $_SESSION["id"], PDO::PARAM_INT);
 		$ivStatement->execute();
@@ -527,14 +527,14 @@ class Task
 			$iv = base64_decode($iv_row['iv']);
 		}
 	
-		// Verschlüsselten Statuswert berechnen, falls es einen IV gibt
+		// Calculate encrypted status if IV exists
 		$encrypted_status = null;
 		if ($iv !== null) {
 			$status = '0';
 			$encrypted_status = $this->encrypt($status, $encryption_key, $iv);
 		}
 	
-		// Anzahl der Aufgaben mit verschlüsseltem Status zählen, wenn es einen verschlüsselten Status gibt
+		// Count the number of tasks with the encrypted status
 		$totalTasks = 0;
 		if ($encrypted_status !== null) {
 			$statement = $this->db->prepare('SELECT COUNT(*) as totalTasks FROM aufgabe WHERE status = :status AND fk_benutzerId = :id');
@@ -543,19 +543,15 @@ class Task
 			$statement->execute();
 			$result = $statement->fetch(PDO::FETCH_ASSOC);
 	
-			if ($result !== false && !empty($result['totalTasks'])) {
+			if ($result !== false && isset($result['totalTasks'])) {
 				$totalTasks = intval($result['totalTasks']);
 			}
 		}
 	
-		// Setze totalTasks auf 1, wenn es keine Aufgaben gibt
-		if ($totalTasks === 0) {
-			$totalTasks = 1;
-		}
-	
-		// Erzeugen eines Arrays von möglichen Prioritäten von 1 bis totalTasks + 1
-		$possiblePriorities = range(1, $totalTasks + 1);
+		// Setze totalTasks auf 1, wenn es keine Aufgaben gibt, und berechne das Array der möglichen Prioritäten
+		$possiblePriorities = ($totalTasks > 0) ? range(1, $totalTasks + 1) : range(1, 1);
 	
 		return $possiblePriorities;
-	}	
+	}
+	
 }

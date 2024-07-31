@@ -152,8 +152,8 @@ class TaskController
 			$iv = base64_decode($task['iv']);
 
 			$title = htmlspecialchars(decrypt($task['titel'], $encryption_key, $iv));
-			$description = decrypt($task['beschreibung'], $encryption_key, $iv);
-			$motivation = decrypt($task['motivation'], $encryption_key, $iv);
+			$description = htmlspecialchars_decode(decrypt($task['beschreibung'], $encryption_key, $iv));
+			$motivation = htmlspecialchars_decode(decrypt($task['motivation'], $encryption_key, $iv));
 			$deadline = htmlspecialchars(decrypt($task['deadline'], $encryption_key, $iv));
 			$priority = htmlspecialchars(decrypt($task['prioritaet'], $encryption_key, $iv));
 			require 'app/Views/editTask.view.php';
