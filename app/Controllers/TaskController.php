@@ -100,10 +100,10 @@ class TaskController
 			$prioritaet = e(post('priority'));
 
             $Task->add_task($titel, $beschreibung, $motivation, $deadline, $prioritaet);
-        } else{
+        } else {
 			$possiblePriorities = $Task->ShowPossiblePriorities();
+			require 'app/Views/addTask.view.php';
 		}
-		require 'app/Views/addTask.view.php';
 	}
 
 	public function edit_task(){

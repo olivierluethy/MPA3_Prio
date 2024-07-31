@@ -17,6 +17,11 @@ class LoginController{
         // Define variables and initialize with empty values
         $email = $password = "";
         $email_err = $password_err = "";
+
+        // Unset all of the session variables
+        $_SESSION = array();
+        // Destroy the session.
+        session_destroy();
     
         // Processing form data when form is submitted
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -217,6 +222,10 @@ class LoginController{
                                         $hashed_password = $row["password"];
                                         $role = $row["role"];
                                         if (password_verify($password, $hashed_password)) {
+                                            // Unset all of the session variables
+                                            $_SESSION = array();
+                                            // Destroy the session.
+                                            session_destroy();
                                             // Password is correct, so start a new session
                                             session_start();
     
