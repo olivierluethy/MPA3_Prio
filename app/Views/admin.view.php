@@ -10,8 +10,6 @@
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/time_recording.js"></script>
     <script defer src="public/js/validation.js"></script>
-    <script defer src="public/js/footer.js"></script>
-
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <link rel="stylesheet" href="public/css/app.css">
     <title>Admin</title>

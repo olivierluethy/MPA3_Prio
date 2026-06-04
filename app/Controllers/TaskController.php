@@ -61,6 +61,9 @@ class TaskController
 						$getObjects = $Task->sortTask($sort_option);
 						$getObjects = $getObjects->fetchAll();
 
+						// Available priorities for the in-page create/edit task modal
+						$possiblePriorities = $Task->ShowPossiblePriorities();
+
 						// Load the view
 						require 'app/Views/home.view.php';
 					}

@@ -10,9 +10,7 @@
     <script defer src="public/js/password_strength_checker.js"></script>
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/login.js"></script>
-    <script defer src="public/js/main.js"></script>
-    <script defer src="public/js/footer.js"></script>
-    <script defer src="public/js/responsive.js"></script>
+    <script defer src="public/js/main.js"></script>    <script defer src="public/js/responsive.js"></script>
 
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <link rel="stylesheet" href="public/css/app.css">

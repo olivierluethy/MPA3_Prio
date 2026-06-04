@@ -24,8 +24,6 @@ $normalRole = hash_hmac('sha256', 0, $salt);
     <script defer src="public/js/searchTask.js"></script>
     <script defer src="public/js/responsive.js"></script>
     <script defer src="public/js/routes.js"></script>
-    <script defer src="public/js/footer.js"></script>
-
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <link rel="stylesheet" href="public/css/app.css">
     <title>Time Records</title>
@@ -82,8 +80,8 @@ include "header.php";
                                     ?>
                                     <td class='editDelete px-3 py-2'>
                                         <?php if ($created_at >= strtotime("-1 day")): ?>
-                                            <img class="inline h-5 w-5 cursor-pointer transition hover:scale-110" onclick='editTime(<?= $rapport["rapportId"] ?>)' title='Edit rapport and time' src='images/edit.png' alt=''>
-                                            / <img class="inline h-5 w-5 cursor-pointer transition hover:scale-110" title='Delete rapport and time' onclick='deleteTime(<?= $rapport["rapportId"] ?>)' src='images/delete.png' alt=''>
+                                            <button type="button" title="Edit rapport and time" aria-label="Edit rapport and time" onclick='editTime(<?= $rapport["rapportId"] ?>)' class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"><?= icon('pencil', 'h-4 w-4') ?></button>
+                                            <button type="button" title="Delete rapport and time" aria-label="Delete rapport and time" onclick='deleteTime(<?= $rapport["rapportId"] ?>)' class="ml-1 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-red-300 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500"><?= icon('trash', 'h-4 w-4') ?></button>
                                         <?php else: ?>
                                             <td></td>
                                         <?php endif; ?>
@@ -103,8 +101,8 @@ include "header.php";
                                         <td class="px-3 py-2 text-surface-300"><i class="fas fa-clock"></i> <?= decrypt($rapport["zeit"], $encryption_key, $ivRapp) ?></td>
                                         <td class='editDelete px-3 py-2'>
                                             <?php if ($created_at >= strtotime("-1 day")): ?>
-                                                <img class="inline h-5 w-5 cursor-pointer transition hover:scale-110" onclick='editTime(<?= $rapport["rapportId"] ?>)' title='Edit rapport and time' src='images/edit.png' alt=''>
-                                                / <img class="inline h-5 w-5 cursor-pointer transition hover:scale-110" title='Delete rapport and time' onclick='deleteTime(<?= $rapport["rapportId"] ?>)' src='images/delete.png' alt=''>
+                                                <button type="button" title="Edit rapport and time" aria-label="Edit rapport and time" onclick='editTime(<?= $rapport["rapportId"] ?>)' class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"><?= icon('pencil', 'h-4 w-4') ?></button>
+                                                <button type="button" title="Delete rapport and time" aria-label="Delete rapport and time" onclick='deleteTime(<?= $rapport["rapportId"] ?>)' class="ml-1 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-red-300 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500"><?= icon('trash', 'h-4 w-4') ?></button>
                                             <?php else: ?>
                                                 <td></td>
                                             <?php endif; ?>

@@ -24,15 +24,21 @@
 
   html {
     color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
   }
 
   /* Global dark theme. Safe now that every view loads only app.css (the legacy
-     per-page stylesheets are no longer linked). */
+     per-page stylesheets are no longer linked).
+     The flex column + min-height makes the footer stick to the bottom on short
+     pages via CSS (.site-footer { margin-top:auto }) instead of the old
+     footer.js that positioned it `fixed` and overlapped page content. */
   body {
     margin: 0;
-    min-height: 100vh;
     overflow-x: hidden;
-    @apply bg-surface-900 font-sans text-surface-100;
+    @apply flex min-h-screen flex-col bg-surface-900 font-sans text-surface-100;
   }
 }
 
@@ -121,7 +127,7 @@
    =========================================================================== */
 @layer components {
   .site-footer {
-    @apply w-full border-0 border-t border-solid border-surface-700
+    @apply mt-auto w-full border-0 border-t border-solid border-surface-700
            bg-surface-800 text-surface-300;
   }
   .site-footer .footer-content {
@@ -244,6 +250,52 @@
    The readonly editors used on the home page hide their toolbar, exactly as
    the legacy home.css did.
    =========================================================================== */
+/* Time-tracking start/stop toggle button (replaces the old clock PNG swap).
+   JS toggles `.is-recording`; the play icon shows when idle, the stop icon
+   while recording. Plain CSS (outside @layer) so it's never purged. */
+.time-toggle .icon-stop {
+  display: none;
+}
+.time-toggle.is-recording .icon-play {
+  display: none;
+}
+.time-toggle.is-recording .icon-stop {
+  display: inline-block;
+}
+.time-toggle.is-recording {
+  border-color: #ef4444;
+  background-color: #dc2626;
+  color: #ffffff;
+  animation: prio-rec-pulse 1.6s ease-in-out infinite;
+}
+@keyframes prio-rec-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+}
+
+/* Scroll-reveal animation for the About landing page (driven by
+   aboutParallax.js via IntersectionObserver adding `.is-visible`). */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  will-change: opacity, transform;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+[data-reveal-delay="1"] { transition-delay: 0.1s; }
+[data-reveal-delay="2"] { transition-delay: 0.2s; }
+[data-reveal-delay="3"] { transition-delay: 0.3s; }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .task .cke_top,
 .essay .cke_top {
   display: none;

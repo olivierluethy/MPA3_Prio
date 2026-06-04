@@ -11,12 +11,15 @@ function start_recording(id) {
     clock_element = document.querySelector('#start' + id);
     time_element = document.querySelector('#active_time' + id);
     if (startCounter == 0) {
-        clock_element.src = "images/clock on.png";
+        clock_element.classList.add("is-recording");
+        clock_element.title = "Stop recording";
+        clock_element.setAttribute("aria-label", "Stop recording");
         start(id);
         startCounter++;
-        clock_element.title = "Stop recording";
     } else if (startCounter == 1) {
-        clock_element.src = "images/clock off.png";
+        clock_element.classList.remove("is-recording");
+        clock_element.title = "Start recording";
+        clock_element.setAttribute("aria-label", "Start recording");
         stop(id);
         // location.href = "addTimeRecord?timeRecord=" + time_element.innerHTML + "&id=" + id;
         modal.style.display = "block";
@@ -58,6 +61,9 @@ function stop(id) {
     span.onclick = function() {
         modal.style.display = "none";
         document.querySelector('#active_time' + id).innerHTML = "00:00:00";
-        document.querySelector('#start' + id).src = "images/clock off.png";
+        var startBtn = document.querySelector('#start' + id);
+        startBtn.classList.remove("is-recording");
+        startBtn.title = "Start recording";
+        startBtn.setAttribute("aria-label", "Start recording");
     }
 }

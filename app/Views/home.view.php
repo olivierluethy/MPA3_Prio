@@ -24,8 +24,7 @@ $normalRole = hash_hmac('sha256', 0, $salt);
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/openDone.js"></script>
     <script defer src="public/js/time_recording.js"></script>
-    <script defer src="public/js/footer.js"></script>
-
+    <script defer src="public/js/taskModal.js"></script>
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <link rel="stylesheet" href="public/css/app.css">
     <title>Home</title>
@@ -91,14 +90,16 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                         <h2 class="text-lg font-semibold text-white">All open tasks sorted by:</h2>
                         <div class="flex items-center gap-3">
                             <form action="" method="GET" class="flex items-center gap-2">
-                                <select name="sort" class="rounded-lg border border-solid border-surface-600 bg-surface-900 px-3 py-2 text-sm text-surface-100 focus:border-brand-500 focus:outline-none">
+                                <label for="sort" class="sr-only">Sort tasks by</label>
+                                <select id="sort" name="sort" onchange="this.form.submit()" aria-label="Sort tasks by"
+                                        class="rounded-lg border border-solid border-surface-600 bg-surface-900 px-3 py-2 text-sm text-surface-100 focus:border-brand-500 focus:outline-none">
                                     <option value="priority" <?= ($_GET["sort"] ?? '') == "priority" ? "selected" : "" ?>>Priority</option>
                                     <option value="alphabet" <?= ($_GET["sort"] ?? '') == "alphabet" ? "selected" : "" ?>>Alphabet</option>
                                     <option value="deadline" <?= ($_GET["sort"] ?? '') == "deadline" ? "selected" : "" ?>>Deadline</option>
                                 </select>
-                                <button type='submit' class="btn-primary">Sort <i class='fa fa-sort'></i></button>
+                                <noscript><button type="submit" class="btn-primary">Sort</button></noscript>
                             </form>
-                            <button class='plus btn-primary !h-12 !w-12 !rounded-full !p-0' title="Add task" onclick='addTask()'><i class='fa fa-plus'></i></button>
+                            <button type="button" class='plus btn-primary !h-12 !w-12 !rounded-full !p-0' title="Add task" aria-label="Add task" onclick='openTaskModal()'><?= icon('plus', 'h-5 w-5') ?></button>
                         </div>
                     </div>
                     <main class="space-y-6">
@@ -106,6 +107,13 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                             $iv = base64_decode($task['iv']);
                             $decrypted_status = decrypt($task['status'], $encryption_key, $iv);
                             if ($decrypted_status !== '0') continue;
+
+                            // Decrypted values for the in-page edit modal (data-* attributes)
+                            $t_title    = decrypt($task["titel"], $encryption_key, $iv);
+                            $t_desc     = htmlspecialchars_decode(decrypt($task["beschreibung"], $encryption_key, $iv));
+                            $t_motiv    = htmlspecialchars_decode(decrypt($task["motivation"], $encryption_key, $iv));
+                            $t_deadline = decrypt($task["deadline"], $encryption_key, $iv);
+                            $t_prio     = decrypt($task['prioritaet'], $encryption_key, $iv);
                         ?>
                         <div class='task overflow-x-auto rounded-xl border border-solid border-surface-700 bg-surface-800 p-5 shadow-lg'>
                             <table class="w-full">
@@ -126,8 +134,20 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                                         <?php if (strtotime(decrypt($task["created_at"], $encryption_key, $iv)) >= strtotime("-1 day")){ ?>
                                             <!-- Task is younger than 24 hours -->
                                             <div class="flex items-center justify-center gap-2">
-                                                <img title='Edit task' onclick='editTask(<?= $task["aufgabeId"] ?>)' src='images/edit.png' alt='Edit' class="h-6 w-6 cursor-pointer transition hover:scale-110">
-                                                <img title='Delete task' onclick='deleteTask(<?= $task["aufgabeId"]?>)' src='images/delete.png' alt='Delete' class="h-6 w-6 cursor-pointer transition hover:scale-110">
+                                                <button type="button" title="Edit task" aria-label="Edit task" onclick="openEditTask(this)"
+                                                        data-id="<?= (int) $task['aufgabeId'] ?>"
+                                                        data-title="<?= htmlspecialchars($t_title, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-description="<?= htmlspecialchars($t_desc, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-motivation="<?= htmlspecialchars($t_motiv, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-deadline="<?= htmlspecialchars($t_deadline, ENT_QUOTES, 'UTF-8') ?>"
+                                                        data-priority="<?= htmlspecialchars($t_prio, ENT_QUOTES, 'UTF-8') ?>"
+                                                        class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                                    <?= icon('pencil', 'h-5 w-5') ?>
+                                                </button>
+                                                <button type="button" title="Delete task" aria-label="Delete task" onclick='deleteTask(<?= $task["aufgabeId"]?>)'
+                                                        class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-red-300 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                    <?= icon('trash', 'h-5 w-5') ?>
+                                                </button>
                                             </div>
                                         <?php } ?>
                                     </th>
@@ -135,7 +155,11 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                                         <h1 id='active_time<?php echo $task["aufgabeId"]; ?>' class="whitespace-nowrap font-mono text-lg font-semibold text-brand-300">00:00:00</h1>
                                     </th>
                                     <th class="px-3 py-2">
-                                        <img title='Start recording' id='start<?php echo $task["aufgabeId"]; ?>' onclick="start_recording(<?= $task['aufgabeId']; ?>)" src='images/clock off.png' alt='Start recording' class="mx-auto h-9 w-9 cursor-pointer transition hover:scale-110">
+                                        <button type="button" id='start<?php echo $task["aufgabeId"]; ?>' onclick="start_recording(<?= $task['aufgabeId']; ?>)" title="Start recording" aria-label="Start recording"
+                                                class="time-toggle mx-auto inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-solid border-surface-600 bg-surface-900 text-brand-300 transition-colors hover:border-brand-500 hover:bg-brand-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                            <?= icon('play', 'icon-play h-5 w-5') ?>
+                                            <?= icon('stop', 'icon-stop h-5 w-5') ?>
+                                        </button>
                                     </th>
                                     <th class="px-3 py-2">
                                         <button title='Complete task' id='completeBtn' onclick="completeTask(<?= $task['aufgabeId']; ?>)"
@@ -145,12 +169,16 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                                     </th>
                                     <th class="px-3 py-2">
                                         <div class="flex flex-col items-center gap-1">
-                                            <img title='Increase priority' onclick="higherPrio(<?=$task['aufgabeId']?>)"
-                                                src='images/up.png' alt='' class="h-5 w-5 cursor-pointer transition hover:scale-110">
+                                            <button type="button" title="Increase priority" aria-label="Increase priority" onclick="higherPrio(<?=$task['aufgabeId']?>)"
+                                                    class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-brand-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                                <?= icon('chevron-up', 'h-4 w-4') ?>
+                                            </button>
                                             <p class="badge bg-surface-700 text-surface-100"><?= htmlspecialchars(decrypt($task['prioritaet'], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></p>
                                             <?php if (decrypt($task['prioritaet'], $encryption_key, $iv) > 0) { ?>
-                                            <img title='Decrease priority' onclick="lowerPrio(<?=$task['aufgabeId']?>)"
-                                                src='images/down.png' alt='' class="h-5 w-5 cursor-pointer transition hover:scale-110">
+                                            <button type="button" title="Decrease priority" aria-label="Decrease priority" onclick="lowerPrio(<?=$task['aufgabeId']?>)"
+                                                    class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-brand-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                                <?= icon('chevron-down', 'h-4 w-4') ?>
+                                            </button>
                                             <?php } ?>
                                         </div>
                                     </th>
@@ -162,7 +190,7 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                 <?php } else { ?>
                     <div class='noData flex flex-col items-center gap-4 py-16 text-center'>
                         <h1 class="text-2xl font-bold text-red-400">No tasks available yet</h1>
-                        <button onclick='addTask()' class="btn-primary">Add task &nbsp;<i class='fa fa-plus'></i></button>
+                        <button type="button" onclick='openTaskModal()' class="btn-primary">Add task &nbsp;<?= icon('plus', 'h-5 w-5') ?></button>
                     </div>
                 <?php } ?>
             </div>
@@ -218,6 +246,7 @@ $normalRole = hash_hmac('sha256', 0, $salt);
     });
     </script>
 
+    <?php include "app/Views/taskModal.view.php"; ?>
     <?php include "app/Views/addRapportModal.view.php"; ?>
     <?php include "app/Views/footer.view.php"; ?>
 </body>
