@@ -191,7 +191,94 @@ class TimeController
 		}else if($s > 1){
 			$output .= "$s Seconds ";
 		}
-		
+
 		echo $output;
+	}
+
+	/* Export a professional PDF time report for one task (owner only). */
+	public function export_pdf(){
+		// Initialize the session
+		session_start();
+
+		if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+			header('Location: login');
+			exit();
+		}
+
+		if (!isset($_GET['id']) || !ctype_digit((string) $_GET['id'])) {
+			http_response_code(400);
+			exit('Invalid task id.');
+		}
+		$id = (int) $_GET['id'];
+
+		// Load environment + encryption key
+		require_once __DIR__ . '/../../vendor/autoload.php';
+		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+		$dotenv->load();
+		$encryption_key = getenv('ENCRYPTION_KEY');
+
+		$Task = new Task();
+		$Time = new Time();
+
+		// Authorization: the task must belong to the logged-in user
+		$task = $Task->getOwnedTask($id, $_SESSION['id']);
+		if (!$task) {
+			http_response_code(403);
+			exit('You are not allowed to export this task.');
+		}
+
+		// Decrypt task fields
+		$ivTask = base64_decode($task['iv']);
+		$title       = decode_all($Task->decrypt($task['titel'], $encryption_key, $ivTask));
+		$description = decode_all($Task->decrypt($task['beschreibung'], $encryption_key, $ivTask));
+		$priority    = decode_all($Task->decrypt($task['prioritaet'], $encryption_key, $ivTask));
+		$statusRaw   = $Task->decrypt($task['status'], $encryption_key, $ivTask);
+		$status      = ($statusRaw === '1') ? 'Completed' : 'Open';
+		$createdRaw  = $Task->decrypt($task['created_at'], $encryption_key, $ivTask);
+		$deadlineRaw = $Task->decrypt($task['deadline'], $encryption_key, $ivTask);
+		$createdLabel  = $createdRaw ? date('d M Y', strtotime($createdRaw)) : '—';
+		$deadlineLabel = $deadlineRaw ? date('d M Y', strtotime($deadlineRaw)) : '—';
+
+		// Decrypt + collect time entries, sorted chronologically
+		$entries  = [];
+		$totalSec = 0;
+		foreach ($Time->getRapportsForTask($id) as $rapport) {
+			$ivR   = base64_decode($rapport['iv']);
+			$zeit  = $Task->decrypt($rapport['zeit'], $encryption_key, $ivR) ?: '00:00:00';
+			$text  = decode_all($Task->decrypt($rapport['rapport'], $encryption_key, $ivR));
+			$cr    = $Task->decrypt($rapport['created_at'], $encryption_key, $ivR);
+			$ts    = $cr ? strtotime($cr) : 0;
+			$totalSec += max(0, strtotime($zeit) - strtotime('00:00:00'));
+			$entries[] = ['ts' => $ts, 'date' => $ts ? date('d M Y', $ts) : '—', 'duration' => $zeit, 'text' => $text];
+		}
+		usort($entries, fn($a, $b) => $a['ts'] <=> $b['ts']);
+
+		$entryCount = count($entries);
+		$totalH = intval($totalSec / 3600);
+		$totalM = intval(($totalSec % 3600) / 60);
+		$genDate = date('d M Y, H:i');
+
+		// Render the report HTML
+		ob_start();
+		require __DIR__ . '/../Views/pdf/timeReport.view.php';
+		$html = ob_get_clean();
+
+		// Generate the PDF
+		$options = new \Dompdf\Options();
+		$options->set('defaultFont', 'DejaVu Sans');
+		$options->set('isRemoteEnabled', false);
+		$dompdf = new \Dompdf\Dompdf($options);
+		$dompdf->loadHtml($html, 'UTF-8');
+		$dompdf->setPaper('A4', 'portrait');
+		$dompdf->render();
+
+		// Footer page numbers
+		$canvas = $dompdf->getCanvas();
+		$font = $dompdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
+		$canvas->page_text(270, 810, 'Page {PAGE_NUM} of {PAGE_COUNT}', $font, 8, [0.5, 0.5, 0.5]);
+
+		$filename = 'time-report-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $title ?: ('task-' . $id)) . '.pdf';
+		$dompdf->stream($filename, ['Attachment' => true]);
+		exit();
 	}
 }

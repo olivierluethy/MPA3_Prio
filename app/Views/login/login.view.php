@@ -36,6 +36,15 @@
                         class="flex-1 cursor-pointer rounded-full border-0 bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors">Login</button>
             </div>
 
+            <?php $server_errors = array_filter([$email_err ?? '', $password_err ?? '', $confirm_password_err ?? '']); ?>
+            <?php if (!empty($server_errors)): ?>
+                <div class="alert-danger mb-5" role="alert">
+                    <?php foreach ($server_errors as $err): ?>
+                        <div><?= htmlspecialchars($err, ENT_QUOTES, 'UTF-8') ?></div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
             <form id="login" action="login" method="POST" class="space-y-4">
                 <div>
                     <label for="email" class="label">Email:</label>
@@ -73,6 +82,10 @@
             </form>
         </div>
     </div>
+
+    <?php if (($active_form ?? 'login') === 'register'): ?>
+    <script>window.addEventListener('load', function () { if (typeof navSwitch === 'function') navSwitch(1); });</script>
+    <?php endif; ?>
 
     <?php include('app/Views/footer.view.php'); ?>
 </body>

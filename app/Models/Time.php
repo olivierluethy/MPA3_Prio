@@ -60,9 +60,9 @@ class Time
         return $statement->fetch(PDO::FETCH_ASSOC);  // Rückgabe als assoziatives Array
 	}
 
-	/* Get title of task */
+	/* Get title of task (plus the fields needed for the reporting summary) */
 	public function getTitleOfTask(){
-		$statement = $this->db->prepare('SELECT DISTINCT titel, aufgabeId, iv FROM aufgabe WHERE fk_benutzerId = :id');
+		$statement = $this->db->prepare('SELECT DISTINCT titel, aufgabeId, iv, status, prioritaet, beschreibung, deadline, created_at FROM aufgabe WHERE fk_benutzerId = :id');
 		$statement->bindParam(':id', $_SESSION["id"], PDO::PARAM_STR);
 		$statement->execute();
         return $statement;
@@ -73,6 +73,14 @@ class Time
 		$statement = $this->db->prepare('SELECT * FROM rapport ORDER BY created_at DESC');
 		$statement->execute();
         return $statement;
+	}
+
+	/* Get all rapports belonging to one task (for the PDF export) */
+	public function getRapportsForTask($id){
+		$statement = $this->db->prepare('SELECT * FROM rapport WHERE fk_aufgabeId = :id');
+		$statement->bindParam(':id', $id, PDO::PARAM_INT);
+		$statement->execute();
+		return $statement->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 	// Edit rapport with it's time

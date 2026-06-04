@@ -259,8 +259,14 @@ class LoginController{
                     unset($stmt);
                 }
             }
-            // Close connection
+
+            // If we reach this point, registration did not succeed (the success
+            // path redirects and exits above). Re-render the form WITH the error
+            // messages and open the Register tab, instead of a blank page.
             unset($pdo);
+            $active_form = 'register';
+            require 'app/Views/login/login.view.php';
+            exit;
         }
     }
     

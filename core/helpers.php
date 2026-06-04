@@ -69,6 +69,47 @@ function asset(string $path): string
 }
 
 /**
+ * Dekodiert HTML-Entities vollständig (auch mehrfach kodierte Werte).
+ *
+ * Hintergrund: Benutzereingaben wurden historisch beim Speichern mehrfach
+ * mit htmlspecialchars() kodiert (einmal im Controller via e(), einmal im
+ * Model). Diese Funktion stellt den ursprünglichen Rohtext wieder her,
+ * indem sie so lange dekodiert, bis sich nichts mehr ändert.
+ */
+function decode_all(?string $value): string
+{
+    $value = (string) $value;
+    $previous = null;
+    $iterations = 0;
+    while ($value !== $previous && $iterations < 5) {
+        $previous = $value;
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $iterations++;
+    }
+    return $value;
+}
+
+/**
+ * Sichere Ausgabe für Klartext-Felder (Titel, Rapport, Zeit ...):
+ * vollständig dekodieren und danach GENAU EINMAL escapen.
+ * Verhindert Doppelkodierung und bleibt XSS-sicher.
+ */
+function display_text(?string $value): string
+{
+    return htmlspecialchars(decode_all($value), ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Ausgabe für Rich-Text-Felder (CKEditor-Inhalte: Beschreibung, Motivation,
+ * Essay): vollständig dekodieren und als HTML ausgeben. Der Inhalt stammt
+ * aus CKEditor und ist bereits bereinigt.
+ */
+function display_html(?string $value): string
+{
+    return decode_all($value);
+}
+
+/**
  * Gibt ein modernes Inline-SVG-Icon (Heroicons-Stil) als String zurück.
  * Wird in den Views für Aktions-Buttons (Bearbeiten, Löschen, Priorität,
  * Zeiterfassung) verwendet, damit ein einheitlicher, vektorbasierter
@@ -92,6 +133,7 @@ function icon(string $name, string $class = 'h-5 w-5'): string
         'chart'        => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/>',
         'flag'         => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5"/>',
         'calendar'     => '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>',
+        'download'     => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>',
     ];
     $p = $paths[$name] ?? '';
     $cls = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');

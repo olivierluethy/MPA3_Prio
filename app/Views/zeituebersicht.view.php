@@ -7,9 +7,6 @@ function decrypt($data, $key, $iv) {
     }
     return $decrypted;
 }
-// Rollenwerte vorab berechnen
-$blockedRole = hash_hmac('sha256', 2, $salt);
-$normalRole = hash_hmac('sha256', 0, $salt);
 ?>
 
 <!DOCTYPE html>
@@ -24,120 +21,166 @@ $normalRole = hash_hmac('sha256', 0, $salt);
     <script defer src="public/js/searchTask.js"></script>
     <script defer src="public/js/responsive.js"></script>
     <script defer src="public/js/routes.js"></script>
+
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <link rel="stylesheet" href="public/css/app.css">
     <title>Time Records</title>
 </head>
 
 <body>
-   <!-- Navigation Bar -->
-<?php
-$actual_link = basename(__FILE__);
-include "header.php";
-?>
+    <!-- Navigation Bar -->
+    <?php
+    $actual_link = basename(__FILE__);
+    include "header.php";
+    ?>
 
-<!-- Time Tracking Overview -->
-<?php if (count($getTitleOfTask) > 0): ?>
-    <div class="mx-auto max-w-6xl px-4 pt-6">
-        <h2 class="text-2xl font-bold text-white">Time overview</h2>
-        <input class="search input mt-4 max-w-md" id="myInput" onkeyup="searchFor()" placeholder="Search for tasks and rapports" type="text">
-    </div>
+    <main class="mx-auto max-w-5xl px-4 py-8">
+        <?php if (count($getTitleOfTask) > 0): ?>
+            <!-- Page header -->
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Time overview</h1>
+                    <p class="mt-1 text-sm text-surface-400">Reported work per task — totals, entries and activity at a glance.</p>
+                </div>
+                <div class="relative w-full sm:w-72">
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-surface-400">
+                        <i class="fas fa-magnifying-glass"></i>
+                    </span>
+                    <input class="search input pl-9" id="myInput" onkeyup="searchFor()" placeholder="Search tasks and reports" type="text" aria-label="Search tasks and reports">
+                </div>
+            </div>
 
-    <div class="flex-container mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:grid-cols-2 lg:grid-cols-3">
-        <?php foreach ($getTitleOfTask as $task):
-            $totaltime = 0;
-            $sum = strtotime("00:00:00");
-            $rapportCounter = 0;
-            $ivTitle = base64_decode($task['iv']);
-            $taskTitle = decrypt($task["titel"], $encryption_key, $ivTitle);
-        ?>
+            <!-- Task reporting cards -->
+            <div class="mt-8 space-y-8">
+                <?php foreach ($getTitleOfTask as $task):
+                    $ivTask      = base64_decode($task['iv']);
+                    $taskTitle   = decode_all(decrypt($task["titel"], $encryption_key, $ivTask));
+                    $taskStatus  = decrypt($task["status"], $encryption_key, $ivTask);          // '0' open, '1' done
+                    $taskPrio    = decode_all(decrypt($task["prioritaet"], $encryption_key, $ivTask));
+                    $taskCreated = decrypt($task["created_at"], $encryption_key, $ivTask);
 
-            <?php foreach ($getRapports as $rapport):
-                $ivRapp = base64_decode($rapport['iv']);
+                    // Collect this task's reports
+                    $entries     = [];
+                    $totalSec    = 0;
+                    $lastTs      = null;
+                    foreach ($getRapports as $rapport):
+                        if ($rapport["fk_aufgabeId"] != $task["aufgabeId"]) continue;
+                        $ivR     = base64_decode($rapport['iv']);
+                        $rZeit   = decrypt($rapport["zeit"], $encryption_key, $ivR);
+                        $rText   = decode_all(decrypt($rapport["rapport"], $encryption_key, $ivR));
+                        $rCreate = decrypt($rapport["created_at"], $encryption_key, $ivR);
+                        $rTs     = strtotime($rCreate);
+                        $totalSec += max(0, strtotime($rZeit) - strtotime("00:00:00"));
+                        if ($lastTs === null || $rTs > $lastTs) $lastTs = $rTs;
+                        $entries[] = ['id' => $rapport["rapportId"], 'zeit' => $rZeit, 'text' => $rText, 'ts' => $rTs];
+                    endforeach;
 
-                if ($rapport["fk_aufgabeId"] == $task["aufgabeId"]):
-                    $rapportCounter++;
-                    if ($rapportCounter == 1): ?>
-                        <div>
-                            <table class='data w-full overflow-hidden rounded-xl border border-solid border-surface-700 bg-surface-800 text-sm text-surface-200 shadow-lg' id="<?= str_replace(" ", "", $taskTitle) ?>">
-                                <tr class="bg-surface-700/40">
-                                    <th class="px-3 py-3 text-left text-base font-semibold italic text-white">
-                                        <p><?= $taskTitle ?></p>
-                                    </th>
-                                    <th class="px-3 py-3 text-left font-semibold text-surface-200">When</th>
-                                    <th class="px-3 py-3 text-left font-semibold text-surface-200">Duration</th>
-                                    <th class="px-3 py-3 text-left font-semibold text-surface-200">Edit / Delete</th>
-                                </tr>
-
-                                <tr class="border-t border-solid border-surface-700">
-                                    <td class="px-3 py-2"><?= decrypt($rapport["rapport"], $encryption_key, $ivRapp) ?></td>
-                                    <td class="px-3 py-2 text-surface-300"><i class="fas fa-calendar-days"></i> <?= date("dS M Y", strtotime(decrypt($rapport["created_at"], $encryption_key, $ivRapp))) ?></td>
-                                    <td class="px-3 py-2 text-surface-300"><i class="fas fa-clock"></i> <?= decrypt($rapport["zeit"], $encryption_key, $ivRapp) ?></td>
-                                    <?php
-                                        $timeinsec = strtotime(decrypt($rapport["zeit"], $encryption_key, $ivRapp)) - $sum;
-                                        $totaltime += $timeinsec;
-                                        $created_at = strtotime(decrypt($rapport["created_at"], $encryption_key, $ivRapp));
-                                    ?>
-                                    <td class='editDelete px-3 py-2'>
-                                        <?php if ($created_at >= strtotime("-1 day")): ?>
-                                            <button type="button" title="Edit rapport and time" aria-label="Edit rapport and time" onclick='editTime(<?= $rapport["rapportId"] ?>)' class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"><?= icon('pencil', 'h-4 w-4') ?></button>
-                                            <button type="button" title="Delete rapport and time" aria-label="Delete rapport and time" onclick='deleteTime(<?= $rapport["rapportId"] ?>)' class="ml-1 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-red-300 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500"><?= icon('trash', 'h-4 w-4') ?></button>
-                                        <?php else: ?>
-                                            <td></td>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-
-                            <?php else:
-                                if ($rapportCounter == 5): ?>
-                                    <tr class="border-t border-solid border-surface-700">
-                                        <td class="px-3 py-2"><button class="btn-secondary" title='Look into the history' onclick='showHistory(<?= $task["aufgabeId"] ?>)'><i class='fa fa-archive'></i>&nbsp History</button></td>
-                                    </tr>
-                                    <?php break; ?>
-                                <?php else: ?>
-                                    <tr class="border-t border-solid border-surface-700">
-                                        <td class="px-3 py-2"><?= decrypt($rapport["rapport"], $encryption_key, $ivRapp) ?></td>
-                                        <td class="px-3 py-2 text-surface-300"><i class="fas fa-calendar-days"></i> <?= date("dS M Y", strtotime(decrypt($rapport["created_at"], $encryption_key, $ivRapp))) ?></td>
-                                        <td class="px-3 py-2 text-surface-300"><i class="fas fa-clock"></i> <?= decrypt($rapport["zeit"], $encryption_key, $ivRapp) ?></td>
-                                        <td class='editDelete px-3 py-2'>
-                                            <?php if ($created_at >= strtotime("-1 day")): ?>
-                                                <button type="button" title="Edit rapport and time" aria-label="Edit rapport and time" onclick='editTime(<?= $rapport["rapportId"] ?>)' class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"><?= icon('pencil', 'h-4 w-4') ?></button>
-                                                <button type="button" title="Delete rapport and time" aria-label="Delete rapport and time" onclick='deleteTime(<?= $rapport["rapportId"] ?>)' class="ml-1 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-red-300 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500"><?= icon('trash', 'h-4 w-4') ?></button>
-                                            <?php else: ?>
-                                                <td></td>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-
-                    <?php if ($rapportCounter == 0): ?>
-                        <div>
-                            <table class='data w-full overflow-hidden rounded-xl border border-solid border-surface-700 bg-surface-800 text-sm text-surface-200 shadow-lg' id="<?= $taskTitle ?>">
-                                <tr class="bg-surface-700/40"><th class="px-3 py-3 text-left text-base font-semibold italic text-white"><p><?= $taskTitle ?></p></th></tr>
-                                <tr class="border-t border-solid border-surface-700">
-                                    <td class="px-3 py-2 text-center font-semibold text-red-400">No rapports found</td>
-                                </tr>
-                            </table>
+                    $entryCount  = count($entries);
+                    $h = intval($totalSec / 3600);
+                    $m = intval(($totalSec % 3600) / 60);
+                    $totalLabel  = ($h > 0 ? $h . 'h ' : '') . $m . 'm';
+                    $isDone      = ($taskStatus === '1');
+                ?>
+                    <article class="data overflow-hidden rounded-2xl border border-solid border-surface-700 bg-surface-800 shadow-lg">
+                        <!-- Card header -->
+                        <div class="flex flex-wrap items-start justify-between gap-3 border-0 border-b border-solid border-surface-700 p-5">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h2 class="truncate text-lg font-semibold text-white"><?= htmlspecialchars($taskTitle, ENT_QUOTES, 'UTF-8') ?></h2>
+                                    <?php if ($isDone): ?>
+                                        <span class="badge bg-green-500/15 text-green-300 ring-1 ring-inset ring-green-500/30"><i class="fas fa-check mr-1"></i>Completed</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-amber-500/15 text-amber-300 ring-1 ring-inset ring-amber-500/30"><i class="fas fa-circle-dot mr-1"></i>Open</span>
+                                    <?php endif; ?>
+                                    <span class="badge bg-brand-500/15 text-brand-200 ring-1 ring-inset ring-brand-500/30">Priority <?= htmlspecialchars($taskPrio, ENT_QUOTES, 'UTF-8') ?></span>
+                                </div>
+                                <p class="mt-1 text-sm text-surface-400">
+                                    <i class="fas fa-calendar-days mr-1"></i>Created <?= htmlspecialchars(date("d M Y", strtotime($taskCreated)), ENT_QUOTES, 'UTF-8') ?>
+                                </p>
+                            </div>
+                            <!-- Per-task actions -->
+                            <div class="flex shrink-0 items-center gap-2">
+                                <a href="export_pdf?id=<?= (int) $task['aufgabeId'] ?>"
+                                   title="Export this task's time report as PDF" aria-label="Export PDF"
+                                   class="btn-secondary !px-3 !py-2 text-sm">
+                                    <?= icon('download', 'h-4 w-4') ?> Export PDF
+                                </a>
+                            </div>
                         </div>
-                    <?php elseif ($rapportCounter < 5):
-                        $h = intval($totaltime / 3600);
-                        $totaltime -= $h * 3600;
-                        $m = intval($totaltime / 60);
-                        $s = $totaltime - $m * 60;
-                    ?>
-                        <tr class="border-t border-solid border-surface-700">
-                            <td class="px-3 py-2"><strong>Total time spent: <span class="text-red-400">
-                                <?php
-                                    $Time = new TimeController();
-                                    $Time->formatTimeOutput($h, $m, $s);
-                                ?>
-                            </span></strong></td>
-                        </tr>
-                    <?php endif; ?>
+
+                        <!-- Summary stats -->
+                        <div class="grid grid-cols-2 gap-px bg-surface-700 sm:grid-cols-4">
+                            <div class="bg-surface-800 p-4">
+                                <div class="text-xs font-medium uppercase tracking-wide text-surface-400">Total time</div>
+                                <div class="mt-1 text-lg font-semibold text-white"><?= $entryCount ? htmlspecialchars($totalLabel, ENT_QUOTES, 'UTF-8') : '—' ?></div>
+                            </div>
+                            <div class="bg-surface-800 p-4">
+                                <div class="text-xs font-medium uppercase tracking-wide text-surface-400">Entries</div>
+                                <div class="mt-1 text-lg font-semibold text-white"><?= (int) $entryCount ?></div>
+                            </div>
+                            <div class="bg-surface-800 p-4">
+                                <div class="text-xs font-medium uppercase tracking-wide text-surface-400">Last activity</div>
+                                <div class="mt-1 text-lg font-semibold text-white"><?= $lastTs ? htmlspecialchars(date("d M Y", $lastTs), ENT_QUOTES, 'UTF-8') : '—' ?></div>
+                            </div>
+                            <div class="bg-surface-800 p-4">
+                                <div class="text-xs font-medium uppercase tracking-wide text-surface-400">Status</div>
+                                <div class="mt-1 text-lg font-semibold <?= $isDone ? 'text-green-300' : 'text-amber-300' ?>"><?= $isDone ? 'Completed' : 'Open' ?></div>
+                            </div>
+                        </div>
+
+                        <!-- Entries table -->
+                        <div class="p-5">
+                            <?php if ($entryCount > 0): ?>
+                                <div class="max-h-96 overflow-auto rounded-lg border border-solid border-surface-700">
+                                    <table class="w-full border-collapse text-sm">
+                                        <thead class="sticky top-0 z-10">
+                                            <tr class="bg-surface-900 text-left text-xs uppercase tracking-wide text-surface-400">
+                                                <th class="px-4 py-3 font-semibold">Date</th>
+                                                <th class="px-4 py-3 font-semibold">Duration</th>
+                                                <th class="px-4 py-3 font-semibold">Report</th>
+                                                <th class="px-4 py-3 text-right font-semibold">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($entries as $e): ?>
+                                                <tr class="border-0 border-t border-solid border-surface-700 transition-colors hover:bg-surface-700/40">
+                                                    <td class="whitespace-nowrap px-4 py-3 text-surface-300">
+                                                        <i class="fas fa-calendar-days mr-1 text-surface-500"></i><?= htmlspecialchars(date("d M Y", $e['ts']), ENT_QUOTES, 'UTF-8') ?>
+                                                    </td>
+                                                    <td class="whitespace-nowrap px-4 py-3">
+                                                        <span class="badge bg-brand-500/15 font-mono text-brand-200"><i class="fas fa-clock mr-1"></i><?= htmlspecialchars($e['zeit'], ENT_QUOTES, 'UTF-8') ?></span>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-surface-200"><?= htmlspecialchars($e['text'], ENT_QUOTES, 'UTF-8') ?></td>
+                                                    <td class="px-4 py-3">
+                                                        <div class="flex items-center justify-end gap-2">
+                                                            <?php if ($e['ts'] >= strtotime("-1 day")): ?>
+                                                                <button type="button" title="Edit rapport and time" aria-label="Edit rapport and time" onclick='editTime(<?= (int) $e["id"] ?>)' class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"><?= icon('pencil', 'h-4 w-4') ?></button>
+                                                                <button type="button" title="Delete rapport and time" aria-label="Delete rapport and time" onclick='deleteTime(<?= (int) $e["id"] ?>)' class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-red-300 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500"><?= icon('trash', 'h-4 w-4') ?></button>
+                                                            <?php else: ?>
+                                                                <span class="text-xs text-surface-500">Locked</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php else: ?>
+                                <div class="rounded-lg border border-dashed border-surface-700 px-4 py-8 text-center text-surface-400">
+                                    <i class="fas fa-clock mb-2 block text-2xl text-surface-600"></i>
+                                    No time reported for this task yet.
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </article>
                 <?php endforeach; ?>
+            </div>
+
+            <!-- No search results -->
+            <div id="nothingFound" class="flex flex-col items-center gap-4 py-12 text-center" style="display:none;">
+                <img src="images/sad_smiley.png" alt="" class="h-20 w-20 opacity-80">
+                <h2 class="text-xl font-semibold text-surface-200">Nothing found</h2>
             </div>
         <?php else: ?>
             <div class="noData">
@@ -145,14 +188,9 @@ include "header.php";
                 <p class="text-surface-300">Add a task, work on it by creating a record and then you'll find it here</p>
             </div>
         <?php endif; ?>
+    </main>
 
-    <div id="nothingFound" class="flex flex-col items-center gap-4 py-10 text-center" style="display:none;">
-        <h1 class="text-2xl font-bold text-surface-200">Nothing found</h1>
-        <img src="images/sad_smiley.png" alt="">
-    </div>
-
-<?php include "app/Views/footer.view.php"; ?>
-
+    <?php include "app/Views/footer.view.php"; ?>
 </body>
 
 </html>

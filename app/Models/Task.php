@@ -195,7 +195,17 @@ class Task
 		$statement->bindParam(':id', $id, PDO::PARAM_INT);
 		$statement->execute();
 		return $statement->fetch(PDO::FETCH_ASSOC);  // Rückgabe als assoziatives Array
-	}	
+	}
+
+	/* Get a task ONLY if it belongs to the given user (authorization for export) */
+	public function getOwnedTask($id, $userId){
+		$statement = $this->db->prepare('SELECT * FROM aufgabe WHERE aufgabeId = :id AND fk_benutzerId = :uid');
+		$statement->bindParam(':id', $id, PDO::PARAM_INT);
+		$statement->bindParam(':uid', $userId, PDO::PARAM_INT);
+		$statement->execute();
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+		return $result ?: null;
+	}
 
 	/* If task completed on point user receives one minus point */
 	public function complete_task($id) {

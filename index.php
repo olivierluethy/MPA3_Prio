@@ -24,6 +24,7 @@ $routes = [
 	'edit_time' => 'TimeController@edit_time',
 	'delete_time' => 'TimeController@delete_time',
 	'showHistory' => 'TimeController@showHistory',
+	'export_pdf' => 'TimeController@export_pdf',
 
 	/* Essay schreiben, akzeptieren und ablehnen */
 	'essay' => 'EssayController@essay',

@@ -109,24 +109,24 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                             if ($decrypted_status !== '0') continue;
 
                             // Decrypted values for the in-page edit modal (data-* attributes)
-                            $t_title    = decrypt($task["titel"], $encryption_key, $iv);
-                            $t_desc     = htmlspecialchars_decode(decrypt($task["beschreibung"], $encryption_key, $iv));
-                            $t_motiv    = htmlspecialchars_decode(decrypt($task["motivation"], $encryption_key, $iv));
-                            $t_deadline = decrypt($task["deadline"], $encryption_key, $iv);
-                            $t_prio     = decrypt($task['prioritaet'], $encryption_key, $iv);
+                            $t_title    = decode_all(decrypt($task["titel"], $encryption_key, $iv));
+                            $t_desc     = decode_all(decrypt($task["beschreibung"], $encryption_key, $iv));
+                            $t_motiv    = decode_all(decrypt($task["motivation"], $encryption_key, $iv));
+                            $t_deadline = decode_all(decrypt($task["deadline"], $encryption_key, $iv));
+                            $t_prio     = decode_all(decrypt($task['prioritaet'], $encryption_key, $iv));
                         ?>
                         <div class='task overflow-x-auto rounded-xl border border-solid border-surface-700 bg-surface-800 p-5 shadow-lg'>
                             <table class="w-full">
                                 <tr class="align-top">
-                                    <th class="px-3 py-2 text-left"><h1 class="text-lg font-semibold text-white"><?php echo htmlspecialchars(decrypt($task["titel"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></h1></th>
+                                    <th class="px-3 py-2 text-left"><h1 class="text-lg font-semibold text-white"><?php echo display_text(decrypt($task["titel"], $encryption_key, $iv)); ?></h1></th>
                                     <th class="px-3 py-2 text-left font-normal">
                                         <textarea readonly class='ckeditor' name='description' id='description_open'>
-                                            <?php echo htmlspecialchars_decode(decrypt($task["beschreibung"], $encryption_key, $iv)) ?>
+                                            <?php echo display_html(decrypt($task["beschreibung"], $encryption_key, $iv)) ?>
                                         </textarea>
                                     </th>
                                     <th class="px-3 py-2 text-left font-normal">
                                         <textarea readonly class='ckeditor' name='motivation' id='motivation_open'>
-                                            <?php echo htmlspecialchars_decode(decrypt($task["motivation"], $encryption_key, $iv)) ?>
+                                            <?php echo display_html(decrypt($task["motivation"], $encryption_key, $iv)) ?>
                                         </textarea>
                                     </th>
                                     <th class="whitespace-nowrap px-3 py-2 text-sm text-surface-300"><i class="fas fa-calendar-days mr-1"></i><?php echo htmlspecialchars(date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8'); ?></th>
@@ -170,13 +170,13 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                                     <th class="px-3 py-2">
                                         <div class="flex flex-col items-center gap-1">
                                             <button type="button" title="Increase priority" aria-label="Increase priority" onclick="higherPrio(<?=$task['aufgabeId']?>)"
-                                                    class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-brand-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                                    class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-solid border-green-500/40 bg-green-500/15 text-green-400 shadow-sm transition hover:-translate-y-0.5 hover:bg-green-600 hover:text-white hover:shadow-green-900/40 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-surface-800 active:translate-y-0 active:scale-95">
                                                 <?= icon('chevron-up', 'h-4 w-4') ?>
                                             </button>
-                                            <p class="badge bg-surface-700 text-surface-100"><?= htmlspecialchars(decrypt($task['prioritaet'], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <p class="badge bg-surface-700 text-surface-100"><?= display_text(decrypt($task['prioritaet'], $encryption_key, $iv)); ?></p>
                                             <?php if (decrypt($task['prioritaet'], $encryption_key, $iv) > 0) { ?>
                                             <button type="button" title="Decrease priority" aria-label="Decrease priority" onclick="lowerPrio(<?=$task['aufgabeId']?>)"
-                                                    class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-brand-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                                    class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-solid border-red-500/40 bg-red-500/15 text-red-400 shadow-sm transition hover:translate-y-0.5 hover:bg-red-600 hover:text-white hover:shadow-red-900/40 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-surface-800 active:translate-y-0 active:scale-95">
                                                 <?= icon('chevron-down', 'h-4 w-4') ?>
                                             </button>
                                             <?php } ?>
@@ -210,15 +210,15 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                             <div class='task overflow-x-auto rounded-xl border border-solid border-surface-700 bg-surface-800 p-5 shadow-lg opacity-90'>
                                 <table class="w-full">
                                     <tr class="align-top">
-                                        <th class="px-3 py-2 text-left"><h1 class="text-lg font-semibold text-white"><?php echo htmlspecialchars(decrypt($task["titel"], $encryption_key, $iv), ENT_QUOTES, 'UTF-8'); ?></h1></th>
+                                        <th class="px-3 py-2 text-left"><h1 class="text-lg font-semibold text-white"><?php echo display_text(decrypt($task["titel"], $encryption_key, $iv)); ?></h1></th>
                                         <th class="px-3 py-2 text-left font-normal">
                                             <textarea readonly class='ckeditor' name='description' id='description_open'>
-                                                <?php echo htmlspecialchars_decode(decrypt($task["beschreibung"], $encryption_key, $iv)) ?>
+                                                <?php echo display_html(decrypt($task["beschreibung"], $encryption_key, $iv)) ?>
                                             </textarea>
                                         </th>
                                         <th class="px-3 py-2 text-left font-normal">
                                             <textarea readonly class='ckeditor' name='motivation' id='motivation_open'>
-                                                <?php echo htmlspecialchars_decode(decrypt($task["motivation"], $encryption_key, $iv)) ?>
+                                                <?php echo display_html(decrypt($task["motivation"], $encryption_key, $iv)) ?>
                                             </textarea>
                                         </th>
                                         <th class="whitespace-nowrap px-3 py-2 text-sm text-surface-300"><i class="fas fa-calendar-days mr-1"></i><?php echo htmlspecialchars(date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8'); ?></th>

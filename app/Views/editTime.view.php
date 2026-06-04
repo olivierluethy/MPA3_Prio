@@ -26,7 +26,7 @@
             <h2 class="text-2xl font-bold text-white">Edit time record</h2>
             <div>
                 <label for="rapport" class="label">Rapport:</label>
-                <input id="rapport" type="text" name="rapport" value="<?= $rapport ?>" class="input" />
+                <input id="rapport" type="text" name="rapport" value="<?= display_text($rapport) ?>" class="input" />
             </div>
             <div>
                 <label for="appt-time" class="label">Time:</label>
