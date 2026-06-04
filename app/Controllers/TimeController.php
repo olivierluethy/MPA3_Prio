@@ -104,7 +104,7 @@ class TimeController
 
             $Time->edit_time($id, $rapport, $time);
 
-            header('Location: http://localhost/Prio/zeituebersicht');
+            header('Location: zeituebersicht');
         }
 		/* Needed data to show data that can be changed */
 		else{

@@ -1,0 +1,21 @@
+# ============================================================================
+# Development overrides.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# Bind-mounts the source tree for live PHP editing and exposes the MySQL port.
+# The baked-in vendor/ directory is preserved via an anonymous volume.
+# For live Tailwind rebuilds run `npm run watch` on the host (see README).
+# ============================================================================
+
+services:
+  app:
+    environment:
+      APP_ENV: local
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/vendor
+
+  db:
+    ports:
+      - "${DB_PORT:-3306}:3306"

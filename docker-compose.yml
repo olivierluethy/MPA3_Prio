@@ -1,0 +1,67 @@
+# ============================================================================
+# Prio — default (client-facing) stack.
+#
+#   Start:   docker compose up -d --build
+#   Open:    http://localhost:8080   (or your APP_PORT)
+#
+# Everything (PHP dependencies, Tailwind CSS build, database schema) is handled
+# automatically. No host installation of PHP, MySQL, Composer or Node required.
+# ============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: app
+    image: prio-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_BASE_PATH: ${APP_BASE_PATH:-}
+      APP_URL: ${APP_URL:-}
+      DB_SERVER: db
+      DB_NAME: ${DB_NAME:-prio}
+      DB_USERNAME: ${DB_USERNAME:-prio}
+      DB_PASSWORD: ${DB_PASSWORD:-prio_secret}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-change_me_dev_key_0123456789abcd}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/about"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - prio
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-prio}
+      MYSQL_USER: ${DB_USERNAME:-prio}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-prio_secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./Prio.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - prio
+
+volumes:
+  db_data:
+
+networks:
+  prio:
+    driver: bridge

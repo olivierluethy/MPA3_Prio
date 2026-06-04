@@ -8,22 +8,23 @@ function navSwitch(num) {
     if (num == 1) {
         login.style.display = "none";
         title.innerHTML = "Register";
-        document.getElementById("registerButton").style.backgroundColor = "white";
-        document.getElementById("loginButton").style.backgroundColor = "black";
+        // Dark-theme active/inactive colors (brand accent vs. muted surface)
+        document.getElementById("registerButton").style.backgroundColor = "#4f46e5";
+        document.getElementById("loginButton").style.backgroundColor = "#1e293b";
 
-        document.getElementById("registerButton").style.color = "black";
-        document.getElementById("loginButton").style.color = "white";
+        document.getElementById("registerButton").style.color = "#ffffff";
+        document.getElementById("loginButton").style.color = "#94a3b8";
         register.style.display = "block";
     } else {
         login.style.display = "block";
         register.style.display = "none";
         title.innerHTML = "Login";
 
-        document.getElementById("registerButton").style.backgroundColor = "black";
-        document.getElementById("loginButton").style.backgroundColor = "white";
+        document.getElementById("registerButton").style.backgroundColor = "#1e293b";
+        document.getElementById("loginButton").style.backgroundColor = "#4f46e5";
 
-        document.getElementById("registerButton").style.color = "white";
-        document.getElementById("loginButton").style.color = "black";
+        document.getElementById("registerButton").style.color = "#94a3b8";
+        document.getElementById("loginButton").style.color = "#ffffff";
     }
 }
 

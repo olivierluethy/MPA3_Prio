@@ -1,4 +1,4 @@
-<footer>
+<footer class="site-footer">
         <div class="footer-content">
             <div class="footer-logo">
                 <img src="images/logo.png" alt="Prio Logo" class="footer-logo-img">

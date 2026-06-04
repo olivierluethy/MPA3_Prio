@@ -8,21 +8,22 @@ function navSwitch(num) {
         done.style.display = "none";
         open.style.display = "block";
 
-        document.getElementById("openButton").style.backgroundColor = "white";
-        document.getElementById("doneButton").style.backgroundColor = "black";
+        // Dark-theme active/inactive colors (brand accent vs. muted surface)
+        document.getElementById("openButton").style.backgroundColor = "#4f46e5";
+        document.getElementById("doneButton").style.backgroundColor = "#1e293b";
 
-        document.getElementById("openButton").style.color = "black";
-        document.getElementById("doneButton").style.color = "white";
+        document.getElementById("openButton").style.color = "#ffffff";
+        document.getElementById("doneButton").style.color = "#94a3b8";
     }
     /* Done */
     else {
         done.style.display = "block";
         open.style.display = "none";
 
-        document.getElementById("openButton").style.backgroundColor = "black";
-        document.getElementById("doneButton").style.backgroundColor = "white";
+        document.getElementById("openButton").style.backgroundColor = "#1e293b";
+        document.getElementById("doneButton").style.backgroundColor = "#4f46e5";
 
-        document.getElementById("openButton").style.color = "white";
-        document.getElementById("doneButton").style.color = "black";
+        document.getElementById("openButton").style.color = "#94a3b8";
+        document.getElementById("doneButton").style.color = "#ffffff";
     }
 }

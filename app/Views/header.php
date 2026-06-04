@@ -1,5 +1,5 @@
 <!-- Der Navigations-Bereich -->
-<nav>
+<nav class="site-header">
     <div class="part1" onclick="home()">
         <img src="images/logo.png" alt="">
         <h1>Prio</h1>

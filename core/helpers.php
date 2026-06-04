@@ -28,6 +28,47 @@ function get(string $key, $default = '', callable $filter = null)
 
 
 /**
+ * Liest eine Konfiguration aus den Umgebungsvariablen
+ * ($_ENV via phpdotenv oder echte Prozess-Umgebung).
+ */
+function env(string $key, $default = null)
+{
+    if (array_key_exists($key, $_ENV)) {
+        return $_ENV[$key];
+    }
+    $value = getenv($key);
+    return $value === false ? $default : $value;
+}
+
+/**
+ * Basis-Pfad der Anwendung (z. B. "" am Web-Root oder "/Prio"
+ * in einem Unterverzeichnis). Über APP_BASE_PATH konfigurierbar,
+ * damit keine Pfade fest verdrahtet werden müssen.
+ */
+function base_path(): string
+{
+    return rtrim((string) env('APP_BASE_PATH', ''), '/');
+}
+
+/**
+ * Baut eine anwendungsinterne URL relativ zum konfigurierten Basis-Pfad.
+ */
+function url(string $path = ''): string
+{
+    $path = ltrim($path, '/');
+    $base = base_path();
+    return $base === '' ? '/' . $path : $base . '/' . $path;
+}
+
+/**
+ * Baut eine URL zu einer statischen Datei (public/, images/ usw.).
+ */
+function asset(string $path): string
+{
+    return url($path);
+}
+
+/**
  * Stellt eine Verbindung zur Datenbank her und gibt die
  * Datenbankverbindung als PDO zurück.
  */

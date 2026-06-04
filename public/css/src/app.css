@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================================================
+   Prio — dark-only design system (Tailwind).
+
+   Migration notes:
+   - Tailwind Preflight is DISABLED (see tailwind.config.js) so that loading
+     this stylesheet on a page does not reset/alter legacy, not-yet-migrated
+     content. Components therefore declare `border-solid` / `box-border`
+     explicitly instead of relying on Preflight's global resets.
+   - This stylesheet is appended *after* the legacy CSS on every page, so its
+     scoped rules win by load order + specificity without editing legacy files.
+   - No light theme, no toggle: the dark palette is the only theme.
+   =========================================================================== */
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  /* Global dark theme. Safe now that every view loads only app.css (the legacy
+     per-page stylesheets are no longer linked). */
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    @apply bg-surface-900 font-sans text-surface-100;
+  }
+}
+
+/* ===========================================================================
+   Shared layout — Navigation (migrated in Checkpoint 2)
+   Scoped under .site-header so these rules reliably override navigation.css.
+   The markup keeps every legacy class/id/onclick the JS relies on
+   (#nav, .part2, .responsive, .burger, .part1, .active, .loginBtn).
+   =========================================================================== */
+@layer components {
+  .site-header {
+    @apply sticky top-0 z-[100] flex w-full items-center justify-between
+           border-0 border-b border-solid border-surface-700
+           bg-surface-800 px-4 py-3 text-surface-100 shadow-lg sm:px-8;
+  }
+
+  .site-header .part1 {
+    @apply flex w-auto cursor-pointer items-center gap-3;
+    margin-left: 0;
+  }
+  .site-header .part1 img {
+    @apply h-10 w-10 min-w-0 object-contain transition-transform duration-300;
+  }
+  .site-header .part1 img:hover {
+    @apply scale-110;
+  }
+  .site-header .part1 h1 {
+    @apply m-0 text-xl font-bold text-white transition;
+  }
+
+  .site-header .burger {
+    @apply hidden cursor-pointer text-3xl leading-none text-surface-200 hover:text-white;
+  }
+
+  .site-header .part2 {
+    @apply flex w-auto items-center justify-end gap-2;
+    margin: 0;
+  }
+
+  /* Nav links (e.g. Admin Area) */
+  .site-header .part2 a {
+    @apply ml-0 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold
+           text-surface-200 no-underline transition-colors hover:bg-surface-700 hover:text-white;
+  }
+  .site-header .part2 a.active {
+    @apply bg-surface-700 not-italic text-brand-300;
+  }
+
+  /* Nav buttons (About, Tasks, Time records, Logout) */
+  .site-header .part2 button {
+    @apply m-0 ml-0 inline-flex cursor-pointer items-center gap-2 rounded-lg
+           border-0 bg-transparent px-3 py-2 text-sm font-semibold text-surface-200
+           shadow-none transition-colors hover:bg-surface-700 hover:text-white;
+  }
+  .site-header .part2 button.active {
+    @apply border-0 bg-surface-700 text-brand-300;
+  }
+
+  /* The primary "Login" call to action */
+  .site-header .part2 button.loginBtn {
+    @apply bg-brand-600 text-white hover:bg-brand-500 hover:text-white;
+  }
+
+  /* Mobile dropdown — toggled by responsive() adding `.responsive` to #nav */
+  @media screen and (max-width: 767px) {
+    .site-header .burger {
+      @apply block;
+    }
+    .site-header .part2 {
+      @apply absolute left-0 top-[64px] hidden w-full flex-col items-stretch gap-1
+             border-0 border-t border-solid border-surface-700 bg-surface-900 p-4 text-center;
+    }
+    .site-header .part2.responsive {
+      @apply flex;
+    }
+    .site-header .part2 a,
+    .site-header .part2 button {
+      @apply mx-auto block w-full justify-center;
+    }
+  }
+}
+
+/* ===========================================================================
+   Shared layout — Footer (migrated in Checkpoint 2)
+   Scoped under .site-footer (class beats `footer` and `body footer`).
+   =========================================================================== */
+@layer components {
+  .site-footer {
+    @apply w-full border-0 border-t border-solid border-surface-700
+           bg-surface-800 text-surface-300;
+  }
+  .site-footer .footer-content {
+    @apply flex flex-wrap items-center justify-around gap-6 p-6;
+  }
+  .site-footer .footer-logo {
+    @apply flex items-center gap-3;
+  }
+  .site-footer .footer-logo-img {
+    @apply h-12 w-12 object-contain;
+  }
+  .site-footer .footer-logo h2 {
+    @apply m-0 text-lg font-bold text-white;
+  }
+  .site-footer .footer-links ul {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+  .site-footer .footer-links li {
+    @apply m-0;
+  }
+  .site-footer .footer-links a {
+    @apply text-surface-300 no-underline transition-colors hover:text-white hover:underline;
+  }
+  .site-footer .footer-bottom {
+    @apply border-0 border-t border-solid border-surface-700 py-3 text-center text-sm text-surface-400;
+  }
+
+  @media (max-width: 768px) {
+    .site-footer .footer-content {
+      @apply flex-col text-center;
+    }
+  }
+}
+
+/* ===========================================================================
+   Reusable component library (used progressively in Part C).
+   These class names do NOT exist in the legacy CSS, so they are inert until
+   referenced by migrated views (Tailwind only ships them when used).
+   =========================================================================== */
+@layer components {
+  /* Buttons */
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg
+           border-0 px-4 py-2 text-sm font-medium transition-colors
+           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-900;
+  }
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-500 focus:ring-brand-500;
+  }
+  .btn-secondary {
+    @apply btn bg-surface-700 text-surface-100 hover:bg-surface-600 focus:ring-surface-500;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-500 focus:ring-red-500;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-surface-200 hover:bg-surface-800 focus:ring-surface-600;
+  }
+
+  /* Cards */
+  .card {
+    @apply rounded-xl border border-solid border-surface-700 bg-surface-800 p-6 shadow-lg;
+  }
+
+  /* Forms */
+  .label {
+    @apply mb-1 block text-sm font-medium text-surface-200;
+  }
+  .input {
+    @apply block w-full rounded-lg border border-solid border-surface-600 bg-surface-900
+           px-3 py-2 text-surface-100 placeholder-surface-400
+           focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+  }
+
+  /* Tables (.table class — legacy tables use other classes, no clash) */
+  .table {
+    @apply w-full text-left text-sm text-surface-200;
+  }
+  .table th {
+    @apply px-4 py-3 font-semibold text-surface-100;
+  }
+  .table td {
+    @apply border-0 border-t border-solid border-surface-700 px-4 py-3;
+  }
+
+  /* Alerts */
+  .alert {
+    @apply rounded-lg border border-solid px-4 py-3 text-sm;
+  }
+  .alert-info {
+    @apply alert border-brand-700 bg-brand-950 text-brand-100;
+  }
+  .alert-danger {
+    @apply alert border-red-700 bg-red-950 text-red-100;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  /* Client-side validation messages (injected by the validation JS as
+     <label class="warning">). */
+  .warning {
+    @apply mt-1 block text-sm font-medium text-red-400;
+  }
+
+  /* Empty-state blocks */
+  .noData {
+    @apply flex flex-col items-center gap-3 py-16 text-center;
+  }
+}
+
+/* ===========================================================================
+   CKEditor 4 (vendored, intentionally untouched).
+   These rules live OUTSIDE @layer so Tailwind never purges them (the .cke_*
+   classes are generated at runtime and don't appear in scanned source).
+   Only the surrounding chrome is adjusted — the editing area is an iframe
+   styled by ckeditor/contents.css and is left as-is per project constraints.
+   The readonly editors used on the home page hide their toolbar, exactly as
+   the legacy home.css did.
+   =========================================================================== */
+.task .cke_top,
+.essay .cke_top {
+  display: none;
+}
+.task .cke,
+.task .cke_chrome,
+.essay .cke,
+.essay .cke_chrome {
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  box-shadow: none;
+}

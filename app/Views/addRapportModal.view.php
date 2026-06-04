@@ -1,135 +1,24 @@
-<style>
-body {
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    padding-top: 100px;
-    left: 25%;
-    top: 0;
-    width: 50%;
-    height: 100%;
-    overflow: auto;
-}
-.modal-content {
-    position: relative;
-    background-color: #fefefe;
-    margin: auto;
-    padding: 0;
-    border: 1px solid #888;
-    width: 80%;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    -webkit-animation-name: animatetop;
-    -webkit-animation-duration: 0.4s;
-    animation-name: animatetop;
-    animation-duration: 0.4s
-}
-
-/* Add Animation */
-@-webkit-keyframes animatetop {
-    from {
-        top: -300px;
-        opacity: 0
-    }
-
-    to {
-        top: 0;
-        opacity: 1
-    }
-}
-
-@keyframes animatetop {
-    from {
-        top: -300px;
-        opacity: 0
-    }
-
-    to {
-        top: 0;
-        opacity: 1
-    }
-}
-
-/* The Close Button */
-.close {
-    color: white;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.modal-header {
-    padding: 2px 16px;
-    background-color: royalblue;
-    color: white;
-}
-
-.modal-body {
-    padding: 2px 16px;
-}
-
-.modal-footer {
-    padding: 2px 16px;
-    background-color: #5cb85c;
-    color: white;
-}
-
-input[type=text],
-input[type=time] {
-    width: 50%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    box-sizing: border-box;
-}
-
-input[type=submit] {
-    background-color: #4CAF50;
-    border: 1px solid #4CAF50;
-    color: white;
-    padding: 16px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    transition-duration: 0.4s;
-    cursor: pointer;
-}
-
-input[type=submit]:hover {
-    background-color: white;
-    color: black;
-}
-</style>
-
-<!-- The Modal -->
-<div id="myModal" class="modal">
+<!-- The Modal (kept hidden via inline display:none; toggled by time_recording.js) -->
+<div id="myModal" class="modal fixed inset-0 z-[1000] overflow-auto bg-black/60 pt-24" style="display: none;">
 
     <!-- Modal content -->
-    <div class="modal-content">
-        <div class="modal-header">
-            <span class="close">&times;</span>
-            <h2>Add Rapport</h2>
+    <div class="modal-content mx-auto w-[90%] max-w-lg overflow-hidden rounded-xl border border-solid border-surface-700 bg-surface-800 shadow-2xl">
+        <div class="modal-header flex items-center justify-between bg-brand-600 px-5 py-3 text-white">
+            <h2 class="text-lg font-semibold">Add Rapport</h2>
+            <span class="close cursor-pointer text-2xl font-bold leading-none text-white/80 hover:text-white">&times;</span>
         </div>
-        <div class="modal-body">
-            <form action="addTimeRecord" method="POST">
-                <br>
-                <label for="rapport">Rapport:</label><br>
-                <input placeholder="What did you achieve?" id="rapport" type="text" name="rapport" /><br><br>
-                <label for="passwort">Time:</label><br>
-                <input id="appt-time" type="time" name="time" step="2" readonly /><br>
-                <input style="display: none;" id="taskId" type="text" name="taskId" /><br>
-                <input title="Add time to time recording" type="submit" value="Add time"><br>
+        <div class="modal-body p-5">
+            <form action="addTimeRecord" method="POST" class="space-y-4">
+                <div>
+                    <label for="rapport" class="label">Rapport:</label>
+                    <input placeholder="What did you achieve?" id="rapport" type="text" name="rapport" class="input" />
+                </div>
+                <div>
+                    <label for="appt-time" class="label">Time:</label>
+                    <input id="appt-time" type="time" name="time" step="2" readonly class="input" />
+                </div>
+                <input style="display: none;" id="taskId" type="text" name="taskId" />
+                <button title="Add time to time recording" type="submit" class="btn-primary w-full">Add time</button>
             </form>
         </div>
     </div>
