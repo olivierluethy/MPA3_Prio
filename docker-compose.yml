@@ -59,6 +59,21 @@ services:
     networks:
       - prio
 
+  # Database admin UI (development convenience). Open http://localhost:${PMA_PORT}
+  phpmyadmin:
+    image: phpmyadmin:5
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "${PMA_PORT:-8081}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - prio
+
 volumes:
   db_data:
 
