@@ -347,3 +347,57 @@
   border-radius: 0.5rem;
   box-shadow: none;
 }
+
+/* FullCalendar dark theme — overrides the library's default light CSS using
+   our existing palette (surface/brand). No jarring white calendar surface. */
+.fc {
+  --fc-border-color: #334155;            /* surface-600 */
+  --fc-page-bg-color: #0f172a;           /* surface-800 */
+  --fc-neutral-bg-color: #1e293b;        /* surface-700 */
+  --fc-neutral-text-color: #cbd5e1;
+  --fc-today-bg-color: rgba(79, 70, 229, 0.12);
+  --fc-highlight-color: rgba(79, 70, 229, 0.18);
+  --fc-list-event-hover-bg-color: #1e293b;
+  --fc-event-border-color: transparent;
+  color: #e2e8f0;
+}
+.fc .fc-toolbar-title { color: #ffffff; font-weight: 700; }
+.fc .fc-col-header-cell-cushion,
+.fc .fc-daygrid-day-number,
+.fc .fc-timegrid-axis-cushion,
+.fc .fc-timegrid-slot-label-cushion,
+.fc .fc-list-day-text,
+.fc .fc-list-day-side-text { color: #94a3b8; text-decoration: none; }
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc .fc-scrollgrid { border-color: #334155; }
+.fc .fc-day-today { background: var(--fc-today-bg-color) !important; }
+.fc .fc-daygrid-day.fc-day-other .fc-daygrid-day-top { opacity: 0.4; }
+
+.fc .fc-button {
+  background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
+  text-transform: none; box-shadow: none; font-weight: 500; padding: 0.4rem 0.75rem;
+}
+.fc .fc-button:hover { background: #334155; }
+.fc .fc-button:focus { outline: none; box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.5); }
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+.fc .fc-button-primary:disabled { background: #1e293b; border-color: #334155; opacity: 0.5; }
+
+.fc .fc-event { cursor: pointer; border-radius: 6px; padding: 1px 4px; font-size: 0.78rem; }
+.fc .fc-event:hover { filter: brightness(1.12); }
+.fc .fc-daygrid-event .fc-event-title { font-weight: 500; }
+.fc .fc-more-link { color: #a5b4fc; }
+.fc .fc-popover { background: #0f172a; border-color: #334155; }
+.fc .fc-popover-header { background: #1e293b; color: #e2e8f0; }
+
+/* Drag-persist feedback toasts */
+.toast {
+  min-width: 220px; max-width: 360px; padding: 0.7rem 1rem; border-radius: 0.6rem;
+  font-size: 0.85rem; color: #ffffff; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border: 1px solid transparent; opacity: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast-success { background: #065f46; border-color: #10b981; }
+.toast-error { background: #7f1d1d; border-color: #ef4444; }
+.toast-hide { opacity: 0; transform: translateY(8px); }

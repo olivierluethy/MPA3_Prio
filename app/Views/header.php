@@ -59,6 +59,14 @@
                     }
                     $a .= '>Time records <i class="fas fa-clock"></i></button>';
                     echo $a;
+
+                    /* Link For Calendar */
+                    $a = '<button title="Plan tasks and time on a calendar" onclick="goToCalendar()"';
+                    if (preg_match("/calendar/i", $actual_link)) {
+                        $a .= ' class="active"';
+                    }
+                    $a .= '>Calendar <i class="fas fa-calendar-days"></i></button>';
+                    echo $a;
                 }
             }
 

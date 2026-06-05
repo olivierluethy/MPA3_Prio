@@ -77,9 +77,8 @@
         });
     };
 
-    // ---- Edit --------------------------------------------------------------
-    window.openEditTask = function (btn) {
-        var d = btn.dataset;
+    // ---- Edit (data-driven, reusable from any page e.g. the Calendar) ------
+    window.openTaskModalEdit = function (d) {
         form.setAttribute("action", "edit_task?id=" + encodeURIComponent(d.id));
         titleEl.textContent = "Edit Task";
         submitBtn.textContent = "Save changes";
@@ -93,6 +92,7 @@
             setData("task_motivation", d.motivation || "");
         });
     };
+    window.openEditTask = function (btn) { window.openTaskModalEdit(btn.dataset); };
 
     // ---- Close interactions ------------------------------------------------
     modal.querySelectorAll("[data-task-close]").forEach(function (b) {

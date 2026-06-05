@@ -60,6 +60,10 @@ function zeiterfassung() {
     location.href = "zeituebersicht";
 }
 
+function goToCalendar() {
+    location.href = "calendar";
+}
+
 function lowerPrio(id) {
     location.href = "lowerPrio?id=" + id;
 }

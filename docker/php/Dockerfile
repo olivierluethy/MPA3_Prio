@@ -14,7 +14,9 @@ COPY public/css/src ./public/css/src
 COPY app ./app
 COPY public/js ./public/js
 COPY index.php ./index.php
-RUN npm run build
+RUN npm run build \
+    && mkdir -p public/vendor/fullcalendar \
+    && cp node_modules/fullcalendar/index.global.min.js public/vendor/fullcalendar/index.global.min.js
 
 # ----------------------------------------------------------------------------
 # Stage 2: Install PHP (Composer) dependencies
@@ -55,6 +57,9 @@ COPY --from=vendor /app/vendor /var/www/html/vendor
 
 # Compiled Tailwind stylesheet from stage 1
 COPY --from=assets /build/public/css/app.css /var/www/html/public/css/app.css
+
+# Vendored FullCalendar bundle from stage 1 (offline, no runtime CDN)
+COPY --from=assets /build/public/vendor/fullcalendar /var/www/html/public/vendor/fullcalendar
 
 # Entrypoint: generates .env from environment, then starts Apache
 COPY docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

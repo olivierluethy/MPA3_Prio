@@ -26,6 +26,12 @@ $routes = [
 	'showHistory' => 'TimeController@showHistory',
 	'export_pdf' => 'TimeController@export_pdf',
 
+	/* Kalender: Ansicht, Event-Feed und Drag&Drop-Persistenz */
+	'calendar' => 'CalendarController@calendar',
+	'calendar_events' => 'CalendarController@events',
+	'update_task_deadline' => 'TaskController@update_deadline',
+	'update_time_date' => 'TimeController@update_time_date',
+
 	/* Essay schreiben, akzeptieren und ablehnen */
 	'essay' => 'EssayController@essay',
 	'add_essay' => 'EssayController@add_essay',

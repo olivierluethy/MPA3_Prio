@@ -44,9 +44,8 @@
         (el.closest("div") || el.parentNode).appendChild(label);
     }
 
-    // ---- Open ---------------------------------------------------------------
-    window.openEditTime = function (btn) {
-        var d = btn.dataset;
+    // ---- Open (data-driven, reusable from any page e.g. the Calendar) -------
+    window.openEditTimeData = function (d) {
         clearWarnings(editForm);
         editForm.setAttribute("data-id", d.id);
         document.getElementById("editTime_date").textContent = d.date || "—";
@@ -54,6 +53,7 @@
         document.getElementById("editTime_duration").value = d.duration || "";
         openModal(editModal);
     };
+    window.openEditTime = function (btn) { window.openEditTimeData(btn.dataset); };
     window.openDeleteTime = function (btn) {
         pendingDeleteId = btn.dataset.id;
         openModal(deleteModal);
@@ -96,6 +96,8 @@
             var input = document.getElementById("myInput");
             if (input && input.value.trim() !== "" && typeof searchFor === "function") searchFor();
         }
+        // Let other pages (e.g. the Calendar) react to a time-record change.
+        document.dispatchEvent(new CustomEvent("prio:timeChanged"));
     }
 
     // ---- Save (edit) --------------------------------------------------------

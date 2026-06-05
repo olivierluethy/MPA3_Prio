@@ -4,3 +4,4 @@
 # Node / Tailwind build artifacts (CSS is compiled inside the Docker build)
 /node_modules
 /public/css/app.css
+/public/vendor/fullcalendar

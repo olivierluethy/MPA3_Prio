@@ -83,6 +83,45 @@ class Time
 		return $statement->fetchAll(PDO::FETCH_ASSOC);
 	}
 
+	/* Calendar: all of the user's time reports (join enforces ownership) */
+	public function getRapportsForUser(){
+		$statement = $this->db->prepare('SELECT r.rapportId, r.rapport, r.zeit, r.created_at, r.iv, r.fk_aufgabeId FROM rapport r JOIN aufgabe a ON a.aufgabeId = r.fk_aufgabeId WHERE a.fk_benutzerId = :id');
+		$statement->bindParam(':id', $_SESSION['id'], PDO::PARAM_INT);
+		$statement->execute();
+		return $statement->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	/* Calendar: move a time report to a new date, keeping its time-of-day. Owner-scoped. */
+	public function updateDate($id, $date){
+		if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $date)) {
+			return false;
+		}
+		$statement = $this->db->prepare('SELECT r.created_at, r.iv FROM rapport r JOIN aufgabe a ON a.aufgabeId = r.fk_aufgabeId WHERE r.rapportId = :id AND a.fk_benutzerId = :uid');
+		$statement->bindValue(':id', $id, PDO::PARAM_INT);
+		$statement->bindValue(':uid', $_SESSION['id'], PDO::PARAM_INT);
+		$statement->execute();
+		$row = $statement->fetch(PDO::FETCH_ASSOC);
+		if (!$row) {
+			return false;
+		}
+		$iv = base64_decode($row['iv']);
+
+		require_once __DIR__ . '/../../vendor/autoload.php';
+		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+		$dotenv->load();
+		$encryption_key = getenv('ENCRYPTION_KEY');
+
+		$oldCreated = openssl_decrypt($row['created_at'], 'aes-256-cbc', $encryption_key, 0, $iv);
+		$timePart = ($oldCreated && strlen($oldCreated) >= 19) ? substr($oldCreated, 11, 8) : '12:00:00';
+		$newCreated = $date . ' ' . $timePart;
+		$encrypted = openssl_encrypt($newCreated, 'aes-256-cbc', $encryption_key, 0, $iv);
+
+		$update = $this->db->prepare('UPDATE rapport SET created_at = :c WHERE rapportId = :id');
+		$update->bindValue(':c', $encrypted, PDO::PARAM_STR);
+		$update->bindValue(':id', $id, PDO::PARAM_INT);
+		return $update->execute();
+	}
+
 	// Edit rapport with it's time
 	public function edit_time($id, $rapport, $time) {
 		// Eingaben bereinigen

@@ -207,6 +207,42 @@ class Task
 		return $result ?: null;
 	}
 
+	/* Calendar: all of the user's tasks (for the event feed) */
+	public function getTasksForUser(){
+		$statement = $this->db->prepare('SELECT aufgabeId, titel, beschreibung, motivation, deadline, prioritaet, status, iv FROM aufgabe WHERE fk_benutzerId = :id');
+		$statement->bindParam(':id', $_SESSION['id'], PDO::PARAM_INT);
+		$statement->execute();
+		return $statement->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	/* Calendar: persist ONLY a new deadline (owner-scoped). Reuses the task's iv. */
+	public function updateDeadline($id, $deadline){
+		if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $deadline)) {
+			return false;
+		}
+		$statement = $this->db->prepare('SELECT iv FROM aufgabe WHERE aufgabeId = :id AND fk_benutzerId = :uid');
+		$statement->bindValue(':id', $id, PDO::PARAM_INT);
+		$statement->bindValue(':uid', $_SESSION['id'], PDO::PARAM_INT);
+		$statement->execute();
+		$row = $statement->fetch(PDO::FETCH_ASSOC);
+		if (!$row) {
+			return false;
+		}
+		$iv = base64_decode($row['iv']);
+
+		require_once __DIR__ . '/../../vendor/autoload.php';
+		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+		$dotenv->load();
+		$encryption_key = getenv('ENCRYPTION_KEY');
+
+		$encrypted = $this->encrypt($deadline, $encryption_key, $iv);
+		$update = $this->db->prepare('UPDATE aufgabe SET deadline = :deadline WHERE aufgabeId = :id AND fk_benutzerId = :uid');
+		$update->bindValue(':deadline', $encrypted, PDO::PARAM_STR);
+		$update->bindValue(':id', $id, PDO::PARAM_INT);
+		$update->bindValue(':uid', $_SESSION['id'], PDO::PARAM_INT);
+		return $update->execute();
+	}
+
 	/* If task completed on point user receives one minus point */
 	public function complete_task($id) {
 		$id = htmlspecialchars($id);

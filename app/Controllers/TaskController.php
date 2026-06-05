@@ -252,4 +252,27 @@ class TaskController
 			exit();
 		}
 	}
+
+	/* Calendar drag&drop: persist a new deadline (owner-scoped, JSON). */
+	public function update_deadline(){
+		session_start();
+		header('Content-Type: application/json');
+
+		if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+			http_response_code(401);
+			echo json_encode(['ok' => false, 'error' => 'Not authenticated']);
+			exit;
+		}
+
+		$Task = new Task();
+		$ok = $Task->updateDeadline(post('id'), post('deadline'));
+
+		if (!$ok) {
+			http_response_code(400);
+			echo json_encode(['ok' => false, 'error' => 'Could not update deadline']);
+			exit;
+		}
+		echo json_encode(['ok' => true]);
+		exit;
+	}
 }

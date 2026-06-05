@@ -265,4 +265,27 @@ class TimeController
 		$dompdf->stream($filename, ['Attachment' => true]);
 		exit();
 	}
+
+	/* Calendar drag&drop: persist a time report's new date (owner-scoped, JSON). */
+	public function update_time_date(){
+		session_start();
+		header('Content-Type: application/json');
+
+		if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+			http_response_code(401);
+			echo json_encode(['ok' => false, 'error' => 'Not authenticated']);
+			exit;
+		}
+
+		$Time = new Time();
+		$ok = $Time->updateDate(post('id'), post('date'));
+
+		if (!$ok) {
+			http_response_code(400);
+			echo json_encode(['ok' => false, 'error' => 'Could not update date']);
+			exit;
+		}
+		echo json_encode(['ok' => true]);
+		exit;
+	}
 }
