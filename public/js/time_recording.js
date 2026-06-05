@@ -23,7 +23,12 @@ function start_recording(id) {
         stop(id);
         // location.href = "addTimeRecord?timeRecord=" + time_element.innerHTML + "&id=" + id;
         modal.style.display = "block";
-        document.getElementById("appt-time").value = time_element.innerHTML;
+        var rd = document.getElementById("reportDuration");
+        if (rd && rd.durationEditor) {
+            var p = String(time_element.innerHTML).split(":");
+            var secs = (parseInt(p[0], 10) || 0) * 3600 + (parseInt(p[1], 10) || 0) * 60 + (parseInt(p[2], 10) || 0);
+            rd.durationEditor.setDuration(secs);
+        }
         document.getElementById("taskId").value = id;
 
         startCounter = 0;

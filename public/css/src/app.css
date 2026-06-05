@@ -391,6 +391,20 @@
 .fc .fc-popover { background: #0f172a; border-color: #334155; }
 .fc .fc-popover-header { background: #1e293b; color: #e2e8f0; }
 
+/* Duration editor — dual-handle window slider (two overlaid native ranges,
+   keyboard-accessible). Numeric inputs remain the source of truth. */
+.dur-slider { position: relative; height: 28px; }
+.dur-track { position: absolute; top: 12px; left: 0; right: 0; height: 4px; border-radius: 9999px; background: #334155; }
+.dur-fill { position: absolute; top: 0; bottom: 0; border-radius: 9999px; background: #4f46e5; }
+.dur-range { position: absolute; top: 0; left: 0; width: 100%; height: 28px; margin: 0; background: transparent; pointer-events: none; -webkit-appearance: none; appearance: none; }
+.dur-range::-webkit-slider-runnable-track { background: transparent; height: 28px; }
+.dur-range::-moz-range-track { background: transparent; height: 28px; }
+.dur-range::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 16px; height: 16px; margin-top: 6px; border-radius: 50%; background: #4f46e5; border: 2px solid #e2e8f0; cursor: pointer; }
+.dur-range::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border-radius: 50%; background: #4f46e5; border: 2px solid #e2e8f0; cursor: pointer; }
+.dur-range:focus { outline: none; }
+.dur-range:focus::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.4); }
+.dur-range:focus::-moz-range-thumb { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.4); }
+
 /* Drag-persist feedback toasts */
 .toast {
   min-width: 220px; max-width: 360px; padding: 0.7rem 1rem; border-radius: 0.6rem;

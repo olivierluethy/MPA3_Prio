@@ -21,6 +21,7 @@ function decrypt($data, $key, $iv) {
     <script defer src="public/js/searchTask.js"></script>
     <script defer src="public/js/responsive.js"></script>
     <script defer src="public/js/routes.js"></script>
+    <script defer src="public/js/durationEditor.js"></script>
     <script defer src="public/js/timeRecords.js"></script>
 
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
@@ -71,9 +72,11 @@ function decrypt($data, $key, $iv) {
                         $rText   = decode_all(decrypt($rapport["rapport"], $encryption_key, $ivR));
                         $rCreate = decrypt($rapport["created_at"], $encryption_key, $ivR);
                         $rTs     = strtotime($rCreate);
+                        $rStart  = !empty($rapport["start_time"]) ? decrypt($rapport["start_time"], $encryption_key, $ivR) : '';
+                        $rEnd    = !empty($rapport["end_time"])   ? decrypt($rapport["end_time"], $encryption_key, $ivR)   : '';
                         $totalSec += max(0, strtotime($rZeit) - strtotime("00:00:00"));
                         if ($lastTs === null || $rTs > $lastTs) $lastTs = $rTs;
-                        $entries[] = ['id' => $rapport["rapportId"], 'zeit' => $rZeit, 'seconds' => max(0, strtotime($rZeit) - strtotime("00:00:00")), 'text' => $rText, 'ts' => $rTs];
+                        $entries[] = ['id' => $rapport["rapportId"], 'zeit' => $rZeit, 'seconds' => max(0, strtotime($rZeit) - strtotime("00:00:00")), 'text' => $rText, 'ts' => $rTs, 'start' => $rStart, 'end' => $rEnd];
                     endforeach;
 
                     $entryCount  = count($entries);
@@ -162,6 +165,9 @@ function decrypt($data, $key, $iv) {
                                                                         onclick="openEditTime(this)"
                                                                         data-id="<?= (int) $e["id"] ?>"
                                                                         data-date="<?= format_date($e['ts']) ?>"
+                                                                        data-date-iso="<?= htmlspecialchars(date('Y-m-d', $e['ts']), ENT_QUOTES, 'UTF-8') ?>"
+                                                                        data-start="<?= htmlspecialchars($e['start'], ENT_QUOTES, 'UTF-8') ?>"
+                                                                        data-end="<?= htmlspecialchars($e['end'], ENT_QUOTES, 'UTF-8') ?>"
                                                                         data-duration="<?= htmlspecialchars($e['zeit'], ENT_QUOTES, 'UTF-8') ?>"
                                                                         data-report="<?= htmlspecialchars($e['text'], ENT_QUOTES, 'UTF-8') ?>"
                                                                         class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"><?= icon('pencil', 'h-4 w-4') ?></button>

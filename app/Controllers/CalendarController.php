@@ -97,7 +97,8 @@ class CalendarController
                 'extendedProps'    => [
                     'type'            => 'time',
                     'timeId'          => (int) $r['rapportId'],
-                    'date'            => $date,
+                    'date'            => $date,            // ISO YYYY-MM-DD
+                    'dateLabel'       => format_date($date), // human label for the modal
                     'duration'        => $zeit, // raw HH:MM:SS for the reused edit modal
                     'durationSeconds' => $seconds,
                     'report'          => decode_all($Task->decrypt($r['rapport'], $encryption_key, $iv)),

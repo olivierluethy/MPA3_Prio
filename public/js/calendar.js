@@ -115,7 +115,17 @@
                     motivation: ep.motivation, priority: ep.priority, deadline: ep.deadline
                 });
             } else if (ep.type === "time" && typeof window.openEditTimeData === "function") {
-                window.openEditTimeData({ id: ep.timeId, date: ep.date, duration: ep.duration, report: ep.report });
+                var st = (!ev.allDay && ev.start) ? fmtTime(ev.start) : null;
+                var en = (!ev.allDay && ev.end) ? fmtTime(ev.end) : null;
+                window.openEditTimeData({
+                    id: ep.timeId,
+                    date: ep.dateLabel || ep.date,
+                    dateIso: ep.date,
+                    duration: ep.duration,
+                    report: ep.report,
+                    start: st,
+                    end: en
+                });
             }
         }
     });

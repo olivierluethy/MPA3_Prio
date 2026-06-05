@@ -9,6 +9,7 @@
 
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/validationEditRapport.js"></script>
+    <script defer src="public/js/durationEditor.js"></script>
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <link rel="stylesheet" href="public/css/app.css">
     <title>Benutzer bearbeiten</title>
@@ -29,8 +30,12 @@
                 <input id="rapport" type="text" name="rapport" value="<?= display_text($rapport) ?>" class="input" />
             </div>
             <div>
-                <label for="appt-time" class="label">Time:</label>
-                <input id="appt-time" type="time" name="time" step="2" value="<?= $zeit ?>" class="input" />
+                <?php
+                $durEditorId = 'reportDuration';
+                $durShowWindow = false;
+                $durInitialSeconds = max(0, strtotime($zeit) - strtotime('00:00:00'));
+                include 'app/Views/durationEditor.view.php';
+                ?>
             </div>
             <input type="submit" value="Edit time" class="btn-primary w-full">
         </form>

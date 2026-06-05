@@ -20,8 +20,7 @@
                 <input type="text" id="editTime_report" name="rapport" class="input" autocomplete="off">
             </div>
             <div>
-                <label for="editTime_duration" class="label">Duration (hh:mm:ss)</label>
-                <input type="time" step="1" id="editTime_duration" name="time" class="input">
+                <?php $durEditorId = 'editTimeDuration'; $durShowWindow = true; $durInitialSeconds = 0; include 'app/Views/durationEditor.view.php'; ?>
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" data-time-close class="btn-secondary">Cancel</button>

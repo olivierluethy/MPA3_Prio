@@ -93,7 +93,7 @@ class Time
 
 	/* Calendar time-grid: set a report's start/end (and derived duration) on a
 	   date. Owner-scoped; duration (zeit) and created_at are kept consistent. */
-	public function updateStartEnd($id, $date, $start, $end){
+	public function updateStartEnd($id, $date, $start, $end, $rapport = null){
 		if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $date)) return false;
 		if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', (string) $start)) return false;
 		if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', (string) $end)) return false;
@@ -123,7 +123,13 @@ class Time
 		$encEnd     = openssl_encrypt($end, 'aes-256-cbc', $key, 0, $iv);
 		$encZeit    = openssl_encrypt($zeit, 'aes-256-cbc', $key, 0, $iv);
 
-		$update = $this->db->prepare('UPDATE rapport SET created_at = :c, start_time = :s, end_time = :e, zeit = :z WHERE rapportId = :id');
+		if ($rapport !== null) {
+			$encRapport = openssl_encrypt(htmlspecialchars($rapport), 'aes-256-cbc', $key, 0, $iv);
+			$update = $this->db->prepare('UPDATE rapport SET created_at = :c, start_time = :s, end_time = :e, zeit = :z, rapport = :r WHERE rapportId = :id');
+			$update->bindValue(':r', $encRapport, PDO::PARAM_STR);
+		} else {
+			$update = $this->db->prepare('UPDATE rapport SET created_at = :c, start_time = :s, end_time = :e, zeit = :z WHERE rapportId = :id');
+		}
 		$update->bindValue(':c', $encCreated, PDO::PARAM_STR);
 		$update->bindValue(':s', $encStart, PDO::PARAM_STR);
 		$update->bindValue(':e', $encEnd, PDO::PARAM_STR);
@@ -201,7 +207,8 @@ class Time
 		$iv_encoded = base64_encode($iv);
 	
 		// Datenbank-Update
-		$statement = $this->db->prepare('UPDATE rapport SET rapport = :rapport, zeit = :time, iv = :iv WHERE rapportId = :id');
+		// Editing the duration directly makes the entry duration-only again (clears any window).
+		$statement = $this->db->prepare('UPDATE rapport SET rapport = :rapport, zeit = :time, iv = :iv, start_time = NULL, end_time = NULL WHERE rapportId = :id');
 		$statement->bindParam(':rapport', $encrypted_rapport, PDO::PARAM_STR);
 		$statement->bindParam(':time', $encrypted_time, PDO::PARAM_STR);
 		$statement->bindParam(':iv', $iv_encoded, PDO::PARAM_STR);

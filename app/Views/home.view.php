@@ -28,6 +28,7 @@ $normalRole = hash_hmac('sha256', 0, $salt);
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/js/openDone.js"></script>
     <script defer src="public/js/time_recording.js"></script>
+    <script defer src="public/js/durationEditor.js"></script>
     <script defer src="public/js/taskModal.js"></script>
     <link rel="stylesheet" href="public/fontawesome/css/all.css">
     <link rel="stylesheet" href="public/css/app.css">

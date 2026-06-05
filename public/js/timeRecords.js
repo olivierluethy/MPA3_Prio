@@ -44,13 +44,24 @@
         (el.closest("div") || el.parentNode).appendChild(label);
     }
 
+    function hmsToSec(str) {
+        if (!str) return 0;
+        var p = String(str).split(":");
+        return (parseInt(p[0], 10) || 0) * 3600 + (parseInt(p[1], 10) || 0) * 60 + (parseInt(p[2], 10) || 0);
+    }
+
     // ---- Open (data-driven, reusable from any page e.g. the Calendar) -------
     window.openEditTimeData = function (d) {
         clearWarnings(editForm);
         editForm.setAttribute("data-id", d.id);
+        editForm.setAttribute("data-date-iso", d.dateIso || "");
         document.getElementById("editTime_date").textContent = d.date || "—";
         document.getElementById("editTime_report").value = d.report || "";
-        document.getElementById("editTime_duration").value = d.duration || "";
+        var ed = document.getElementById("editTimeDuration");
+        if (ed && ed.durationEditor) {
+            if (d.start && d.end) ed.durationEditor.setWindow(d.start, d.end);
+            else ed.durationEditor.setDuration(hmsToSec(d.duration));
+        }
         openModal(editModal);
     };
     window.openEditTime = function (btn) { window.openEditTimeData(btn.dataset); };
@@ -100,32 +111,58 @@
         document.dispatchEvent(new CustomEvent("prio:timeChanged"));
     }
 
+    // After a save, refresh the cards in place (Time overview) or notify the
+    // calendar; works for both the duration (edit_time) and window
+    // (update_time_slot) paths.
+    function afterSave() {
+        closeModal(editModal);
+        if (document.getElementById("timeCards")) {
+            fetch("zeituebersicht", { credentials: "same-origin" })
+                .then(function (r) { return r.text(); })
+                .then(refreshCards);
+        } else {
+            document.dispatchEvent(new CustomEvent("prio:timeChanged"));
+        }
+    }
+
     // ---- Save (edit) --------------------------------------------------------
     if (editForm) {
         editForm.addEventListener("submit", function (e) {
             e.preventDefault();
             clearWarnings(editForm);
             var report = document.getElementById("editTime_report");
-            var duration = document.getElementById("editTime_duration");
+            var ed = document.getElementById("editTimeDuration");
+            var state = (ed && ed.durationEditor) ? ed.durationEditor.getState() : { seconds: 0, hhmmss: "00:00:00", hasWindow: false };
             var errors = false;
             if (report.value.trim() === "") { warn(report, "Please enter a report!"); errors = true; }
-            if (duration.value.trim() === "") { warn(duration, "Please enter a time!"); errors = true; }
+            if (state.seconds <= 0 && !state.hasWindow) { warn(ed || report, "Please enter a duration!"); errors = true; }
             if (errors) return;
 
             var id = editForm.getAttribute("data-id");
-            var body = new URLSearchParams();
-            body.set("rapport", report.value);
-            body.set("time", duration.value);
+            var url, body = new URLSearchParams();
+            if (state.hasWindow) {
+                // window mode -> start/end (duration derived) via update_time_slot
+                url = "update_time_slot";
+                body.set("id", id);
+                body.set("date", editForm.getAttribute("data-date-iso") || "");
+                body.set("start", state.start);
+                body.set("end", state.end);
+                body.set("rapport", report.value);
+            } else {
+                // duration-only mode -> edit_time (clears any window server-side)
+                url = "edit_time?id=" + encodeURIComponent(id);
+                body.set("rapport", report.value);
+                body.set("time", state.hhmmss);
+            }
 
-            fetch("edit_time?id=" + encodeURIComponent(id), {
+            fetch(url, {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                headers: { "Content-Type": "application/x-www-form-urlencoded", "X-Requested-With": "XMLHttpRequest" },
                 body: body.toString(),
                 credentials: "same-origin"
             })
-                .then(function (r) { return r.text(); })
-                .then(function (html) { refreshCards(html); closeModal(editModal); })
-                .catch(function () { warn(report, "Could not save — please try again."); });
+                .then(function (r) { if (!r.ok) throw new Error(); afterSave(); })
+                .catch(function () { warn(ed || report, "Could not save — please try again."); });
         });
     }
 

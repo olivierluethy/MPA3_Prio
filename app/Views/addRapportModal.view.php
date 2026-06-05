@@ -14,8 +14,7 @@
                     <input placeholder="What did you achieve?" id="rapport" type="text" name="rapport" class="input" />
                 </div>
                 <div>
-                    <label for="appt-time" class="label">Time:</label>
-                    <input id="appt-time" type="time" name="time" step="2" readonly class="input" />
+                    <?php $durEditorId = 'reportDuration'; $durShowWindow = false; $durInitialSeconds = 0; include 'app/Views/durationEditor.view.php'; ?>
                 </div>
                 <input style="display: none;" id="taskId" type="text" name="taskId" />
                 <button title="Add time to time recording" type="submit" class="btn-primary w-full">Add time</button>

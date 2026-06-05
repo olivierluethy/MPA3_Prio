@@ -11,6 +11,7 @@
     <script defer src="public/js/routes.js"></script>
     <script defer src="public/vendor/fullcalendar/index.global.min.js"></script>
     <script defer src="public/js/taskModal.js"></script>
+    <script defer src="public/js/durationEditor.js"></script>
     <script defer src="public/js/timeRecords.js"></script>
     <script defer src="public/js/calendar.js"></script>
 

@@ -301,7 +301,10 @@ class TimeController
 		}
 
 		$Time = new Time();
-		$ok = $Time->updateStartEnd(post('id'), post('date'), post('start'), post('end'));
+		// rapport is only present when the edit modal saves a window; the calendar
+		// drag/resize omits it so the report text is never clobbered.
+		$rapport = isset($_POST['rapport']) ? post('rapport') : null;
+		$ok = $Time->updateStartEnd(post('id'), post('date'), post('start'), post('end'), $rapport);
 
 		if (!$ok) {
 			http_response_code(400);
