@@ -110,6 +110,32 @@ function display_html(?string $value): string
 }
 
 /**
+ * Bereinigt gespeichertes Rich-Text-HTML (CKEditor) serverseitig gegen XSS,
+ * damit es als formatierte, schreibgeschützte Ausgabe gerendert werden kann.
+ * Nutzt symfony/html-sanitizer (W3C-konform): Skripte, Event-Handler,
+ * gefährliche URLs usw. werden entfernt; sichere Formatierung bleibt erhalten.
+ */
+function sanitize_html(?string $value): string
+{
+    $value = (string) $value;
+    if (trim($value) === '') {
+        return '';
+    }
+
+    static $sanitizer = null;
+    if ($sanitizer === null) {
+        $config = (new \Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig())
+            ->allowSafeElements()                                  // p, ul, ol, li, strong, em, a, h1-6, blockquote, ...
+            ->allowLinkSchemes(['https', 'http', 'mailto'])
+            ->forceAttribute('a', 'rel', 'noopener noreferrer nofollow')
+            ->forceAttribute('a', 'target', '_blank');
+        $sanitizer = new \Symfony\Component\HtmlSanitizer\HtmlSanitizer($config);
+    }
+
+    return $sanitizer->sanitize($value);
+}
+
+/**
  * Gibt ein modernes Inline-SVG-Icon (Heroicons-Stil) als String zurück.
  * Wird in den Views für Aktions-Buttons (Bearbeiten, Löschen, Priorität,
  * Zeiterfassung) verwendet, damit ein einheitlicher, vektorbasierter

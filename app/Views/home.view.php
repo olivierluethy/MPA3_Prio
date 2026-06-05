@@ -7,6 +7,10 @@ function decrypt($data, $key, $iv) {
     }
     return $decrypted;
 }
+// Plain-text preview from CKEditor HTML (strip tags + collapse whitespace)
+function preview_text(string $html): string {
+    return trim(preg_replace('/\s+/', ' ', strip_tags($html)));
+}
 // Rollenwerte vorab berechnen
 $blockedRole = hash_hmac('sha256', 2, $salt);
 $normalRole = hash_hmac('sha256', 0, $salt);
@@ -68,29 +72,27 @@ $normalRole = hash_hmac('sha256', 0, $salt);
             }
         }
         ?>
-        <div class="mx-auto max-w-7xl px-4 py-6">
-            <!-- Schalter für offene und abgeschlossene Aufgaben -->
+        <div class="mx-auto max-w-4xl px-4 py-6">
+            <!-- Open / Completed switch -->
             <div class='switch mx-auto mb-8 flex w-full max-w-md gap-2 rounded-full border border-solid border-surface-700 bg-surface-800 p-1.5 shadow-lg'>
                 <button id='openButton' onclick='navSwitch(1)'
                         class="flex-1 cursor-pointer rounded-full border-0 bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors">
-                    Open
-                    <?php echo ($open_tasks_counter == 0) ? "(empty)" : "($open_tasks_counter)"; ?>
+                    Open (<?= (int) $open_tasks_counter ?>)
                 </button>
                 <button id='doneButton' onclick='navSwitch(2)'
                         class="flex-1 cursor-pointer rounded-full border-0 bg-surface-800 px-6 py-3 text-sm font-semibold text-surface-400 transition-colors">
-                    Completed
-                    <?php echo ($done_tasks_counter == 0) ? "(empty)" : "($done_tasks_counter)"; ?>
+                    Completed (<?= (int) $done_tasks_counter ?>)
                 </button>
             </div>
 
-            <!-- Offene Aufgaben -->
+            <!-- Open tasks -->
             <div id='open'>
                 <?php if ($open_tasks_counter > 0) { ?>
                     <div class="order mb-4 flex flex-wrap items-center justify-between gap-4">
-                        <h2 class="text-lg font-semibold text-white">All open tasks sorted by:</h2>
+                        <h2 class="text-lg font-semibold text-white">Open tasks</h2>
                         <div class="flex items-center gap-3">
                             <form action="" method="GET" class="flex items-center gap-2">
-                                <label for="sort" class="sr-only">Sort tasks by</label>
+                                <label for="sort" class="whitespace-nowrap text-sm text-surface-400">Sort by</label>
                                 <select id="sort" name="sort" onchange="this.form.submit()" aria-label="Sort tasks by"
                                         class="rounded-lg border border-solid border-surface-600 bg-surface-900 px-3 py-2 text-sm text-surface-100 focus:border-brand-500 focus:outline-none">
                                     <option value="priority" <?= ($_GET["sort"] ?? '') == "priority" ? "selected" : "" ?>>Priority</option>
@@ -99,151 +101,194 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                                 </select>
                                 <noscript><button type="submit" class="btn-primary">Sort</button></noscript>
                             </form>
-                            <button type="button" class='plus btn-primary !h-12 !w-12 !rounded-full !p-0' title="Add task" aria-label="Add task" onclick='openTaskModal()'><?= icon('plus', 'h-5 w-5') ?></button>
+                            <button type="button" class='plus btn-primary !h-11 !w-11 !rounded-full !p-0' title="Add task" aria-label="Add task" onclick='openTaskModal()'><?= icon('plus', 'h-5 w-5') ?></button>
                         </div>
                     </div>
-                    <main class="space-y-6">
+                    <main class="space-y-5">
                         <?php foreach ($getObjects as $task) {
                             $iv = base64_decode($task['iv']);
                             $decrypted_status = decrypt($task['status'], $encryption_key, $iv);
                             if ($decrypted_status !== '0') continue;
 
-                            // Decrypted values for the in-page edit modal (data-* attributes)
+                            $taskId     = (int) $task['aufgabeId'];
                             $t_title    = decode_all(decrypt($task["titel"], $encryption_key, $iv));
                             $t_desc     = decode_all(decrypt($task["beschreibung"], $encryption_key, $iv));
                             $t_motiv    = decode_all(decrypt($task["motivation"], $encryption_key, $iv));
                             $t_deadline = decode_all(decrypt($task["deadline"], $encryption_key, $iv));
                             $t_prio     = decode_all(decrypt($task['prioritaet'], $encryption_key, $iv));
+                            $descText   = preview_text($t_desc);
+                            $motivText  = preview_text($t_motiv);
+                            $isFresh    = strtotime(decrypt($task["created_at"], $encryption_key, $iv)) >= strtotime("-1 day");
+                            $showToggle = (mb_strlen($descText) > 140 || mb_strlen($motivText) > 140);
                         ?>
-                        <div class='task overflow-x-auto rounded-xl border border-solid border-surface-700 bg-surface-800 p-5 shadow-lg'>
-                            <table class="w-full">
-                                <tr class="align-top">
-                                    <th class="px-3 py-2 text-left"><h1 class="text-lg font-semibold text-white"><?php echo display_text(decrypt($task["titel"], $encryption_key, $iv)); ?></h1></th>
-                                    <th class="px-3 py-2 text-left font-normal">
-                                        <textarea readonly class='ckeditor' name='description' id='description_open'>
-                                            <?php echo display_html(decrypt($task["beschreibung"], $encryption_key, $iv)) ?>
-                                        </textarea>
-                                    </th>
-                                    <th class="px-3 py-2 text-left font-normal">
-                                        <textarea readonly class='ckeditor' name='motivation' id='motivation_open'>
-                                            <?php echo display_html(decrypt($task["motivation"], $encryption_key, $iv)) ?>
-                                        </textarea>
-                                    </th>
-                                    <th class="whitespace-nowrap px-3 py-2 text-sm text-surface-300"><i class="fas fa-calendar-days mr-1"></i><?php echo htmlspecialchars(date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8'); ?></th>
-                                    <th class="px-3 py-2">
-                                        <?php if (strtotime(decrypt($task["created_at"], $encryption_key, $iv)) >= strtotime("-1 day")){ ?>
-                                            <!-- Task is younger than 24 hours -->
-                                            <div class="flex items-center justify-center gap-2">
-                                                <button type="button" title="Edit task" aria-label="Edit task" onclick="openEditTask(this)"
-                                                        data-id="<?= (int) $task['aufgabeId'] ?>"
-                                                        data-title="<?= htmlspecialchars($t_title, ENT_QUOTES, 'UTF-8') ?>"
-                                                        data-description="<?= htmlspecialchars($t_desc, ENT_QUOTES, 'UTF-8') ?>"
-                                                        data-motivation="<?= htmlspecialchars($t_motiv, ENT_QUOTES, 'UTF-8') ?>"
-                                                        data-deadline="<?= htmlspecialchars($t_deadline, ENT_QUOTES, 'UTF-8') ?>"
-                                                        data-priority="<?= htmlspecialchars($t_prio, ENT_QUOTES, 'UTF-8') ?>"
-                                                        class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                                    <?= icon('pencil', 'h-5 w-5') ?>
-                                                </button>
-                                                <button type="button" title="Delete task" aria-label="Delete task" onclick='deleteTask(<?= $task["aufgabeId"]?>)'
-                                                        class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-red-300 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
-                                                    <?= icon('trash', 'h-5 w-5') ?>
-                                                </button>
-                                            </div>
-                                        <?php } ?>
-                                    </th>
-                                    <th class="px-3 py-2">
-                                        <h1 id='active_time<?php echo $task["aufgabeId"]; ?>' class="whitespace-nowrap font-mono text-lg font-semibold text-brand-300">00:00:00</h1>
-                                    </th>
-                                    <th class="px-3 py-2">
-                                        <button type="button" id='start<?php echo $task["aufgabeId"]; ?>' onclick="start_recording(<?= $task['aufgabeId']; ?>)" title="Start recording" aria-label="Start recording"
-                                                class="time-toggle mx-auto inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-solid border-surface-600 bg-surface-900 text-brand-300 transition-colors hover:border-brand-500 hover:bg-brand-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                            <?= icon('play', 'icon-play h-5 w-5') ?>
-                                            <?= icon('stop', 'icon-stop h-5 w-5') ?>
+                        <div class='task rounded-xl border border-solid border-surface-700 bg-surface-800 p-5 shadow-lg'>
+                            <!-- Header: title, due date, priority + reorder -->
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <h3 class="truncate text-lg font-semibold text-white"><?= display_text(decrypt($task["titel"], $encryption_key, $iv)) ?></h3>
+                                    <p class="mt-1 flex items-center gap-1.5 text-sm text-surface-400">
+                                        <?= icon('calendar', 'h-4 w-4') ?>
+                                        <span>Due <?= htmlspecialchars(date("d M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8') ?></span>
+                                    </p>
+                                </div>
+                                <div class="flex shrink-0 items-center gap-2">
+                                    <span class="badge bg-brand-500/15 text-brand-200 ring-1 ring-inset ring-brand-500/30" title="Priority <?= htmlspecialchars($t_prio, ENT_QUOTES, 'UTF-8') ?>">P<?= htmlspecialchars($t_prio, ENT_QUOTES, 'UTF-8') ?></span>
+                                    <div class="flex items-center overflow-hidden rounded-lg border border-solid border-surface-600">
+                                        <button type="button" title="Move up (raise priority)" aria-label="Move task up" onclick="higherPrio(<?= $taskId ?>)"
+                                                class="inline-flex h-8 w-8 cursor-pointer items-center justify-center border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500">
+                                            <?= icon('chevron-up', 'h-4 w-4') ?>
                                         </button>
-                                    </th>
-                                    <th class="px-3 py-2">
-                                        <button title='Complete task' id='completeBtn' onclick="completeTask(<?= $task['aufgabeId']; ?>)"
-                                                class="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-lg border-0 bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-500">
-                                            Complete task <i class='fa fa-check'></i>
+                                        <?php if ($t_prio > 0): ?>
+                                        <button type="button" title="Move down (lower priority)" aria-label="Move task down" onclick="lowerPrio(<?= $taskId ?>)"
+                                                class="inline-flex h-8 w-8 cursor-pointer items-center justify-center border-0 border-l border-solid border-surface-600 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500">
+                                            <?= icon('chevron-down', 'h-4 w-4') ?>
                                         </button>
-                                    </th>
-                                    <th class="px-3 py-2">
-                                        <div class="flex flex-col items-center gap-1">
-                                            <button type="button" title="Increase priority" aria-label="Increase priority" onclick="higherPrio(<?=$task['aufgabeId']?>)"
-                                                    class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-solid border-green-500/40 bg-green-500/15 text-green-400 shadow-sm transition hover:-translate-y-0.5 hover:bg-green-600 hover:text-white hover:shadow-green-900/40 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-surface-800 active:translate-y-0 active:scale-95">
-                                                <?= icon('chevron-up', 'h-4 w-4') ?>
-                                            </button>
-                                            <p class="badge bg-surface-700 text-surface-100"><?= display_text(decrypt($task['prioritaet'], $encryption_key, $iv)); ?></p>
-                                            <?php if (decrypt($task['prioritaet'], $encryption_key, $iv) > 0) { ?>
-                                            <button type="button" title="Decrease priority" aria-label="Decrease priority" onclick="lowerPrio(<?=$task['aufgabeId']?>)"
-                                                    class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-solid border-red-500/40 bg-red-500/15 text-red-400 shadow-sm transition hover:translate-y-0.5 hover:bg-red-600 hover:text-white hover:shadow-red-900/40 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-surface-800 active:translate-y-0 active:scale-95">
-                                                <?= icon('chevron-down', 'h-4 w-4') ?>
-                                            </button>
-                                            <?php } ?>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </table>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Body: description + motivation previews -->
+                            <div class="mt-4 grid gap-4 sm:grid-cols-2 <?= $showToggle ? 'task-clamp' : '' ?>">
+                                <div>
+                                    <div class="mb-1 text-xs font-medium uppercase tracking-wide text-surface-500">Description</div>
+                                    <?php if (trim($t_desc) !== ''): ?><div class="task-prose"><?= sanitize_html($t_desc) ?></div><?php else: ?><p class="text-sm italic text-surface-500">No description</p><?php endif; ?>
+                                </div>
+                                <div>
+                                    <div class="mb-1 text-xs font-medium uppercase tracking-wide text-surface-500">Motivation</div>
+                                    <?php if (trim($t_motiv) !== ''): ?><div class="task-prose"><?= sanitize_html($t_motiv) ?></div><?php else: ?><p class="text-sm italic text-surface-500">No motivation</p><?php endif; ?>
+                                </div>
+                            </div>
+                            <?php if ($showToggle): ?>
+                                <button type="button" class="mt-2 text-xs font-medium text-brand-300 hover:text-brand-200 focus:outline-none" data-expanded="0" onclick="toggleDetails(this)">Show more</button>
+                            <?php endif; ?>
+
+                            <!-- Actions: time tracking · edit/delete · complete -->
+                            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-0 border-t border-solid border-surface-700 pt-4">
+                                <!-- Time-tracking group (timer + play) -->
+                                <div class="flex items-center gap-2 rounded-full border border-solid border-surface-600 bg-surface-900 py-1 pl-4 pr-1">
+                                    <i class="fas fa-clock text-surface-500"></i>
+                                    <span id='active_time<?= $taskId ?>' class="font-mono text-sm font-semibold text-surface-100">00:00:00</span>
+                                    <button type="button" id='start<?= $taskId ?>' onclick="start_recording(<?= $taskId ?>)" title="Start recording" aria-label="Start recording"
+                                            class="time-toggle inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-brand-600 text-white transition-colors hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                        <?= icon('play', 'icon-play h-4 w-4') ?>
+                                        <?= icon('stop', 'icon-stop h-4 w-4') ?>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <?php if ($isFresh): ?>
+                                        <button type="button" title="Edit task" aria-label="Edit task" onclick="openEditTask(this)"
+                                                data-id="<?= $taskId ?>"
+                                                data-title="<?= htmlspecialchars($t_title, ENT_QUOTES, 'UTF-8') ?>"
+                                                data-description="<?= htmlspecialchars($t_desc, ENT_QUOTES, 'UTF-8') ?>"
+                                                data-motivation="<?= htmlspecialchars($t_motiv, ENT_QUOTES, 'UTF-8') ?>"
+                                                data-deadline="<?= htmlspecialchars($t_deadline, ENT_QUOTES, 'UTF-8') ?>"
+                                                data-priority="<?= htmlspecialchars($t_prio, ENT_QUOTES, 'UTF-8') ?>"
+                                                class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                            <?= icon('pencil', 'h-5 w-5') ?>
+                                        </button>
+                                        <button type="button" title="Delete task" aria-label="Delete task" onclick='deleteTask(<?= $taskId ?>)'
+                                                class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-red-300 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                                            <?= icon('trash', 'h-5 w-5') ?>
+                                        </button>
+                                    <?php endif; ?>
+                                    <button type="button" title='Complete task' id='completeBtn' onclick="completeTask(<?= $taskId ?>)"
+                                            class="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-lg border border-solid border-green-600/50 bg-green-600/10 px-4 py-2 text-sm font-medium text-green-300 transition-colors hover:bg-green-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        <i class='fa fa-check'></i> Complete
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <?php } ?>
                     </main>
                 <?php } else { ?>
                     <div class='noData flex flex-col items-center gap-4 py-16 text-center'>
-                        <h1 class="text-2xl font-bold text-red-400">No tasks available yet</h1>
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-surface-800 text-surface-500"><?= icon('flag', 'h-8 w-8') ?></div>
+                        <h1 class="text-xl font-semibold text-surface-200">No open tasks yet</h1>
+                        <p class="text-sm text-surface-400">Create your first task to get started.</p>
                         <button type="button" onclick='openTaskModal()' class="btn-primary">Add task &nbsp;<?= icon('plus', 'h-5 w-5') ?></button>
                     </div>
                 <?php } ?>
             </div>
 
-            <!-- Abgeschlossene Aufgaben -->
+            <!-- Completed tasks -->
             <div id='done'>
                 <?php if ($done_tasks_counter > 0) { ?>
                     <div class='order mb-4'>
-                        <h2 class="text-lg font-semibold text-white">All done tasks</h2>
+                        <h2 class="text-lg font-semibold text-white">Completed tasks</h2>
                     </div>
-                    <main class="space-y-6">
+                    <main class="space-y-5">
                         <?php foreach ($getObjects as $task) {
                             $iv = base64_decode($task['iv']);
                             $decrypted_status = decrypt($task['status'], $encryption_key, $iv);
                             if ($decrypted_status !== '1') continue;
+
+                            $taskId     = (int) $task['aufgabeId'];
+                            $t_desc     = decode_all(decrypt($task["beschreibung"], $encryption_key, $iv));
+                            $t_motiv    = decode_all(decrypt($task["motivation"], $encryption_key, $iv));
+                            $descText   = preview_text($t_desc);
+                            $motivText  = preview_text($t_motiv);
+                            $showToggle = (mb_strlen($descText) > 140 || mb_strlen($motivText) > 140);
                         ?>
-                            <div class='task overflow-x-auto rounded-xl border border-solid border-surface-700 bg-surface-800 p-5 shadow-lg opacity-90'>
-                                <table class="w-full">
-                                    <tr class="align-top">
-                                        <th class="px-3 py-2 text-left"><h1 class="text-lg font-semibold text-white"><?php echo display_text(decrypt($task["titel"], $encryption_key, $iv)); ?></h1></th>
-                                        <th class="px-3 py-2 text-left font-normal">
-                                            <textarea readonly class='ckeditor' name='description' id='description_open'>
-                                                <?php echo display_html(decrypt($task["beschreibung"], $encryption_key, $iv)) ?>
-                                            </textarea>
-                                        </th>
-                                        <th class="px-3 py-2 text-left font-normal">
-                                            <textarea readonly class='ckeditor' name='motivation' id='motivation_open'>
-                                                <?php echo display_html(decrypt($task["motivation"], $encryption_key, $iv)) ?>
-                                            </textarea>
-                                        </th>
-                                        <th class="whitespace-nowrap px-3 py-2 text-sm text-surface-300"><i class="fas fa-calendar-days mr-1"></i><?php echo htmlspecialchars(date("dS M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8'); ?></th>
-                                        <th class="px-3 py-2">
-                                            <span class="badge bg-green-600/20 text-green-300"><i class="fa fa-check mr-1"></i>Done</span>
-                                        </th>
-                                    </tr>
-                                </table>
+                            <div class='task rounded-xl border border-solid border-surface-700 bg-surface-800 p-5 opacity-90 shadow-lg'>
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <h3 class="truncate text-lg font-semibold text-white"><?= display_text(decrypt($task["titel"], $encryption_key, $iv)) ?></h3>
+                                        <p class="mt-1 flex items-center gap-1.5 text-sm text-surface-400">
+                                            <?= icon('calendar', 'h-4 w-4') ?>
+                                            <span>Due <?= htmlspecialchars(date("d M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8') ?></span>
+                                        </p>
+                                    </div>
+                                    <span class="badge bg-green-500/15 text-green-300 ring-1 ring-inset ring-green-500/30"><i class="fa fa-check mr-1"></i>Completed</span>
+                                </div>
+
+                                <div class="mt-4 grid gap-4 sm:grid-cols-2 <?= $showToggle ? 'task-clamp' : '' ?>">
+                                    <div>
+                                        <div class="mb-1 text-xs font-medium uppercase tracking-wide text-surface-500">Description</div>
+                                        <?php if (trim($t_desc) !== ''): ?><div class="task-prose"><?= sanitize_html($t_desc) ?></div><?php else: ?><p class="text-sm italic text-surface-500">No description</p><?php endif; ?>
+                                    </div>
+                                    <div>
+                                        <div class="mb-1 text-xs font-medium uppercase tracking-wide text-surface-500">Motivation</div>
+                                        <?php if (trim($t_motiv) !== ''): ?><div class="task-prose"><?= sanitize_html($t_motiv) ?></div><?php else: ?><p class="text-sm italic text-surface-500">No motivation</p><?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php if ($showToggle): ?>
+                                    <button type="button" class="mt-2 text-xs font-medium text-brand-300 hover:text-brand-200 focus:outline-none" data-expanded="0" onclick="toggleDetails(this)">Show more</button>
+                                <?php endif; ?>
                             </div>
                         <?php } ?>
                     </main>
                 <?php } else { ?>
                     <div class='noData flex flex-col items-center gap-4 py-16 text-center'>
-                        <h1 class="text-2xl font-bold text-surface-300">No tasks completed yet</h1>
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-surface-800 text-surface-500"><i class="fas fa-check text-2xl"></i></div>
+                        <h1 class="text-xl font-semibold text-surface-200">No tasks completed yet</h1>
+                        <p class="text-sm text-surface-400">Completed tasks will appear here.</p>
                     </div>
                 <?php } ?>
             </div>
         </div>
     <?php } ?>
 
+    <!-- CKEditor is needed by the in-page task modal (taskModal.js) -->
     <script src="ckeditor/ckeditor.js"></script>
     <script>
-    ['essay_content', 'motivation_open', 'description_open', 'motivation_done', 'description_done'].forEach(function(id) {
-        CKEDITOR.replace(id);
-    });
+    // Expand / collapse the description & motivation previews on a card.
+    function toggleDetails(btn) {
+        var card = btn.closest('.task');
+        if (!card) return;
+        var expand = btn.getAttribute('data-expanded') !== '1';
+        card.querySelectorAll('.task-clamp').forEach(function (el) {
+            el.classList.toggle('is-expanded', expand);
+        });
+        btn.setAttribute('data-expanded', expand ? '1' : '0');
+        btn.textContent = expand ? 'Show less' : 'Show more';
+    }
+
+    // Rich-text editor for the (rare) blocked-user essay field
+    if (window.CKEDITOR && document.getElementById('essay_content')) {
+        CKEDITOR.replace('essay_content');
+    }
     </script>
 
     <?php include "app/Views/taskModal.view.php"; ?>
