@@ -7,6 +7,12 @@
  * Dompdf supports a subset of CSS, so the layout uses tables + inline styles.
  */
 $statusColor = ($status === 'Completed') ? '#16a34a' : '#d97706';
+// Inline-SVG calendar glyph (FontAwesome's webfont can't render in Dompdf).
+$calIcon = '<svg width="9" height="9" viewBox="0 0 24 24" style="vertical-align:middle">'
+    . '<rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="#6b7280" stroke-width="2"/>'
+    . '<line x1="3" y1="9" x2="21" y2="9" stroke="#6b7280" stroke-width="2"/>'
+    . '<line x1="8" y1="3" x2="8" y2="6" stroke="#6b7280" stroke-width="2"/>'
+    . '<line x1="16" y1="3" x2="16" y2="6" stroke="#6b7280" stroke-width="2"/></svg>';
 ?>
 <!DOCTYPE html>
 <html>
@@ -56,9 +62,9 @@ $statusColor = ($status === 'Completed') ? '#16a34a' : '#d97706';
         </tr>
         <tr>
             <td class="label">Created</td>
-            <td><?= htmlspecialchars($createdLabel, ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= $calIcon ?> <?= htmlspecialchars($createdLabel, ENT_QUOTES, 'UTF-8') ?></td>
             <td class="label">Deadline</td>
-            <td><?= htmlspecialchars($deadlineLabel, ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= $calIcon ?> <?= htmlspecialchars($deadlineLabel, ENT_QUOTES, 'UTF-8') ?></td>
         </tr>
         <?php if (!empty($includeDescription)): ?>
         <tr>
@@ -83,7 +89,7 @@ $statusColor = ($status === 'Completed') ? '#16a34a' : '#d97706';
                 <?php foreach ($entries as $i => $e): ?>
                     <tr>
                         <td class="num"><?= $i + 1 ?></td>
-                        <td><?= htmlspecialchars($e['date'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td><?= $calIcon ?> <?= htmlspecialchars($e['date'], ENT_QUOTES, 'UTF-8') ?></td>
                         <td class="dur"><?= htmlspecialchars(format_duration($e['seconds']), ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($e['text'], ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>

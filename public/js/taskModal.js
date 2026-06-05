@@ -116,6 +116,7 @@
     }
 
     form.addEventListener("submit", function (evt) {
+        evt.preventDefault();
         clearWarnings();
         var errors = false;
 
@@ -139,7 +140,6 @@
         else if (parseInt(prio, 10) <= 0) { warn("task_priority", "Please enter a priority higher than 0!"); errors = true; }
 
         if (errors) {
-            evt.preventDefault();
             return;
         }
         // Make sure CKEditor content is written back to the textareas before POST.
@@ -148,5 +148,30 @@
                 if (CKEDITOR.instances[name]) CKEDITOR.instances[name].updateElement();
             });
         }
+
+        // Submit via AJAX so the calendar (and anywhere else) can save without a
+        // full-page redirect. The controller answers JSON for XHR; the standalone
+        // add_task/edit_task pages (plain POST) keep their original redirect flow.
+        if (submitBtn) submitBtn.disabled = true;
+        fetch(form.getAttribute("action"), {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body: new FormData(form),
+            credentials: "same-origin"
+        })
+            .then(function (r) { return r.json().catch(function () { return { ok: r.ok }; }); })
+            .then(function (d) {
+                if (submitBtn) submitBtn.disabled = false;
+                if (!d || !d.ok) {
+                    warn("task_priority", (d && d.error) ? d.error : "Could not save the task.");
+                    return;
+                }
+                closeModal();
+                document.dispatchEvent(new CustomEvent("prio:taskChanged"));
+            })
+            .catch(function () {
+                if (submitBtn) submitBtn.disabled = false;
+                warn("task_priority", "Could not save the task. Please try again.");
+            });
     });
 })();

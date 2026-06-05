@@ -215,8 +215,8 @@ class TimeController
 		$status      = ($statusRaw === '1') ? 'Completed' : 'Open';
 		$createdRaw  = $Task->decrypt($task['created_at'], $encryption_key, $ivTask);
 		$deadlineRaw = $Task->decrypt($task['deadline'], $encryption_key, $ivTask);
-		$createdLabel  = $createdRaw ? date('d M Y', strtotime($createdRaw)) : '—';
-		$deadlineLabel = $deadlineRaw ? date('d M Y', strtotime($deadlineRaw)) : '—';
+		$createdLabel  = format_date($createdRaw);
+		$deadlineLabel = format_date($deadlineRaw);
 
 		// Decrypt + collect time entries, sorted chronologically
 		$entries  = [];
@@ -228,14 +228,14 @@ class TimeController
 			$cr    = $Task->decrypt($rapport['created_at'], $encryption_key, $ivR);
 			$ts    = $cr ? strtotime($cr) : 0;
 			$totalSec += max(0, strtotime($zeit) - strtotime('00:00:00'));
-			$entries[] = ['ts' => $ts, 'date' => $ts ? date('d M Y', $ts) : '—', 'seconds' => max(0, strtotime($zeit) - strtotime('00:00:00')), 'duration' => $zeit, 'text' => $text];
+			$entries[] = ['ts' => $ts, 'date' => format_date($ts), 'seconds' => max(0, strtotime($zeit) - strtotime('00:00:00')), 'duration' => $zeit, 'text' => $text];
 		}
 		usort($entries, fn($a, $b) => $a['ts'] <=> $b['ts']);
 
 		$entryCount = count($entries);
 		$totalH = intval($totalSec / 3600);
 		$totalM = intval(($totalSec % 3600) / 60);
-		$genDate = date('d M Y, H:i');
+		$genDate = format_date(time()) . ', ' . date('H:i');
 
 		// Description is included by default; ?description=0 produces a clean
 		// "summary only" report for HR / billing.
@@ -283,6 +283,29 @@ class TimeController
 		if (!$ok) {
 			http_response_code(400);
 			echo json_encode(['ok' => false, 'error' => 'Could not update date']);
+			exit;
+		}
+		echo json_encode(['ok' => true]);
+		exit;
+	}
+
+	/* Calendar time-grid: persist a time report's start/end + date (owner-scoped, JSON). */
+	public function update_time_slot(){
+		session_start();
+		header('Content-Type: application/json');
+
+		if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+			http_response_code(401);
+			echo json_encode(['ok' => false, 'error' => 'Not authenticated']);
+			exit;
+		}
+
+		$Time = new Time();
+		$ok = $Time->updateStartEnd(post('id'), post('date'), post('start'), post('end'));
+
+		if (!$ok) {
+			http_response_code(400);
+			echo json_encode(['ok' => false, 'error' => 'Could not update time slot']);
 			exit;
 		}
 		echo json_encode(['ok' => true]);

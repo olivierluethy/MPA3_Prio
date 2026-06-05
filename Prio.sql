@@ -56,6 +56,8 @@ CREATE TABLE rapport (
   rapportId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   rapport VARCHAR(256) NOT NULL,
   zeit VARCHAR(256) NOT NULL,
+  start_time VARCHAR(256) NULL, /* optional clock start (encrypted); NULL = duration-only */
+  end_time VARCHAR(256) NULL,   /* optional clock end (encrypted); NULL = duration-only */
   iv VARCHAR(256) NOT NULL,
   created_at VARCHAR(256) NOT NULL,
   fk_aufgabeId INT NOT NULL,

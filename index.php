@@ -31,6 +31,7 @@ $routes = [
 	'calendar_events' => 'CalendarController@events',
 	'update_task_deadline' => 'TaskController@update_deadline',
 	'update_time_date' => 'TimeController@update_time_date',
+	'update_time_slot' => 'TimeController@update_time_slot',
 
 	/* Essay schreiben, akzeptieren und ablehnen */
 	'essay' => 'EssayController@essay',

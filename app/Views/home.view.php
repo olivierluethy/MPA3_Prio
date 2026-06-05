@@ -126,9 +126,8 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                             <div class="flex flex-wrap items-start justify-between gap-3">
                                 <div class="min-w-0">
                                     <h3 class="truncate text-lg font-semibold text-white"><?= display_text(decrypt($task["titel"], $encryption_key, $iv)) ?></h3>
-                                    <p class="mt-1 flex items-center gap-1.5 text-sm text-surface-400">
-                                        <?= icon('calendar', 'h-4 w-4') ?>
-                                        <span>Due <?= htmlspecialchars(date("d M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8') ?></span>
+                                    <p class="mt-1 text-sm text-surface-400">
+                                        <?= date_with_icon(decrypt($task["deadline"], $encryption_key, $iv), 'Due') ?>
                                     </p>
                                 </div>
                                 <div class="flex shrink-0 items-center gap-2">
@@ -235,9 +234,8 @@ $normalRole = hash_hmac('sha256', 0, $salt);
                                 <div class="flex flex-wrap items-start justify-between gap-3">
                                     <div class="min-w-0">
                                         <h3 class="truncate text-lg font-semibold text-white"><?= display_text(decrypt($task["titel"], $encryption_key, $iv)) ?></h3>
-                                        <p class="mt-1 flex items-center gap-1.5 text-sm text-surface-400">
-                                            <?= icon('calendar', 'h-4 w-4') ?>
-                                            <span>Due <?= htmlspecialchars(date("d M Y", strtotime(decrypt($task["deadline"], $encryption_key, $iv))), ENT_QUOTES, 'UTF-8') ?></span>
+                                        <p class="mt-1 text-sm text-surface-400">
+                                            <?= date_with_icon(decrypt($task["deadline"], $encryption_key, $iv), 'Due') ?>
                                         </p>
                                     </div>
                                     <span class="badge bg-green-500/15 text-green-300 ring-1 ring-inset ring-green-500/30"><i class="fa fa-check mr-1"></i>Completed</span>
@@ -289,6 +287,10 @@ $normalRole = hash_hmac('sha256', 0, $salt);
     if (window.CKEDITOR && document.getElementById('essay_content')) {
         CKEDITOR.replace('essay_content');
     }
+
+    // The shared task modal now saves via AJAX; refresh the Tasks list on success
+    // (same end result the full-page redirect used to give).
+    document.addEventListener('prio:taskChanged', function () { location.reload(); });
     </script>
 
     <?php include "app/Views/taskModal.view.php"; ?>

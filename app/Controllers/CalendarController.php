@@ -57,6 +57,8 @@ class CalendarController
                 'allDay'          => true,
                 'backgroundColor' => $isDone ? '#16a34a' : '#4f46e5',
                 'borderColor'     => $isDone ? '#16a34a' : '#4f46e5',
+                'startEditable'   => true,
+                'durationEditable'=> false,
                 'extendedProps'   => [
                     'type'        => 'task',
                     'taskId'      => (int) $t['aufgabeId'],
@@ -69,7 +71,9 @@ class CalendarController
             ];
         }
 
-        // --- Time reports: all-day events on their date ----------------------
+        // --- Time reports ----------------------------------------------------
+        // With start/end -> timed event (week time-grid; drag = move, resize =
+        // change duration). Without -> all-day pill (existing duration-only entries).
         foreach ($Time->getRapportsForUser() as $r) {
             $iv = base64_decode($r['iv']);
             $date = $this->dateOnly($Task->decrypt($r['created_at'], $encryption_key, $iv));
@@ -79,22 +83,36 @@ class CalendarController
             $seconds = max(0, strtotime($zeit) - strtotime('00:00:00'));
             $taskTitle = $titleById[$r['fk_aufgabeId']] ?? 'Task';
 
-            $events[] = [
-                'id'              => 'time-' . $r['rapportId'],
-                'title'           => $taskTitle . ' · ' . format_duration($seconds),
-                'start'           => $date,
-                'allDay'          => true,
-                'backgroundColor' => '#0d9488', // teal-600
-                'borderColor'     => '#0d9488',
-                'extendedProps'   => [
-                    'type'      => 'time',
-                    'timeId'    => (int) $r['rapportId'],
-                    'date'      => $date,
-                    'duration'  => $zeit, // raw HH:MM:SS for the reused edit modal
-                    'report'    => decode_all($Task->decrypt($r['rapport'], $encryption_key, $iv)),
-                    'taskTitle' => $taskTitle,
+            $startT = !empty($r['start_time']) ? $Task->decrypt($r['start_time'], $encryption_key, $iv) : null;
+            $endT   = !empty($r['end_time'])   ? $Task->decrypt($r['end_time'], $encryption_key, $iv)   : null;
+            $hasSlot = ($startT && $endT && strlen((string) $startT) >= 5 && strlen((string) $endT) >= 5);
+
+            $event = [
+                'id'               => 'time-' . $r['rapportId'],
+                'title'            => $taskTitle . ' · ' . format_duration($seconds),
+                'backgroundColor'  => '#0d9488', // teal-600
+                'borderColor'      => '#0d9488',
+                'startEditable'    => true,
+                'durationEditable' => $hasSlot,
+                'extendedProps'    => [
+                    'type'            => 'time',
+                    'timeId'          => (int) $r['rapportId'],
+                    'date'            => $date,
+                    'duration'        => $zeit, // raw HH:MM:SS for the reused edit modal
+                    'durationSeconds' => $seconds,
+                    'report'          => decode_all($Task->decrypt($r['rapport'], $encryption_key, $iv)),
+                    'taskTitle'       => $taskTitle,
                 ],
             ];
+            if ($hasSlot) {
+                $event['start']  = $date . 'T' . $startT;
+                $event['end']    = $date . 'T' . $endT;
+                $event['allDay'] = false;
+            } else {
+                $event['start']  = $date;
+                $event['allDay'] = true;
+            }
+            $events[] = $event;
         }
 
         echo json_encode($events);

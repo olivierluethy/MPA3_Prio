@@ -13,7 +13,7 @@
         <form id="editTimeForm" class="space-y-4 p-5">
             <div>
                 <span class="label">Date</span>
-                <p id="editTime_date" class="text-sm text-surface-300">—</p>
+                <p class="flex items-center gap-1.5 text-sm text-surface-300"><i class="fas fa-calendar-days" aria-hidden="true"></i> <span id="editTime_date">—</span></p>
             </div>
             <div>
                 <label for="editTime_report" class="label">Report</label>

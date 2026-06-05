@@ -102,7 +102,8 @@ class TaskController
 			$deadline = e(post('deadline'));
 			$prioritaet = e(post('priority'));
 
-            $Task->add_task($titel, $beschreibung, $motivation, $deadline, $prioritaet);
+            $ajax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+            $Task->add_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $ajax);
         } else {
 			$possiblePriorities = $Task->ShowPossiblePriorities();
 			require 'app/Views/addTask.view.php';
@@ -146,7 +147,8 @@ class TaskController
 			$deadline = e(post('deadline'));
 			$prioritaet = e(post('priority'));
         
-			$Task->edit_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $id);
+			$ajax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+			$Task->edit_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $id, $ajax);
         } else{
 			/* Get Data to edit */
 			$task = $Task -> getTask($id);

@@ -110,6 +110,35 @@ function display_html(?string $value): string
 }
 
 /**
+ * Einheitliche, menschenlesbare Datumsausgabe: "04 Jun 2026".
+ * EINZIGE Quelle für die Datumsformatierung in der ganzen Anwendung.
+ * Akzeptiert einen Datums-String ("Y-m-d" / "Y-m-d H:i:s") oder einen Timestamp.
+ * Reine Anzeige — verändert NICHT Speicherung oder API-Format.
+ */
+function format_date($date): string
+{
+    if ($date === null || $date === '' || $date === false) {
+        return '—';
+    }
+    $ts = is_numeric($date) ? (int) $date : strtotime((string) $date);
+    return $ts ? date('d M Y', $ts) : '—';
+}
+
+/**
+ * Wiederverwendbarer Datums-Baustein: Kalender-Icon + formatiertes Datum.
+ * EINZIGE Stelle für Icon + Format, damit beides überall konsistent ist.
+ * $label ist optional ("Due", "Created", ...).
+ */
+function date_with_icon($date, string $label = '', string $class = ''): string
+{
+    $wrap   = trim('inline-flex items-center gap-1.5 ' . $class);
+    $prefix = $label !== '' ? htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . ' ' : '';
+    return '<span class="' . htmlspecialchars($wrap, ENT_QUOTES, 'UTF-8') . '">'
+         . '<i class="fas fa-calendar-days" aria-hidden="true"></i>'
+         . '<span>' . $prefix . format_date($date) . '</span></span>';
+}
+
+/**
  * Formatiert eine Dauer (in Sekunden) als kompakten, menschenlesbaren String.
  * Zeigt nur Einheiten ungleich 0 (h -> m -> s), gibt nie einen leeren String
  * zurück. Einzige Quelle für Dauer-Formatierung in der ganzen Anwendung.

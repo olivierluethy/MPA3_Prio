@@ -40,8 +40,7 @@ include ("header.php");
                 <tr>
                     <td><?= $getHistory['rapport']; ?></td>
                     <td>Duration: <?= $getHistory['zeit']; ?></td>
-                    <?php $date = date('dS M Y', strtotime($getHistory['created_at'])); ?>
-                    <td>Created on the <?= $date ?></td>
+                    <td>Created on <?= date_with_icon($getHistory['created_at']) ?></td>
                 </tr>
                 <?php } ?>
             </tbody>

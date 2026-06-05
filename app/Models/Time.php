@@ -85,10 +85,51 @@ class Time
 
 	/* Calendar: all of the user's time reports (join enforces ownership) */
 	public function getRapportsForUser(){
-		$statement = $this->db->prepare('SELECT r.rapportId, r.rapport, r.zeit, r.created_at, r.iv, r.fk_aufgabeId FROM rapport r JOIN aufgabe a ON a.aufgabeId = r.fk_aufgabeId WHERE a.fk_benutzerId = :id');
+		$statement = $this->db->prepare('SELECT r.rapportId, r.rapport, r.zeit, r.start_time, r.end_time, r.created_at, r.iv, r.fk_aufgabeId FROM rapport r JOIN aufgabe a ON a.aufgabeId = r.fk_aufgabeId WHERE a.fk_benutzerId = :id');
 		$statement->bindParam(':id', $_SESSION['id'], PDO::PARAM_INT);
 		$statement->execute();
 		return $statement->fetchAll(PDO::FETCH_ASSOC);
+	}
+
+	/* Calendar time-grid: set a report's start/end (and derived duration) on a
+	   date. Owner-scoped; duration (zeit) and created_at are kept consistent. */
+	public function updateStartEnd($id, $date, $start, $end){
+		if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $date)) return false;
+		if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', (string) $start)) return false;
+		if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', (string) $end)) return false;
+		if (strlen($start) === 5) $start .= ':00';
+		if (strlen($end) === 5) $end .= ':00';
+
+		$dur = strtotime($end) - strtotime($start);
+		if ($dur < 0) return false; // end before start
+		$zeit = sprintf('%02d:%02d:%02d', intdiv($dur, 3600), intdiv($dur % 3600, 60), $dur % 60);
+
+		// Ownership check + IV
+		$stmt = $this->db->prepare('SELECT r.iv FROM rapport r JOIN aufgabe a ON a.aufgabeId = r.fk_aufgabeId WHERE r.rapportId = :id AND a.fk_benutzerId = :uid');
+		$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+		$stmt->bindValue(':uid', $_SESSION['id'], PDO::PARAM_INT);
+		$stmt->execute();
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		if (!$row) return false;
+		$iv = base64_decode($row['iv']);
+
+		require_once __DIR__ . '/../../vendor/autoload.php';
+		$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+		$dotenv->load();
+		$key = getenv('ENCRYPTION_KEY');
+
+		$encCreated = openssl_encrypt($date . ' ' . $start, 'aes-256-cbc', $key, 0, $iv);
+		$encStart   = openssl_encrypt($start, 'aes-256-cbc', $key, 0, $iv);
+		$encEnd     = openssl_encrypt($end, 'aes-256-cbc', $key, 0, $iv);
+		$encZeit    = openssl_encrypt($zeit, 'aes-256-cbc', $key, 0, $iv);
+
+		$update = $this->db->prepare('UPDATE rapport SET created_at = :c, start_time = :s, end_time = :e, zeit = :z WHERE rapportId = :id');
+		$update->bindValue(':c', $encCreated, PDO::PARAM_STR);
+		$update->bindValue(':s', $encStart, PDO::PARAM_STR);
+		$update->bindValue(':e', $encEnd, PDO::PARAM_STR);
+		$update->bindValue(':z', $encZeit, PDO::PARAM_STR);
+		$update->bindValue(':id', $id, PDO::PARAM_INT);
+		return $update->execute();
 	}
 
 	/* Calendar: move a time report to a new date, keeping its time-of-day. Owner-scoped. */

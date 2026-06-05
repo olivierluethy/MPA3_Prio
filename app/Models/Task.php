@@ -32,7 +32,7 @@ class Task
 	}
 
 	/* To add one task */
-	public function add_task($titel, $beschreibung, $motivation, $deadline, $prioritaet) {
+	public function add_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $ajax = false) {
 		// Sanitize inputs
 		$titel = htmlspecialchars($titel);
 		$beschreibung = htmlspecialchars($beschreibung);
@@ -87,12 +87,23 @@ class Task
 			$statement->bindParam(':id', $_SESSION['id'], PDO::PARAM_INT);
 			$statement->execute();
 	
+			if ($ajax) {
+				header('Content-Type: application/json');
+				echo json_encode(['ok' => true]);
+				exit;
+			}
 			header('Location: home');
 		} else {
 			$message = $prioritaet > $totalTasks + 1 ? 
 				'The priority cannot be higher than ' . ($totalTasks + 1) . '.' :
 				'The priority must be at least 1.';
 	
+			if ($ajax) {
+				header('Content-Type: application/json');
+				http_response_code(400);
+				echo json_encode(['ok' => false, 'error' => $message]);
+				exit;
+			}
 			echo "<script>
 					alert('$message');
 					window.location.href = 'add_task';
@@ -101,7 +112,7 @@ class Task
 	}	
 
 	/* To edit a task */
-	public function edit_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $id) {
+	public function edit_task($titel, $beschreibung, $motivation, $deadline, $prioritaet, $id, $ajax = false) {
 		$titel = htmlspecialchars($titel);
 		$beschreibung = htmlspecialchars($beschreibung);
 		$motivation = htmlspecialchars($motivation);
@@ -160,12 +171,23 @@ class Task
 			$statement->bindParam(':id', $id, PDO::PARAM_INT);
 			$statement->execute();
 	
+			if ($ajax) {
+				header('Content-Type: application/json');
+				echo json_encode(['ok' => true]);
+				exit;
+			}
 			header('Location: home');
 		} else {
 			$message = $prioritaet > $totalTasks + 1 ? 
 				'The priority cannot be higher than ' . ($totalTasks + 1) . '.' :
 				'The priority must be at least 1.';
 	
+			if ($ajax) {
+				header('Content-Type: application/json');
+				http_response_code(400);
+				echo json_encode(['ok' => false, 'error' => $message]);
+				exit;
+			}
 			echo "<script>
 					alert('$message');
 					window.location.href = 'edit_task';
@@ -412,6 +434,11 @@ class Task
 			$updateStatement->bindParam(':task', $task, PDO::PARAM_STR);
 			$updateStatement->execute();
 	
+			if ($ajax) {
+				header('Content-Type: application/json');
+				echo json_encode(['ok' => true]);
+				exit;
+			}
 			header('Location: home');
 		} else {
 			echo "<script>
@@ -470,6 +497,11 @@ class Task
 			$updateStatement->bindParam(':task', $task, PDO::PARAM_STR);
 			$updateStatement->execute();
 	
+			if ($ajax) {
+				header('Content-Type: application/json');
+				echo json_encode(['ok' => true]);
+				exit;
+			}
 			header('Location: home');
 		} else {
 			echo "<script>

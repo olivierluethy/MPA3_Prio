@@ -94,7 +94,7 @@ function decrypt($data, $key, $iv) {
                                     <span class="badge bg-brand-500/15 text-brand-200 ring-1 ring-inset ring-brand-500/30">Priority <?= htmlspecialchars($taskPrio, ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                                 <p class="mt-1 text-sm text-surface-400">
-                                    <i class="fas fa-calendar-days mr-1"></i>Created <?= htmlspecialchars(date("d M Y", strtotime($taskCreated)), ENT_QUOTES, 'UTF-8') ?>
+                                    <?= date_with_icon($taskCreated, 'Created') ?>
                                 </p>
                             </div>
                             <!-- Per-task actions -->
@@ -124,7 +124,7 @@ function decrypt($data, $key, $iv) {
                             </div>
                             <div class="bg-surface-800 p-4">
                                 <div class="text-xs font-medium uppercase tracking-wide text-surface-400">Last activity</div>
-                                <div class="mt-1 text-lg font-semibold text-white"><?= $lastTs ? htmlspecialchars(date("d M Y", $lastTs), ENT_QUOTES, 'UTF-8') : '—' ?></div>
+                                <div class="mt-1 text-lg font-semibold text-white"><?= $lastTs ? date_with_icon($lastTs) : '—' ?></div>
                             </div>
                             <div class="bg-surface-800 p-4">
                                 <div class="text-xs font-medium uppercase tracking-wide text-surface-400">Status</div>
@@ -149,7 +149,7 @@ function decrypt($data, $key, $iv) {
                                             <?php foreach ($entries as $e): ?>
                                                 <tr class="border-0 border-t border-solid border-surface-700 transition-colors hover:bg-surface-700/40">
                                                     <td class="whitespace-nowrap px-4 py-3 text-surface-300">
-                                                        <i class="fas fa-calendar-days mr-1 text-surface-500"></i><?= htmlspecialchars(date("d M Y", $e['ts']), ENT_QUOTES, 'UTF-8') ?>
+                                                        <?= date_with_icon($e['ts'], '', 'text-surface-300') ?>
                                                     </td>
                                                     <td class="whitespace-nowrap px-4 py-3">
                                                         <span class="badge bg-brand-500/15 font-mono text-brand-200"><i class="fas fa-clock mr-1"></i><?= htmlspecialchars(format_duration($e['seconds']), ENT_QUOTES, 'UTF-8') ?></span>
@@ -161,7 +161,7 @@ function decrypt($data, $key, $iv) {
                                                                 <button type="button" title="Edit rapport and time" aria-label="Edit rapport and time"
                                                                         onclick="openEditTime(this)"
                                                                         data-id="<?= (int) $e["id"] ?>"
-                                                                        data-date="<?= htmlspecialchars(date("d M Y", $e['ts']), ENT_QUOTES, 'UTF-8') ?>"
+                                                                        data-date="<?= format_date($e['ts']) ?>"
                                                                         data-duration="<?= htmlspecialchars($e['zeit'], ENT_QUOTES, 'UTF-8') ?>"
                                                                         data-report="<?= htmlspecialchars($e['text'], ENT_QUOTES, 'UTF-8') ?>"
                                                                         class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-surface-700 text-surface-200 transition-colors hover:bg-surface-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"><?= icon('pencil', 'h-4 w-4') ?></button>
