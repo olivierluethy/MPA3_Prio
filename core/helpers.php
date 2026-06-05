@@ -110,6 +110,29 @@ function display_html(?string $value): string
 }
 
 /**
+ * Formatiert eine Dauer (in Sekunden) als kompakten, menschenlesbaren String.
+ * Zeigt nur Einheiten ungleich 0 (h -> m -> s), gibt nie einen leeren String
+ * zurück. Einzige Quelle für Dauer-Formatierung in der ganzen Anwendung.
+ *
+ *   0 -> "0s", 11 -> "11s", 60 -> "1m", 71 -> "1m 11s", 600 -> "10m",
+ *   3600 -> "1h", 3720 -> "1h 2m", 3661 -> "1h 1m 1s"
+ */
+function format_duration(int $totalSeconds): string
+{
+    $totalSeconds = max(0, $totalSeconds);
+    $h = intdiv($totalSeconds, 3600);
+    $m = intdiv($totalSeconds % 3600, 60);
+    $s = $totalSeconds % 60;
+
+    $parts = [];
+    if ($h > 0) { $parts[] = $h . 'h'; }
+    if ($m > 0) { $parts[] = $m . 'm'; }
+    if ($s > 0) { $parts[] = $s . 's'; }
+
+    return $parts === [] ? '0s' : implode(' ', $parts);
+}
+
+/**
  * Bereinigt gespeichertes Rich-Text-HTML (CKEditor) serverseitig gegen XSS,
  * damit es als formatierte, schreibgeschützte Ausgabe gerendert werden kann.
  * Nutzt symfony/html-sanitizer (W3C-konform): Skripte, Event-Handler,

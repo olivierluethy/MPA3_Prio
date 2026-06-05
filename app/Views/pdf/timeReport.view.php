@@ -60,10 +60,12 @@ $statusColor = ($status === 'Completed') ? '#16a34a' : '#d97706';
             <td class="label">Deadline</td>
             <td><?= htmlspecialchars($deadlineLabel, ENT_QUOTES, 'UTF-8') ?></td>
         </tr>
+        <?php if (!empty($includeDescription)): ?>
         <tr>
             <td class="label">Description</td>
             <td colspan="3"><div class="desc"><?= $description ?></div></td>
         </tr>
+        <?php endif; ?>
     </table>
 
     <h2>Reported time</h2>
@@ -82,7 +84,7 @@ $statusColor = ($status === 'Completed') ? '#16a34a' : '#d97706';
                     <tr>
                         <td class="num"><?= $i + 1 ?></td>
                         <td><?= htmlspecialchars($e['date'], ENT_QUOTES, 'UTF-8') ?></td>
-                        <td class="dur"><?= htmlspecialchars($e['duration'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td class="dur"><?= htmlspecialchars(format_duration($e['seconds']), ENT_QUOTES, 'UTF-8') ?></td>
                         <td><?= htmlspecialchars($e['text'], ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -95,9 +97,8 @@ $statusColor = ($status === 'Completed') ? '#16a34a' : '#d97706';
     <h2>Summary</h2>
     <table class="summary">
         <tr><td class="k">Total number of entries</td><td class="v"><?= (int) $entryCount ?></td></tr>
-        <tr><td class="k">Total reported time</td><td class="v"><?= (int) $totalH ?> hours <?= (int) $totalM ?> minutes</td></tr>
-        <tr><td class="k">Total reported hours</td><td class="v"><?= (int) $totalH ?></td></tr>
-        <tr><td class="k">Total reported minutes</td><td class="v"><?= (int) $totalM ?></td></tr>
+        <tr><td class="k">Total reported time</td><td class="v"><?= htmlspecialchars(format_duration($totalSec), ENT_QUOTES, 'UTF-8') ?></td></tr>
+        <tr><td class="k">Total (decimal hours)</td><td class="v"><?= number_format($totalSec / 3600, 2) ?> h</td></tr>
         <tr><td class="k">Report generation date</td><td class="v"><?= htmlspecialchars($genDate, ENT_QUOTES, 'UTF-8') ?></td></tr>
     </table>
 

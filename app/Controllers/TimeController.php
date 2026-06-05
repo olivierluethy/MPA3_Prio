@@ -174,27 +174,6 @@ class TimeController
 		require 'app/Views/history.view.php';
 	}
 
-	public function formatTimeOutput($h, $m, $s){
-		$output = "";
-		if($h == 1){
-			$output .= "$h Hour ";
-		}else if($h > 1){
-			$output .= "$h Hours ";
-		}
-		if($m == 1){
-			$output .= "$m Minute ";
-		}else if($m > 1){
-			$output .= "$m Minutes ";
-		}
-		if($s == 1){
-			$output .= "$s Second ";
-		}else if($s > 1){
-			$output .= "$s Seconds ";
-		}
-
-		echo $output;
-	}
-
 	/* Export a professional PDF time report for one task (owner only). */
 	public function export_pdf(){
 		// Initialize the session
@@ -249,7 +228,7 @@ class TimeController
 			$cr    = $Task->decrypt($rapport['created_at'], $encryption_key, $ivR);
 			$ts    = $cr ? strtotime($cr) : 0;
 			$totalSec += max(0, strtotime($zeit) - strtotime('00:00:00'));
-			$entries[] = ['ts' => $ts, 'date' => $ts ? date('d M Y', $ts) : '—', 'duration' => $zeit, 'text' => $text];
+			$entries[] = ['ts' => $ts, 'date' => $ts ? date('d M Y', $ts) : '—', 'seconds' => max(0, strtotime($zeit) - strtotime('00:00:00')), 'duration' => $zeit, 'text' => $text];
 		}
 		usort($entries, fn($a, $b) => $a['ts'] <=> $b['ts']);
 
@@ -257,6 +236,10 @@ class TimeController
 		$totalH = intval($totalSec / 3600);
 		$totalM = intval(($totalSec % 3600) / 60);
 		$genDate = date('d M Y, H:i');
+
+		// Description is included by default; ?description=0 produces a clean
+		// "summary only" report for HR / billing.
+		$includeDescription = !(isset($_GET['description']) && $_GET['description'] === '0');
 
 		// Render the report HTML
 		ob_start();
@@ -277,7 +260,8 @@ class TimeController
 		$font = $dompdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
 		$canvas->page_text(270, 810, 'Page {PAGE_NUM} of {PAGE_COUNT}', $font, 8, [0.5, 0.5, 0.5]);
 
-		$filename = 'time-report-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $title ?: ('task-' . $id)) . '.pdf';
+		$filename = 'time-report-' . preg_replace('/[^A-Za-z0-9_-]+/', '-', $title ?: ('task-' . $id))
+			. ($includeDescription ? '' : '-summary') . '.pdf';
 		$dompdf->stream($filename, ['Attachment' => true]);
 		exit();
 	}
